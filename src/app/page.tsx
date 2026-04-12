@@ -201,12 +201,35 @@ export default function Home() {
     setPolygons([...polygonsRef.current])
   }, [])
 
+  const fetchBuildingPolygon = async (lat: number, lng: number) => {
+    // 1. Try Flanders (GRB)
+    try {
+      const flandersUrl = `https://geoservices.informatievlaanderen.be/overdrachter/grb/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=grb:GBG&outputFormat=application/json&srsName=EPSG:4326&cql_filter=INTERSECTS(SHAPE,POINT(${lng} ${lat}))`
+      const res = await fetch(flandersUrl)
+      const data = await res.json()
+      if (data.features && data.features.length > 0) {
+        return data.features[0].geometry.coordinates[0][0].map((c: number[]) => ({ lat: c[1], lng: c[0] }))
+      }
+    } catch (e) { console.error('Flanders API error', e) }
+
+    // 2. Try Brussels (UrbIS)
+    try {
+      const brusselsUrl = `https://geoserver.gis.irisnet.be/irisnet/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=urbis:BU&outputFormat=application/json&srsName=EPSG:4326&cql_filter=INTERSECTS(SHAPE,POINT(${lng} ${lat}))`
+      const res = await fetch(brusselsUrl)
+      const data = await res.json()
+      if (data.features && data.features.length > 0) {
+        return data.features[0].geometry.coordinates[0][0].map((c: number[]) => ({ lat: c[1], lng: c[0] }))
+      }
+    } catch (e) { console.error('Brussels API error', e) }
+
+    return null
+  }
+
   const handleSearch = async () => {
     if (!address.trim() || !geocoderRef.current || !mapInstanceRef.current) return
     setSearching(true)
     setError('')
 
-    // Increment counter on every search
     fetch('/api/counter', { method: 'POST' })
       .then(r => r.json())
       .then(d => setUsageCount(d.count))
@@ -214,15 +237,58 @@ export default function Home() {
 
     geocoderRef.current.geocode(
       { address: address + ', Belgium', region: 'BE' },
-      (results, status) => {
-        setSearching(false)
+      async (results, status) => {
         if (status !== 'OK' || !results?.[0]) {
+          setSearching(false)
           setError('Adres niet gevonden. Probeer een vollediger adres.')
           return
         }
-        mapInstanceRef.current!.setCenter(results[0].geometry.location)
+        
+        const loc = results[0].geometry.location
+        mapInstanceRef.current!.setCenter(loc)
         mapInstanceRef.current!.setZoom(20)
-        setTimeout(() => startDrawingMode(), 600)
+
+        // Try to auto-fetch building polygon
+        const buildingPath = await fetchBuildingPolygon(loc.lat(), loc.lng())
+        setSearching(false)
+
+        if (buildingPath) {
+          // Add automatically
+          const color = `hsl(${Math.floor(Math.random() * 280 + 40)}, 70%, 60%)`
+          const polygon = new google.maps.Polygon({
+            paths: buildingPath,
+            fillColor: color,
+            fillOpacity: 0.25,
+            strokeColor: color,
+            strokeWeight: 2,
+            editable: true,
+            draggable: false,
+            map: mapInstanceRef.current,
+          })
+
+          const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath())
+          const area = Math.round(areaSqM * 10) / 10
+          const id = crypto.randomUUID()
+          const label = `Gebouw ${polygonsRef.current.length + 1}`
+
+          const entry: PolygonEntry = { id, label, area, polygon }
+          polygonsRef.current = [...polygonsRef.current, entry]
+          setPolygons([...polygonsRef.current])
+          setMode('idle')
+
+          const update = () => {
+            const pts: google.maps.LatLng[] = []
+            polygon.getPath().forEach(p => pts.push(p))
+            const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
+            polygonsRef.current = polygonsRef.current.map(e => e.id === id ? { ...e, area: newArea } : e)
+            setPolygons([...polygonsRef.current])
+          }
+          polygon.getPath().addListener('set_at', update)
+          polygon.getPath().addListener('insert_at', update)
+        } else {
+          // Fallback to manual drawing
+          setTimeout(() => startDrawingMode(), 600)
+        }
       }
     )
   }
