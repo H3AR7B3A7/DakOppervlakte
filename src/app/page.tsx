@@ -342,20 +342,18 @@ export default function Home() {
 
   const rotate = useCallback((delta: number) => {
     const map = mapInstanceRef.current
-    if (!map) return
-    const currentHeading = map.getHeading() || 0
-    const nextHeading = (currentHeading + delta + 360) % 360
-    
-    map.setHeading(nextHeading)
-    setHeading(Math.round(nextHeading))
+    if (map) {
+      const currentHeading = map.getHeading() || 0
+      map.setHeading((currentHeading + delta + 360) % 360)
+    }
   }, [])
 
   const toggleTilt = () => {
     const map = mapInstanceRef.current
-    if (!map) return
-    const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
-    map.setTilt(next)
-    setTilt(next)
+    if (map) {
+      const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
+      map.setTilt(next)
+    }
   }
 
   const s: Record<string, React.CSSProperties> = {
