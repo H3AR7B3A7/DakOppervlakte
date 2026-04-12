@@ -209,16 +209,26 @@ export default function Home() {
       
       if (feature && feature.geometry) {
         const geometry = feature.geometry
-        const coords = geometry.type === 'MultiPolygon' 
-          ? geometry.coordinates[0][0] 
-          : geometry.coordinates[0]
+        let coords: any[] = []
         
-        // Handle coordinate nesting differences
-        const path = Array.isArray(coords[0]) && Array.isArray(coords[0][0])
-          ? coords[0] // Some WFS returns an extra level
-          : coords
-
-        return path.map((c: number[]) => ({ lat: c[1], lng: c[0] }))
+        if (geometry.type === 'MultiPolygon') {
+          coords = geometry.coordinates[0][0]
+        } else if (geometry.type === 'Polygon') {
+          coords = geometry.coordinates[0]
+        } else if (Array.isArray(geometry.coordinates)) {
+          // Basisregisters return coordinates as an array
+          coords = geometry.coordinates[0]
+        }
+        
+        // Final robustness check: make sure we have an array of arrays [lng, lat]
+        if (coords && Array.isArray(coords[0]) && typeof coords[0][0] === 'number') {
+          return coords.map((c: number[]) => ({ lat: c[1], lng: c[0] }))
+        }
+        
+        // If it's already an array of {lat, lng} (unlikely but just in case)
+        if (coords && coords[0] && typeof coords[0].lat === 'number') {
+          return coords
+        }
       }
     } catch (e) { console.error('Proxy API error', e) }
     return null
@@ -317,8 +327,12 @@ export default function Home() {
   }
 
   const applyHeading = (next: number) => {
+    console.log('Applying heading:', next)
     const map = mapInstanceRef.current
-    if (!map) return
+    if (!map) {
+      console.warn('Map instance not found!')
+      return
+    }
     map.setHeading(next)
     setHeading(Math.round(next))
     // Force overlay repaint so polygons stay aligned after rotation
