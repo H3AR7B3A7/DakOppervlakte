@@ -11,59 +11,81 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing lat/lng' }, { status: 400 })
   }
 
+  const results: any = {
+    flanders_v2_gebouwen: null,
+    flanders_v2_eenheden: null,
+    flanders_wfs: null,
+    brussels_wfs: null
+  }
+
   const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (DakOppervlakte/1.0)',
     'Accept': 'application/json'
   }
 
-  // 1. Try Flanders via Geopunt Location Service (Most robust)
+  // 1. Flanders Basisregisters v2 - Gebouwen
   try {
-    const geopuntUrl = `https://loc.geopunt.be/v4/Location?latlon=${lat},${lng}`
-    const res = await fetch(geopuntUrl, { headers })
-    
+    const res = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen?latlon=${lat},${lng}`, { headers })
     if (res.ok) {
       const data = await res.json()
-      // Geopunt returns LocationResult with a building ID (if found)
-      if (data.LocationResult?.[0]?.BoundingBox) {
-        // We can use the center of the bounding box to find the building in Basisregisters
-        const bb = data.LocationResult[0].BoundingBox
-        const midLat = (bb.LowerLeft.Lat_WGS84 + bb.UpperRight.Lat_WGS84) / 2
-        const midLng = (bb.LowerLeft.Lon_WGS84 + bb.UpperRight.Lon_WGS84) / 2
-
-        // Now fetch from Basisregisters with the normalized coordinate
-        const searchUrl = `https://api.basisregisters.vlaanderen.be/v2/gebouwen?latlon=${midLat},${midLng}`
-        const searchRes = await fetch(searchUrl, { headers })
-        const searchData = await searchRes.json()
-
-        if (searchData.gebouwen?.length > 0) {
-          const buildingId = searchData.gebouwen[0].identificator.objectidentificator
-          const detailRes = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen/${buildingId}`, { headers })
-          const detailData = await detailRes.json()
-          
-          if (detailData.geometriePolygoon) {
-            return NextResponse.json({
-              type: 'Feature',
-              geometry: detailData.geometriePolygoon.polygoon
-            })
-          }
+      results.flanders_v2_gebouwen = data.gebouwen?.length || 0
+      if (data.gebouwen?.length > 0) {
+        const id = data.gebouwen[0].identificator.objectidentificator
+        const detail = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen/${id}`, { headers }).then(r => r.json())
+        if (detail.geometriePolygoon) {
+          return NextResponse.json({ type: 'Feature', geometry: detail.geometriePolygoon.polygoon })
         }
       }
     }
-  } catch (e) {
-    console.error('Geopunt/Basisregisters error:', e)
-  }
+  } catch (e: any) { results.flanders_v2_gebouwen = 'Error: ' + e.message }
 
-  // 2. Fallback to WFS with a slightly larger BBOX
+  // 2. Flanders Basisregisters v2 - Gebouweenheden (Units)
   try {
-    const d = 0.0002
+    const res = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouweenheden?latlon=${lat},${lng}`, { headers })
+    if (res.ok) {
+      const data = await res.json()
+      results.flanders_v2_eenheden = data.gebouweenheden?.length || 0
+      if (data.gebouweenheden?.length > 0) {
+        const buildingUrl = data.gebouweenheden[0].gebouw.detail
+        const detail = await fetch(buildingUrl, { headers }).then(r => r.json())
+        if (detail.geometriePolygoon) {
+          return NextResponse.json({ type: 'Feature', geometry: detail.geometriePolygoon.polygoon })
+        }
+      }
+    }
+  } catch (e: any) { results.flanders_v2_eenheden = 'Error: ' + e.message }
+
+  // 3. Flanders WFS (New Endpoint)
+  try {
+    const d = 0.0001
     const bbox = `${parseFloat(lng)-d},${parseFloat(lat)-d},${parseFloat(lng)+d},${parseFloat(lat)+d}`
-    const wfsUrl = `https://geoservices.informatievlaanderen.be/overdrachter/grb/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=grb:GBG&outputFormat=application/json&srsName=EPSG:4326&bbox=${bbox}`
+    // Using the newer geoserver endpoint
+    const wfsUrl = `https://geoserver.vlaanderen.be/grb/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=grb:GBG&outputFormat=application/json&srsName=EPSG:4326&bbox=${bbox},EPSG:4326`
     const res = await fetch(wfsUrl, { headers })
     if (res.ok) {
       const data = await res.json()
+      results.flanders_wfs = data.features?.length || 0
       if (data.features?.length > 0) return NextResponse.json(data.features[0])
     }
-  } catch (e) {}
+  } catch (e: any) { results.flanders_wfs = 'Error: ' + e.message }
 
-  return NextResponse.json({ features: [], debug: { lat, lng, msg: 'No building found in Flanders or Brussels' } })
+  // 4. Brussels WFS (UrbIS)
+  try {
+    const brusselsUrl = `https://geoserver.gis.irisnet.be/irisnet/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=urbis:BU&outputFormat=application/json&srsName=EPSG:4326&cql_filter=INTERSECTS(SHAPE,POINT(${lng} ${lat}))`
+    const res = await fetch(brusselsUrl, { headers })
+    if (res.ok) {
+      const data = await res.json()
+      results.brussels_wfs = data.features?.length || 0
+      if (data.features?.length > 0) return NextResponse.json(data.features[0])
+    }
+  } catch (e: any) { results.brussels_wfs = 'Error: ' + e.message }
+
+  return NextResponse.json({ 
+    features: [], 
+    debug: { 
+      coords: `${lat},${lng}`,
+      results,
+      msg: "No building polygon found in any of the 4 Belgian data sources."
+    } 
+  })
 }
