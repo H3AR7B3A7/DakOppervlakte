@@ -332,24 +332,21 @@ export default function Home() {
   }
 
   const rotate = useCallback((delta: number) => {
-    console.log('Rotate called with delta:', delta);
     const map = mapInstanceRef.current
-    console.log('Map instance found:', !!map);
     if (!map) return
     const currentHeading = map.getHeading() || 0
     const nextHeading = (currentHeading + delta + 360) % 360
-    applyHeading(nextHeading)
+    
+    map.setHeading(nextHeading)
+    setHeading(Math.round(nextHeading))
   }, [])
 
   const toggleTilt = () => {
-    console.log('Toggle tilt called');
     const map = mapInstanceRef.current
-    console.log('Map instance found:', !!map);
     if (!map) return
     const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
     map.setTilt(next)
     setTilt(next)
-    setTimeout(() => google.maps.event.trigger(map, 'resize'), 50)
   }
 
   const s: Record<string, React.CSSProperties> = {
