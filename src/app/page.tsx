@@ -80,11 +80,12 @@ export default function Home() {
       disableDefaultUI: true,
       zoomControl: true,
       gestureHandling: 'greedy',
-      tilt: 45,
+      tilt: 0,
       heading: 0,
     })
     mapInstanceRef.current = map
     geocoderRef.current = new google.maps.Geocoder()
+    setTilt(0)
   }, [mapLoaded])
 
   // Removed heading/tilt listeners to prevent sync loops
