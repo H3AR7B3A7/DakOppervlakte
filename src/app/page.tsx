@@ -202,26 +202,25 @@ export default function Home() {
   }, [])
 
   const fetchBuildingPolygon = async (lat: number, lng: number) => {
-    // 1. Try Flanders (GRB)
     try {
-      const flandersUrl = `https://geoservices.informatievlaanderen.be/overdrachter/grb/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=grb:GBG&outputFormat=application/json&srsName=EPSG:4326&cql_filter=INTERSECTS(SHAPE,POINT(${lng} ${lat}))`
-      const res = await fetch(flandersUrl)
-      const data = await res.json()
-      if (data.features && data.features.length > 0) {
-        return data.features[0].geometry.coordinates[0][0].map((c: number[]) => ({ lat: c[1], lng: c[0] }))
-      }
-    } catch (e) { console.error('Flanders API error', e) }
+      const res = await fetch(`/api/building-polygon?lat=${lat}&lng=${lng}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const feature = await res.json()
+      
+      if (feature && feature.geometry) {
+        const geometry = feature.geometry
+        const coords = geometry.type === 'MultiPolygon' 
+          ? geometry.coordinates[0][0] 
+          : geometry.coordinates[0]
+        
+        // Handle coordinate nesting differences
+        const path = Array.isArray(coords[0]) && Array.isArray(coords[0][0])
+          ? coords[0] // Some WFS returns an extra level
+          : coords
 
-    // 2. Try Brussels (UrbIS)
-    try {
-      const brusselsUrl = `https://geoserver.gis.irisnet.be/irisnet/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=urbis:BU&outputFormat=application/json&srsName=EPSG:4326&cql_filter=INTERSECTS(SHAPE,POINT(${lng} ${lat}))`
-      const res = await fetch(brusselsUrl)
-      const data = await res.json()
-      if (data.features && data.features.length > 0) {
-        return data.features[0].geometry.coordinates[0][0].map((c: number[]) => ({ lat: c[1], lng: c[0] }))
+        return path.map((c: number[]) => ({ lat: c[1], lng: c[0] }))
       }
-    } catch (e) { console.error('Brussels API error', e) }
-
+    } catch (e) { console.error('Proxy API error', e) }
     return null
   }
 
