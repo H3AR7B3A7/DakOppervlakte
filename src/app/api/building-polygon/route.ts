@@ -11,40 +11,35 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing lat/lng' }, { status: 400 })
   }
 
-  // 1. Try Flanders (Basisregisters Vlaanderen)
-  try {
-    // Increase search reliability by fetching nearby buildings if exact location fails
-    // Using a 20m buffer by slightly varying coordinates if needed, 
-    // but the API also supports searching with a point.
-    const searchUrl = `https://api.basisregisters.vlaanderen.be/v2/gebouwen?latlon=${lat},${lng}`
-    const searchRes = await fetch(searchUrl)
-    
-    if (searchRes.ok) {
-      const searchData = await searchRes.json()
-      
-      // If no building at exact point, try a small offset search (North, South, East, West)
-      let buildingId = searchData.gebouwen?.[0]?.identificator?.objectidentificator
-      
-      if (!buildingId) {
-        const offsets = [0.0001, -0.0001]
-        for (const dx of offsets) {
-          for (const dy of offsets) {
-            const offUrl = `https://api.basisregisters.vlaanderen.be/v2/gebouwen?latlon=${parseFloat(lat)+dy},${parseFloat(lng)+dx}`
-            const offRes = await fetch(offUrl)
-            const offData = await offRes.json()
-            if (offData.gebouwen?.length > 0) {
-              buildingId = offData.gebouwen[0].identificator.objectidentificator
-              break
-            }
-          }
-          if (buildingId) break
-        }
-      }
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept': 'application/json'
+  }
 
-      if (buildingId) {
-        const detailRes = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen/${buildingId}`)
-        if (detailRes.ok) {
+  // 1. Try Flanders via Geopunt Location Service (Most robust)
+  try {
+    const geopuntUrl = `https://loc.geopunt.be/v4/Location?latlon=${lat},${lng}`
+    const res = await fetch(geopuntUrl, { headers })
+    
+    if (res.ok) {
+      const data = await res.json()
+      // Geopunt returns LocationResult with a building ID (if found)
+      if (data.LocationResult?.[0]?.BoundingBox) {
+        // We can use the center of the bounding box to find the building in Basisregisters
+        const bb = data.LocationResult[0].BoundingBox
+        const midLat = (bb.LowerLeft.Lat_WGS84 + bb.UpperRight.Lat_WGS84) / 2
+        const midLng = (bb.LowerLeft.Lon_WGS84 + bb.UpperRight.Lon_WGS84) / 2
+
+        // Now fetch from Basisregisters with the normalized coordinate
+        const searchUrl = `https://api.basisregisters.vlaanderen.be/v2/gebouwen?latlon=${midLat},${midLng}`
+        const searchRes = await fetch(searchUrl, { headers })
+        const searchData = await searchRes.json()
+
+        if (searchData.gebouwen?.length > 0) {
+          const buildingId = searchData.gebouwen[0].identificator.objectidentificator
+          const detailRes = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen/${buildingId}`, { headers })
           const detailData = await detailRes.json()
+          
           if (detailData.geometriePolygoon) {
             return NextResponse.json({
               type: 'Feature',
@@ -55,18 +50,20 @@ export async function GET(request: Request) {
       }
     }
   } catch (e) {
-    console.error('Flanders Basisregisters error', e)
+    console.error('Geopunt/Basisregisters error:', e)
   }
 
-  // 2. Brussels Fallback
+  // 2. Fallback to WFS with a slightly larger BBOX
   try {
-    const brusselsUrl = `https://geoserver.gis.irisnet.be/irisnet/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=urbis:BU&outputFormat=application/json&srsName=EPSG:4326&bbox=${parseFloat(lng)-0.0002},${parseFloat(lat)-0.0002},${parseFloat(lng)+0.0002},${parseFloat(lat)+0.0002}`
-    const res = await fetch(brusselsUrl)
+    const d = 0.0002
+    const bbox = `${parseFloat(lng)-d},${parseFloat(lat)-d},${parseFloat(lng)+d},${parseFloat(lat)+d}`
+    const wfsUrl = `https://geoservices.informatievlaanderen.be/overdrachter/grb/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=grb:GBG&outputFormat=application/json&srsName=EPSG:4326&bbox=${bbox}`
+    const res = await fetch(wfsUrl, { headers })
     if (res.ok) {
       const data = await res.json()
-      if (data.features && data.features.length > 0) return NextResponse.json(data.features[0])
+      if (data.features?.length > 0) return NextResponse.json(data.features[0])
     }
   } catch (e) {}
 
-  return NextResponse.json({ features: [] })
+  return NextResponse.json({ features: [], debug: { lat, lng, msg: 'No building found in Flanders or Brussels' } })
 }
