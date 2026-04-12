@@ -150,72 +150,72 @@ export default function Home() {
   const fetchBuildingPolygon = async (lat: number, lng: number) => {
     console.log('fetchBuildingPolygon called with:', lat, lng); // Log that the function is entered
     try {
-      const res = await fetch(`/api/building-polygon?lat=${lat}&lng=${lng}`)
+      const res = await fetch(`/api/building-polygon?lat=${lat}&lng=${lng}`);
       console.log('fetchBuildingPolygon: fetch response status:', res.status); // Log fetch response status
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const feature = await res.json()
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const feature = await res.json();
       console.log('fetchBuildingPolygon: received feature:', feature); // Log the fetched feature
       
       if (feature && feature.geometry) {
-        const geometry = feature.geometry
-        let coords: any[] = []
+        const geometry = feature.geometry;
+        let coords: any[] = [];
         
         if (geometry.type === 'MultiPolygon') {
-          coords = geometry.coordinates[0][0]
+          coords = geometry.coordinates[0][0];
         } else if (geometry.type === 'Polygon') {
-          coords = geometry.coordinates[0]
+          coords = geometry.coordinates[0];
         } else if (Array.isArray(geometry.coordinates)) {
           // Basisregisters return coordinates as an array
-          coords = geometry.coordinates[0]
+          coords = geometry.coordinates[0];
         }
         
         // Final robustness check: make sure we have an array of arrays [lng, lat]
         if (coords && Array.isArray(coords[0]) && typeof coords[0][0] === 'number') {
-          return coords.map((c: number[]) => ({ lat: c[1], lng: c[0] }))
+          return coords.map((c: number[]) => ({ lat: c[1], lng: c[0] }));
         }
         
         // If it's already an array of {lat, lng} (unlikely but just in case)
         if (coords && coords[0] && typeof coords[0].lat === 'number') {
-          return coords
+          return coords;
         }
       }
       console.log('fetchBuildingPolygon: No valid coordinates found in feature.');
-    } catch (e) { console.error('Proxy API error', e); return null }
+    } catch (e) { console.error('Proxy API error', e); return null; }
     console.log('fetchBuildingPolygon: Returning null.');
-    return null
-  }
+    return null;
+  };
 
   const handleSearch = async () => {
-    if (!address.trim() || !geocoderRef.current || !mapInstanceRef.current) return
-    setSearching(true)
-    setError('')
+    if (!address.trim() || !geocoderRef.current || !mapInstanceRef.current) return;
+    setSearching(true);
+    setError('');
 
     fetch('/api/counter', { method: 'POST' })
       .then(r => r.json())
       .then(d => setUsageCount(d.count))
-      .catch(() => {})
+      .catch(() => {});
 
     geocoderRef.current.geocode(
       { address: address + ', Belgium', region: 'BE' },
       async (results, status) => {
         if (status !== 'OK' || !results?.[0]) {
-          setSearching(false)
-          setError('Adres niet gevonden. Probeer een vollediger adres.')
-          return
+          setSearching(false);
+          setError('Adres niet gevonden. Probeer een vollediger adres.');
+          return;
         }
         
-        const loc = results[0].geometry.location
-        mapInstanceRef.current!.setCenter(loc)
-        mapInstanceRef.current!.setZoom(20)
+        const loc = results[0].geometry.location;
+        mapInstanceRef.current!.setCenter(loc);
+        mapInstanceRef.current!.setZoom(20);
 
         // Try to auto-fetch building polygon
-        const buildingPath = await fetchBuildingPolygon(loc.lat(), loc.lng())
+        const buildingPath = await fetchBuildingPolygon(loc.lat(), loc.lng());
         console.log('handleSearch: buildingPath after fetch:', buildingPath); // Log the result
-        setSearching(false)
+        setSearching(false);
 
         if (buildingPath) {
           // Add automatically
-          const color = `hsl(${Math.floor(Math.random() * 280 + 40)}, 70%, 60%)`
+          const color = `hsl(${Math.floor(Math.random() * 280 + 40)}, 70%, 60%)`;
           const polygon = new google.maps.Polygon({
             paths: buildingPath,
             fillColor: color,
@@ -225,31 +225,31 @@ export default function Home() {
             editable: true,
             draggable: false,
             map: mapInstanceRef.current,
-          })
+          });
 
-          const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath())
-          const area = Math.round(areaSqM * 10) / 10
-          const id = crypto.randomUUID()
-          const label = `Gebouw ${polygonsRef.current.length + 1}`
+          const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath());
+          const area = Math.round(areaSqM * 10) / 10;
+          const id = crypto.randomUUID();
+          const label = `Gebouw ${polygonsRef.current.length + 1}`;
 
-          const entry: PolygonEntry = { id, label, area, polygon }
-          polygonsRef.current = [...polygonsRef.current, entry]
-          setPolygons([...polygonsRef.current])
-          setMode('idle')
+          const entry: PolygonEntry = { id, label, area, polygon };
+          polygonsRef.current = [...polygonsRef.current, entry];
+          setPolygons([...polygonsRef.current]);
+          setMode('idle');
 
           const update = () => {
-            const pts: google.maps.LatLng[] = []
-            polygon.getPath().forEach(p => pts.push(p))
-            const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
-            polygonsRef.current = polygonsRef.current.map(e => e.id === id ? { ...e, area: newArea } : e)
-            setPolygons([...polygonsRef.current])
-          }
-          polygon.getPath().addListener('set_at', update)
-          polygon.getPath().addListener('insert_at', update)
+            const pts: google.maps.LatLng[] = [];
+            polygon.getPath().forEach(p => pts.push(p));
+            const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10;
+            polygonsRef.current = polygonsRef.current.map(e => e.id === id ? { ...e, area: newArea } : e);
+            setPolygons([...polygonsRef.current]);
+          };
+          polygon.getPath().addListener('set_at', update);
+          polygon.getPath().addListener('insert_at', update);
         } else {
           // Fallback to manual drawing
-          setTimeout(() => startDrawingMode(), 600)
+          setTimeout(() => startDrawingMode(), 600);
         }
       }
-    )
-  }
+    );
+  };
