@@ -332,7 +332,9 @@ export default function Home() {
   }
 
   const rotate = useCallback((delta: number) => {
+    console.log('Rotate called with delta:', delta);
     const map = mapInstanceRef.current
+    console.log('Map instance found:', !!map);
     if (!map) return
     const currentHeading = map.getHeading() || 0
     const nextHeading = (currentHeading + delta + 360) % 360
@@ -340,7 +342,9 @@ export default function Home() {
   }, [])
 
   const toggleTilt = () => {
+    console.log('Toggle tilt called');
     const map = mapInstanceRef.current
+    console.log('Map instance found:', !!map);
     if (!map) return
     const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
     map.setTilt(next)
