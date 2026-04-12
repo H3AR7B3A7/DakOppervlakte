@@ -343,8 +343,19 @@ export default function Home() {
   const rotate = useCallback((delta: number) => {
     const map = mapInstanceRef.current
     if (map) {
+      // Ensure tilt is set for rotation to work
+      const currentTilt = map.getTilt() ?? 0
+      if (currentTilt === 0) {
+        map.setTilt(45);
+        setTilt(45);
+        // Trigger a resize event to ensure map updates after tilt change
+        google.maps.event.trigger(map, 'resize');
+      }
+
       const currentHeading = map.getHeading() || 0
       map.setHeading((currentHeading + delta + 360) % 360)
+      // Update React state for heading (optional but good for consistency)
+      setHeading(Math.round((currentHeading + delta + 360) % 360));
     }
   }, [])
 
@@ -353,9 +364,11 @@ export default function Home() {
     if (map) {
       const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
       map.setTilt(next)
+      setTilt(next)
+      // Trigger resize event to ensure map updates after tilt change
+      google.maps.event.trigger(map, 'resize');
     }
   }
-
   const s: Record<string, React.CSSProperties> = {
     page: { minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' },
     header: {
