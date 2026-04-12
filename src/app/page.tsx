@@ -85,19 +85,18 @@ export default function Home() {
     })
     mapInstanceRef.current = map
     geocoderRef.current = new google.maps.Geocoder()
-    setTilt(0)
-
-    const hListener = map.addListener('heading_changed', () => {
-      setHeading(Math.round(map.getHeading() ?? 0))
-    })
-    const tListener = map.addListener('tilt_changed', () => {
-      setTilt(map.getTilt() ?? 0)
-    })
-    
-    return () => { hListener.remove(); tListener.remove() }
   }, [mapLoaded])
 
-  // Removed heading/tilt listeners to prevent sync loops
+  // Sync heading/tilt to map
+  useEffect(() => {
+    if (!mapInstanceRef.current) return
+    mapInstanceRef.current.setHeading(heading)
+  }, [heading])
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return
+    mapInstanceRef.current.setTilt(tilt)
+  }, [tilt])
 
   const clearDrawingState = useCallback(() => {
     tempMarkersRef.current.forEach(m => m.setMap(null))
@@ -200,108 +199,29 @@ export default function Home() {
     setPolygons([...polygonsRef.current])
   }, [])
 
-  const fetchBuildingPolygon = async (lat: number, lng: number) => {
-    try {
-      const res = await fetch(`/api/building-polygon?lat=${lat}&lng=${lng}`)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const feature = await res.json()
-      
-      if (feature && feature.geometry) {
-        const geometry = feature.geometry
-        let coords: any[] = []
-        
-        if (geometry.type === 'MultiPolygon') {
-          coords = geometry.coordinates[0][0]
-        } else if (geometry.type === 'Polygon') {
-          coords = geometry.coordinates[0]
-        } else if (Array.isArray(geometry.coordinates)) {
-          // Basisregisters return coordinates as an array
-          coords = geometry.coordinates[0]
-        }
-        
-        // Final robustness check: make sure we have an array of arrays [lng, lat]
-        if (coords && Array.isArray(coords[0]) && typeof coords[0][0] === 'number') {
-          return coords.map((c: number[]) => ({ lat: c[1], lng: c[0] }))
-        }
-        
-        // If it's already an array of {lat, lng} (unlikely but just in case)
-        if (coords && coords[0] && typeof coords[0].lat === 'number') {
-          return coords
-        }
-      }
-    } catch (e) { console.error('Proxy API error', e) }
-    return null
-  }
-
   const handleSearch = async () => {
     if (!address.trim() || !geocoderRef.current || !mapInstanceRef.current) return
     setSearching(true)
     setError('')
-
-    fetch('/api/counter', { method: 'POST' })
-      .then(r => r.json())
-      .then(d => setUsageCount(d.count))
-      .catch(() => {})
-
     geocoderRef.current.geocode(
       { address: address + ', Belgium', region: 'BE' },
-      async (results, status) => {
+      (results, status) => {
+        setSearching(false)
         if (status !== 'OK' || !results?.[0]) {
-          setSearching(false)
           setError('Adres niet gevonden. Probeer een vollediger adres.')
           return
         }
-        
-        const loc = results[0].geometry.location
-        mapInstanceRef.current!.setCenter(loc)
+        mapInstanceRef.current!.setCenter(results[0].geometry.location)
         mapInstanceRef.current!.setZoom(20)
-
-        // Try to auto-fetch building polygon
-        const buildingPath = await fetchBuildingPolygon(loc.lat(), loc.lng())
-        setSearching(false)
-
-        if (buildingPath) {
-          // Add automatically
-          const color = `hsl(${Math.floor(Math.random() * 280 + 40)}, 70%, 60%)`
-          const polygon = new google.maps.Polygon({
-            paths: buildingPath,
-            fillColor: color,
-            fillOpacity: 0.25,
-            strokeColor: color,
-            strokeWeight: 2,
-            editable: true,
-            draggable: false,
-            map: mapInstanceRef.current,
-          })
-
-          const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath())
-          const area = Math.round(areaSqM * 10) / 10
-          const id = crypto.randomUUID()
-          const label = `Gebouw ${polygonsRef.current.length + 1}`
-
-          const entry: PolygonEntry = { id, label, area, polygon }
-          polygonsRef.current = [...polygonsRef.current, entry]
-          setPolygons([...polygonsRef.current])
-          setMode('idle')
-
-          const update = () => {
-            const pts: google.maps.LatLng[] = []
-            polygon.getPath().forEach(p => pts.push(p))
-            const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
-            polygonsRef.current = polygonsRef.current.map(e => e.id === id ? { ...e, area: newArea } : e)
-            setPolygons([...polygonsRef.current])
-          }
-          polygon.getPath().addListener('set_at', update)
-          polygon.getPath().addListener('insert_at', update)
-        } else {
-          // Fallback to manual drawing
-          setTimeout(() => startDrawingMode(), 600)
-        }
+        setTimeout(() => startDrawingMode(), 600)
       }
     )
   }
 
   const handleSave = async () => {
+    const counterRes = await fetch('/api/counter', { method: 'POST' })
+    const counterData = await counterRes.json()
+    setUsageCount(counterData.count)
     setSaved(true)
     if (user && address && totalArea > 0) {
       await fetch('/api/searches', {
@@ -325,38 +245,8 @@ export default function Home() {
     setSaved(false)
   }
 
-  const applyHeading = (next: number) => {
-    const map = mapInstanceRef.current
-    if (!map) return
-    
-    // 1. Update Map directly
-    map.setHeading(next)
-    setHeading(Math.round(next))
+  const rotate = (delta: number) => setHeading(h => (h + delta + 360) % 360)
 
-    // 2. Debounced resize (only resize once, 300ms after rotation stops)
-    if ((window as any).resizeTimer) (window as any).clearTimeout((window as any).resizeTimer)
-    (window as any).resizeTimer = (window as any).setTimeout(() => {
-       google.maps.event.trigger(map, 'resize')
-    }, 300)
-  }
-
-  const rotate = useCallback((delta: number) => {
-    const map = mapInstanceRef.current
-    if (!map) return
-    const currentHeading = map.getHeading() || 0
-    const nextHeading = (currentHeading + delta + 360) % 360
-    applyHeading(nextHeading)
-  }, [applyHeading]) // Add applyHeading as dependency
-
-  const toggleTilt = () => {
-    const map = mapInstanceRef.current
-    if (!map) return
-    const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
-    map.setTilt(next)
-    setTilt(next)
-    // Keep non-debounced resize for toggleTilt as it might be less sensitive
-    google.maps.event.trigger(map, 'resize');
-  }
   const s: Record<string, React.CSSProperties> = {
     page: { minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' },
     header: {
@@ -441,7 +331,7 @@ export default function Home() {
               }}>↺</button>
               <div style={{ flex: 1 }}>
                 <input type="range" min="0" max="360" value={heading}
-                  onChange={e => applyHeading(Number(e.target.value))}
+                  onChange={e => setHeading(Number(e.target.value))}
                   style={{ width: '100%', accentColor: 'var(--accent)' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
                   <span>N</span><span>{heading}°</span><span>N</span>
@@ -452,7 +342,7 @@ export default function Home() {
                 color: 'var(--text)', width: 36, height: 36, fontSize: 16, cursor: 'pointer', flexShrink: 0,
               }}>↻</button>
             </div>
-            <button onClick={toggleTilt} style={{
+            <button onClick={() => setTilt(t => t === 0 ? 45 : 0)} style={{
               width: '100%', background: tilt === 45 ? 'rgba(110,231,183,0.15)' : 'var(--surface2)',
               border: `1px solid ${tilt === 45 ? 'rgba(110,231,183,0.5)' : 'var(--border)'}`,
               borderRadius: 7, color: tilt === 45 ? 'var(--accent)' : 'var(--text-muted)',
@@ -575,20 +465,18 @@ export default function Home() {
             {/* Save / reset */}
             {polygons.length > 0 && mode === 'idle' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {user ? (
-                  !saved ? (
-                    <button onClick={handleSave} style={{
-                      background: 'var(--accent)', border: 'none', borderRadius: 8, color: '#000',
-                      padding: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Syne, sans-serif', width: '100%',
-                    }}>
-                      💾 Opslaan in geschiedenis
-                    </button>
-                  ) : (
-                    <div style={{ background: 'var(--surface2)', border: '1px solid var(--accent)', borderRadius: 8, color: 'var(--accent)', padding: 11, fontSize: 13, textAlign: 'center' as const, fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
-                      ✓ Opgeslagen in geschiedenis
-                    </div>
-                  )
-                ) : null}
+                {!saved ? (
+                  <button onClick={handleSave} style={{
+                    background: 'var(--accent)', border: 'none', borderRadius: 8, color: '#000',
+                    padding: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Syne, sans-serif', width: '100%',
+                  }}>
+                    {user ? '💾 Opslaan in geschiedenis' : '📊 Teller bijwerken'}
+                  </button>
+                ) : (
+                  <div style={{ background: 'var(--surface2)', border: '1px solid var(--accent)', borderRadius: 8, color: 'var(--accent)', padding: 11, fontSize: 13, textAlign: 'center' as const, fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
+                    ✓ Opgeslagen
+                  </div>
+                )}
                 <button onClick={handleReset} style={{
                   background: 'transparent', border: 'none', color: 'var(--text-muted)',
                   padding: 8, fontSize: 12, cursor: 'pointer', width: '100%',
@@ -666,7 +554,7 @@ export default function Home() {
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)',
                 width: 40, height: 40, fontSize: 18, cursor: 'pointer',
               }}>↺</button>
-              <button onClick={() => applyHeading(0)} title="Reset rotatie" style={{
+              <button onClick={() => setHeading(0)} title="Reset rotatie" style={{
                 background: 'rgba(17,17,24,0.9)', backdropFilter: 'blur(8px)',
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-muted)',
                 width: 40, height: 40, fontSize: 11, cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 700,
@@ -676,7 +564,7 @@ export default function Home() {
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)',
                 width: 40, height: 40, fontSize: 18, cursor: 'pointer',
               }}>↻</button>
-              <button onClick={toggleTilt} title="Toggle perspectief" style={{
+              <button onClick={() => setTilt(t => t === 0 ? 45 : 0)} title="Toggle perspectief" style={{
                 background: tilt === 45 ? 'rgba(110,231,183,0.2)' : 'rgba(17,17,24,0.9)',
                 backdropFilter: 'blur(8px)', border: `1px solid ${tilt === 45 ? 'rgba(110,231,183,0.5)' : 'var(--border)'}`,
                 borderRadius: 8, color: tilt === 45 ? 'var(--accent)' : 'var(--text-muted)',
