@@ -339,12 +339,15 @@ export default function Home() {
     setTimeout(() => google.maps.event.trigger(map, 'resize'), 50)
   }
 
-  const rotate = (delta: number) => {
+  const rotate = useCallback((delta: number) => {
     const map = mapInstanceRef.current
-    if (!map) return
+    if (!map) {
+      console.warn('Map instance not available!')
+      return
+    }
     const current = map.getHeading() ?? 0
     applyHeading((current + delta + 360) % 360)
-  }
+  }, [])
 
   const toggleTilt = () => {
     const map = mapInstanceRef.current
