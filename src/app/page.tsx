@@ -87,28 +87,7 @@ export default function Home() {
     geocoderRef.current = new google.maps.Geocoder()
   }, [mapLoaded])
 
-  // Sync heading to map, read back actual value (map may not support rotation everywhere)
-  useEffect(() => {
-    const map = mapInstanceRef.current
-    if (!map) return
-    map.setHeading(heading)
-    setTimeout(() => {
-      const actual = Math.round(map.getHeading() ?? 0)
-      if (Math.abs(actual - heading) > 2) setHeading(actual)
-    }, 150)
-  }, [heading])
-
-  useEffect(() => {
-    const map = mapInstanceRef.current
-    if (!map) return
-    map.setTilt(tilt)
-    setTimeout(() => {
-      const actual = map.getTilt() ?? 0
-      if (actual !== tilt) setTilt(actual)
-    }, 150)
-  }, [tilt])
-
-  // Keep React state in sync if user drag-rotates the map directly
+  // Listen to map heading/tilt changes (drag-rotate etc) and sync to React state
   useEffect(() => {
     const map = mapInstanceRef.current
     if (!map) return
@@ -272,7 +251,30 @@ export default function Home() {
     setSaved(false)
   }
 
-  const rotate = (delta: number) => setHeading(h => (h + delta + 360) % 360)
+  const applyHeading = (next: number) => {
+    const map = mapInstanceRef.current
+    if (!map) return
+    map.setHeading(next)
+    setHeading(Math.round(next))
+    // Force overlay repaint so polygons stay aligned after rotation
+    setTimeout(() => google.maps.event.trigger(map, 'resize'), 50)
+  }
+
+  const rotate = (delta: number) => {
+    const map = mapInstanceRef.current
+    if (!map) return
+    const current = map.getHeading() ?? 0
+    applyHeading((current + delta + 360) % 360)
+  }
+
+  const toggleTilt = () => {
+    const map = mapInstanceRef.current
+    if (!map) return
+    const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
+    map.setTilt(next)
+    setTilt(next)
+    setTimeout(() => google.maps.event.trigger(map, 'resize'), 50)
+  }
 
   const s: Record<string, React.CSSProperties> = {
     page: { minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' },
@@ -358,7 +360,7 @@ export default function Home() {
               }}>↺</button>
               <div style={{ flex: 1 }}>
                 <input type="range" min="0" max="360" value={heading}
-                  onChange={e => setHeading(Number(e.target.value))}
+                  onChange={e => applyHeading(Number(e.target.value))}
                   style={{ width: '100%', accentColor: 'var(--accent)' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
                   <span>N</span><span>{heading}°</span><span>N</span>
@@ -369,7 +371,7 @@ export default function Home() {
                 color: 'var(--text)', width: 36, height: 36, fontSize: 16, cursor: 'pointer', flexShrink: 0,
               }}>↻</button>
             </div>
-            <button onClick={() => setTilt(t => t === 0 ? 45 : 0)} style={{
+            <button onClick={toggleTilt} style={{
               width: '100%', background: tilt === 45 ? 'rgba(110,231,183,0.15)' : 'var(--surface2)',
               border: `1px solid ${tilt === 45 ? 'rgba(110,231,183,0.5)' : 'var(--border)'}`,
               borderRadius: 7, color: tilt === 45 ? 'var(--accent)' : 'var(--text-muted)',
@@ -492,18 +494,20 @@ export default function Home() {
             {/* Save / reset */}
             {polygons.length > 0 && mode === 'idle' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {!saved ? (
-                  <button onClick={handleSave} style={{
-                    background: 'var(--accent)', border: 'none', borderRadius: 8, color: '#000',
-                    padding: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Syne, sans-serif', width: '100%',
-                  }}>
-                    {user ? '💾 Opslaan in geschiedenis' : '📊 Teller bijwerken'}
-                  </button>
-                ) : (
-                  <div style={{ background: 'var(--surface2)', border: '1px solid var(--accent)', borderRadius: 8, color: 'var(--accent)', padding: 11, fontSize: 13, textAlign: 'center' as const, fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
-                    ✓ Opgeslagen
-                  </div>
-                )}
+                {user ? (
+                  !saved ? (
+                    <button onClick={handleSave} style={{
+                      background: 'var(--accent)', border: 'none', borderRadius: 8, color: '#000',
+                      padding: 11, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Syne, sans-serif', width: '100%',
+                    }}>
+                      💾 Opslaan in geschiedenis
+                    </button>
+                  ) : (
+                    <div style={{ background: 'var(--surface2)', border: '1px solid var(--accent)', borderRadius: 8, color: 'var(--accent)', padding: 11, fontSize: 13, textAlign: 'center' as const, fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
+                      ✓ Opgeslagen in geschiedenis
+                    </div>
+                  )
+                ) : null}
                 <button onClick={handleReset} style={{
                   background: 'transparent', border: 'none', color: 'var(--text-muted)',
                   padding: 8, fontSize: 12, cursor: 'pointer', width: '100%',
@@ -581,7 +585,7 @@ export default function Home() {
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)',
                 width: 40, height: 40, fontSize: 18, cursor: 'pointer',
               }}>↺</button>
-              <button onClick={() => setHeading(0)} title="Reset rotatie" style={{
+              <button onClick={() => applyHeading(0)} title="Reset rotatie" style={{
                 background: 'rgba(17,17,24,0.9)', backdropFilter: 'blur(8px)',
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-muted)',
                 width: 40, height: 40, fontSize: 11, cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 700,
@@ -591,7 +595,7 @@ export default function Home() {
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)',
                 width: 40, height: 40, fontSize: 18, cursor: 'pointer',
               }}>↻</button>
-              <button onClick={() => setTilt(t => t === 0 ? 45 : 0)} title="Toggle perspectief" style={{
+              <button onClick={toggleTilt} title="Toggle perspectief" style={{
                 background: tilt === 45 ? 'rgba(110,231,183,0.2)' : 'rgba(17,17,24,0.9)',
                 backdropFilter: 'blur(8px)', border: `1px solid ${tilt === 45 ? 'rgba(110,231,183,0.5)' : 'var(--border)'}`,
                 borderRadius: 8, color: tilt === 45 ? 'var(--accent)' : 'var(--text-muted)',
