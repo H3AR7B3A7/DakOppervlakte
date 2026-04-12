@@ -327,16 +327,18 @@ export default function Home() {
   }
 
   const applyHeading = (next: number) => {
-    console.log('Applying heading:', next)
     const map = mapInstanceRef.current
-    if (!map) {
-      console.warn('Map instance not found!')
-      return
-    }
+    if (!map) return
+    
+    // 1. Update Map directly
     map.setHeading(next)
     setHeading(Math.round(next))
-    // Force overlay repaint so polygons stay aligned after rotation
-    setTimeout(() => google.maps.event.trigger(map, 'resize'), 50)
+
+    // 2. Debounced resize (only resize once, 300ms after rotation stops)
+    if ((window as any).resizeTimer) clearTimeout((window as any).resizeTimer)
+    (window as any).resizeTimer = setTimeout(() => {
+       google.maps.event.trigger(map, 'resize')
+    }, 300)
   }
 
   const rotate = useCallback((delta: number) => {
