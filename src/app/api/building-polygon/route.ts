@@ -12,22 +12,22 @@ export async function GET(request: Request) {
   const headers = { 'User-Agent': 'DakOppervlakte/1.0', 'Accept': 'application/json' }
   const debug: any[] = []
 
-  // 1. Flanders Basisregisters v2 - Gebouwen
+  // 1. Flanders WFS (Most reliable for complex shapes)
   try {
-    const res = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen?latlon=${lat},${lng}`, { headers })
-    const data = await res.json()
-    debug.push({ source: 'gebouwen', found: data.gebouwen?.length || 0 })
+    const d = 0.0002
+    const bbox = `${parseFloat(lng)-d},${parseFloat(lat)-d},${parseFloat(lng)+d},${parseFloat(lat)+d}`
+    const wfsUrl = `https://geoserver.vlaanderen.be/grb/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=grb:GBG&outputFormat=application/json&srsName=EPSG:4326&bbox=${bbox},EPSG:4326`
     
-    if (data.gebouwen?.length > 0) {
-      // Probeer de eerste, maar als er geen geometrie is, probeer de tweede
-      for (const b of data.gebouwen) {
-        const detail = await fetch(`https://api.basisregisters.vlaanderen.be/v2/gebouwen/${b.identificator.objectidentificator}`, { headers }).then(r => r.json())
-        if (detail.geometriePolygoon) {
-          return NextResponse.json({ type: 'Feature', geometry: detail.geometriePolygoon.polygoon })
-        }
+    const res = await fetch(wfsUrl, { headers })
+    if (res.ok) {
+      const data = await res.json()
+      debug.push({ source: 'wfs', found: data.features?.length || 0 })
+      if (data.features?.length > 0) {
+        // Return first valid feature
+        return NextResponse.json({ type: 'Feature', geometry: data.features[0].geometry })
       }
     }
-  } catch (e: any) { debug.push({ source: 'gebouwen', error: e.message }) }
+  } catch (e: any) { debug.push({ source: 'wfs', error: e.message }) }
 
   return NextResponse.json({ features: [], debug: { lat, lng, msg: "No building found", steps: debug } })
 }
