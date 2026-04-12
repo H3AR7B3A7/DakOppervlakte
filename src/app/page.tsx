@@ -87,16 +87,39 @@ export default function Home() {
     geocoderRef.current = new google.maps.Geocoder()
   }, [mapLoaded])
 
-  // Sync heading/tilt to map
+  // Sync heading to map, read back actual value (map may not support rotation everywhere)
   useEffect(() => {
-    if (!mapInstanceRef.current) return
-    mapInstanceRef.current.setHeading(heading)
+    const map = mapInstanceRef.current
+    if (!map) return
+    map.setHeading(heading)
+    setTimeout(() => {
+      const actual = Math.round(map.getHeading() ?? 0)
+      if (Math.abs(actual - heading) > 2) setHeading(actual)
+    }, 150)
   }, [heading])
 
   useEffect(() => {
-    if (!mapInstanceRef.current) return
-    mapInstanceRef.current.setTilt(tilt)
+    const map = mapInstanceRef.current
+    if (!map) return
+    map.setTilt(tilt)
+    setTimeout(() => {
+      const actual = map.getTilt() ?? 0
+      if (actual !== tilt) setTilt(actual)
+    }, 150)
   }, [tilt])
+
+  // Keep React state in sync if user drag-rotates the map directly
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!map) return
+    const hListener = map.addListener('heading_changed', () => {
+      setHeading(Math.round(map.getHeading() ?? 0))
+    })
+    const tListener = map.addListener('tilt_changed', () => {
+      setTilt(map.getTilt() ?? 0)
+    })
+    return () => { hListener.remove(); tListener.remove() }
+  }, [mapLoaded])
 
   const clearDrawingState = useCallback(() => {
     tempMarkersRef.current.forEach(m => m.setMap(null))
@@ -203,6 +226,13 @@ export default function Home() {
     if (!address.trim() || !geocoderRef.current || !mapInstanceRef.current) return
     setSearching(true)
     setError('')
+
+    // Increment counter on every search
+    fetch('/api/counter', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => setUsageCount(d.count))
+      .catch(() => {})
+
     geocoderRef.current.geocode(
       { address: address + ', Belgium', region: 'BE' },
       (results, status) => {
@@ -219,9 +249,6 @@ export default function Home() {
   }
 
   const handleSave = async () => {
-    const counterRes = await fetch('/api/counter', { method: 'POST' })
-    const counterData = await counterRes.json()
-    setUsageCount(counterData.count)
     setSaved(true)
     if (user && address && totalArea > 0) {
       await fetch('/api/searches', {
