@@ -87,18 +87,7 @@ export default function Home() {
     geocoderRef.current = new google.maps.Geocoder()
   }, [mapLoaded])
 
-  // Listen to map heading/tilt changes (drag-rotate etc) and sync to React state
-  useEffect(() => {
-    const map = mapInstanceRef.current
-    if (!map) return
-    const hListener = map.addListener('heading_changed', () => {
-      setHeading(Math.round(map.getHeading() ?? 0))
-    })
-    const tListener = map.addListener('tilt_changed', () => {
-      setTilt(map.getTilt() ?? 0)
-    })
-    return () => { hListener.remove(); tListener.remove() }
-  }, [mapLoaded])
+  // Removed heading/tilt listeners to prevent sync loops
 
   const clearDrawingState = useCallback(() => {
     tempMarkersRef.current.forEach(m => m.setMap(null))
