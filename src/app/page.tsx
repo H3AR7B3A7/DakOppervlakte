@@ -5,7 +5,7 @@ import { SignInButton, SignUpButton, UserButton, Show, useUser } from '@clerk/ne
 
 declare global {
   interface Window {
-    google: unknown
+    google: typeof google
     initMap: () => void
   }
 }
@@ -17,8 +17,11 @@ export default function Home() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<google.maps.Map | null>(null)
   const polygonRef = useRef<google.maps.Polygon | null>(null)
-  const drawingManagerRef = useRef<google.maps.drawing.DrawingManager | null>(null)
   const geocoderRef = useRef<google.maps.Geocoder | null>(null)
+  const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
+  const tempMarkersRef = useRef<google.maps.Marker[]>([])
+  const tempPathRef = useRef<google.maps.LatLng[]>([])
+  const previewPolyRef = useRef<google.maps.Polyline | null>(null)
 
   const [address, setAddress] = useState('')
   const [area, setArea] = useState<number | null>(null)
@@ -29,6 +32,7 @@ export default function Home() {
   const [mode, setMode] = useState<'idle' | 'drawing' | 'done'>('idle')
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [pointCount, setPointCount] = useState(0)
 
   useEffect(() => {
     fetch('/api/counter').then(r => r.json()).then(d => setUsageCount(d.count))
@@ -42,61 +46,150 @@ export default function Home() {
     }
   }, [user])
 
+  // Load Maps with new async pattern (no deprecated drawing library)
   useEffect(() => {
-    if (window.google) { setMapLoaded(true); return }
-    window.initMap = () => setMapLoaded(true)
-    const script = document.createElement('script')
+    if (typeof window === 'undefined') return
+    if ((window as Window & typeof globalThis).google?.maps) { setMapLoaded(true); return }
+
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ''
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=drawing,geometry&callback=initMap`
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=geometry&loading=async&callback=initMap`
     script.async = true
+    script.defer = true
+    ;(window as Window & typeof globalThis).initMap = () => setMapLoaded(true)
     document.head.appendChild(script)
   }, [])
 
+  const calculateArea = useCallback((path: google.maps.LatLng[]) => {
+    const areaSqM = google.maps.geometry.spherical.computeArea(path)
+    setArea(Math.round(areaSqM * 10) / 10)
+    setMode('done')
+    setSaved(false)
+  }, [])
+
+  const clearDrawing = useCallback(() => {
+    // Remove temp markers
+    tempMarkersRef.current.forEach(m => m.setMap(null))
+    tempMarkersRef.current = []
+    tempPathRef.current = []
+    if (previewPolyRef.current) { previewPolyRef.current.setMap(null); previewPolyRef.current = null }
+    if (clickListenerRef.current) { clickListenerRef.current.remove(); clickListenerRef.current = null }
+    if (mapInstanceRef.current) mapInstanceRef.current.setOptions({ draggableCursor: '' })
+    setPointCount(0)
+  }, [])
+
+  const finishPolygon = useCallback(() => {
+    const path = tempPathRef.current
+    if (path.length < 3) return
+
+    clearDrawing()
+
+    if (polygonRef.current) polygonRef.current.setMap(null)
+
+    const polygon = new google.maps.Polygon({
+      paths: path,
+      fillColor: '#6ee7b7',
+      fillOpacity: 0.25,
+      strokeColor: '#6ee7b7',
+      strokeWeight: 2,
+      editable: true,
+      draggable: false,
+      map: mapInstanceRef.current,
+    })
+    polygonRef.current = polygon
+    calculateArea(path)
+
+    // Recalculate on edit
+    const update = () => {
+      const pts: google.maps.LatLng[] = []
+      polygon.getPath().forEach(p => pts.push(p))
+      calculateArea(pts)
+    }
+    polygon.getPath().addListener('set_at', update)
+    polygon.getPath().addListener('insert_at', update)
+  }, [clearDrawing, calculateArea])
+
+  const startDrawingMode = useCallback(() => {
+    const map = mapInstanceRef.current
+    if (!map) return
+
+    clearDrawing()
+    if (polygonRef.current) { polygonRef.current.setMap(null); polygonRef.current = null }
+    setArea(null)
+    setMode('drawing')
+    setSaved(false)
+    setPointCount(0)
+
+    map.setOptions({ draggableCursor: 'crosshair' })
+
+    // Preview polyline (shows line from last point to cursor — optional enhancement)
+    const previewLine = new google.maps.Polyline({
+      strokeColor: '#6ee7b7',
+      strokeWeight: 1.5,
+      strokeOpacity: 0.5,
+      map,
+    })
+    previewPolyRef.current = previewLine
+
+    clickListenerRef.current = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return
+      const pt = e.latLng
+      tempPathRef.current.push(pt)
+      setPointCount(tempPathRef.current.length)
+
+      // Small dot marker for each point
+      const marker = new google.maps.Marker({
+        position: pt,
+        map,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 5,
+          fillColor: '#6ee7b7',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 1.5,
+        },
+        clickable: true,
+      })
+
+      // Click first marker to close polygon
+      if (tempPathRef.current.length === 1) {
+        marker.addListener('click', () => {
+          if (tempPathRef.current.length >= 3) finishPolygon()
+        })
+      }
+
+      tempMarkersRef.current.push(marker)
+
+      // Update preview polyline
+      previewLine.setPath(tempPathRef.current)
+
+      // Auto-close after enough points if user clicks first marker
+      // Also allow double-click to finish
+    })
+
+    // Double-click to finish
+    map.addListener('dblclick', () => {
+      if (tempPathRef.current.length >= 3) finishPolygon()
+    })
+  }, [clearDrawing, finishPolygon])
+
+  // Init map
   useEffect(() => {
     if (!mapLoaded || !mapRef.current || mapInstanceRef.current) return
 
-    const map = new window.google.maps.Map(mapRef.current, {
+    const map = new google.maps.Map(mapRef.current, {
       center: { lat: 51.1, lng: 4.4 },
       zoom: 8,
       mapTypeId: 'satellite',
       disableDefaultUI: true,
       zoomControl: true,
+      gestureHandling: 'greedy',
     })
 
     mapInstanceRef.current = map
-    geocoderRef.current = new window.google.maps.Geocoder()
-
-    const dm = new window.google.maps.drawing.DrawingManager({
-      drawingMode: null,
-      drawingControl: false,
-      polygonOptions: {
-        fillColor: '#6ee7b7',
-        fillOpacity: 0.25,
-        strokeColor: '#6ee7b7',
-        strokeWeight: 2,
-        editable: true,
-        draggable: true,
-      },
-    })
-    dm.setMap(map)
-    drawingManagerRef.current = dm
-
-    dm.addListener('polygoncomplete', (polygon: google.maps.Polygon) => {
-      if (polygonRef.current) polygonRef.current.setMap(null)
-      polygonRef.current = polygon
-      dm.setDrawingMode(null)
-      calculateArea(polygon)
-      polygon.getPath().addListener('set_at', () => calculateArea(polygon))
-      polygon.getPath().addListener('insert_at', () => calculateArea(polygon))
-    })
+    geocoderRef.current = new google.maps.Geocoder()
   }, [mapLoaded])
-
-  const calculateArea = useCallback((polygon: google.maps.Polygon) => {
-    const areaSqM = window.google.maps.geometry.spherical.computeArea(polygon.getPath())
-    setArea(Math.round(areaSqM * 10) / 10)
-    setMode('done')
-    setSaved(false)
-  }, [])
 
   const handleSearch = async () => {
     if (!address.trim() || !geocoderRef.current || !mapInstanceRef.current) return
@@ -115,16 +208,7 @@ export default function Home() {
         mapInstanceRef.current!.setCenter(loc)
         mapInstanceRef.current!.setZoom(20)
 
-        if (polygonRef.current) { polygonRef.current.setMap(null); polygonRef.current = null }
-        setArea(null)
-        setMode('drawing')
-        setSaved(false)
-
-        setTimeout(() => {
-          drawingManagerRef.current?.setDrawingMode(
-            window.google.maps.drawing.OverlayType.POLYGON
-          )
-        }, 600)
+        setTimeout(() => startDrawingMode(), 600)
       }
     )
   }
@@ -147,21 +231,13 @@ export default function Home() {
   }
 
   const handleReset = () => {
+    clearDrawing()
     if (polygonRef.current) { polygonRef.current.setMap(null); polygonRef.current = null }
     setArea(null)
     setMode('idle')
     setAddress('')
     setError('')
     setSaved(false)
-    drawingManagerRef.current?.setDrawingMode(null)
-  }
-
-  const startDrawing = () => {
-    if (polygonRef.current) { polygonRef.current.setMap(null); polygonRef.current = null }
-    setArea(null)
-    setMode('drawing')
-    setSaved(false)
-    drawingManagerRef.current?.setDrawingMode(window.google.maps.drawing.OverlayType.POLYGON)
   }
 
   const s: Record<string, React.CSSProperties> = {
@@ -261,6 +337,12 @@ export default function Home() {
       color: 'var(--accent)', fontSize: 13, fontFamily: 'Syne, sans-serif', fontWeight: 600,
       pointerEvents: 'none' as const, whiteSpace: 'nowrap' as const,
     },
+    finishBtn: {
+      position: 'absolute' as const, bottom: 24, right: 24,
+      background: 'var(--accent)', border: 'none', borderRadius: 8, color: '#000',
+      padding: '10px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+      fontFamily: 'Syne, sans-serif', boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+    },
   }
 
   return (
@@ -311,7 +393,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Address search */}
           <div style={s.searchSection}>
             <label style={s.label}>Adres</label>
             <div style={s.inputRow}>
@@ -334,15 +415,14 @@ export default function Home() {
             {error && <p style={{ color: '#f87171', fontSize: 12, marginTop: 8 }}>{error}</p>}
           </div>
 
-          {/* Instructions / state */}
           <div style={s.content}>
             {mode === 'idle' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, color: 'var(--text-muted)', fontSize: 13 }}>
                 {[
                   ['1', 'Typ een Belgisch adres hierboven'],
                   ['2', 'Zoom in op het satellietbeeld'],
-                  ['3', 'Teken de dakcontouren door te klikken'],
-                  ['4', 'Sluit de vorm — de oppervlakte verschijnt!'],
+                  ['3', 'Klik de hoekpunten van het dak aan'],
+                  ['4', 'Dubbelklik of klik op het eerste punt om te sluiten'],
                 ].map(([n, t]) => (
                   <div key={n} style={s.stepItem}>
                     <span style={s.stepNum}>{n}</span>
@@ -359,8 +439,23 @@ export default function Home() {
                   Tekenmode actief
                 </p>
                 <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6 }}>
-                  Klik op de hoekpunten van het dak.<br />Klik op het startpunt om te sluiten.
+                  {pointCount === 0 && 'Klik op de hoekpunten van het dak.'}
+                  {pointCount === 1 && '1 punt geplaatst — ga verder...'}
+                  {pointCount === 2 && '2 punten — nog minimaal 1 meer.'}
+                  {pointCount >= 3 && `${pointCount} punten — dubbelklik of klik ✓ om te sluiten.`}
                 </p>
+                {pointCount >= 3 && (
+                  <button
+                    onClick={finishPolygon}
+                    style={{
+                      marginTop: 12, background: 'var(--accent)', border: 'none',
+                      borderRadius: 7, color: '#000', padding: '8px 16px',
+                      fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Syne, sans-serif',
+                    }}
+                  >
+                    ✓ Vorm sluiten
+                  </button>
+                )}
               </div>
             )}
 
@@ -385,7 +480,7 @@ export default function Home() {
                       ✓ Opgeslagen
                     </div>
                   )}
-                  <button onClick={startDrawing} style={s.btnSecondary}>Opnieuw tekenen</button>
+                  <button onClick={() => startDrawingMode()} style={s.btnSecondary}>Opnieuw tekenen</button>
                   <button onClick={handleReset} style={s.btnGhost}>Nieuw adres</button>
                 </div>
 
@@ -408,7 +503,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* History (signed in only) */}
           <Show when="signed-in">
             {history.length > 0 && (
               <div style={s.historySection}>
@@ -443,8 +537,13 @@ export default function Home() {
             </div>
           )}
           <div ref={mapRef} style={s.mapEl} />
+
           {mode === 'drawing' && (
-            <div style={s.mapHint}>✏️ Klik op de hoekpunten van het dak</div>
+            <div style={s.mapHint}>
+              {pointCount < 3
+                ? `✏️ Klik hoekpunten aan (${pointCount} geplaatst)`
+                : `✏️ ${pointCount} punten — dubbelklik om te sluiten`}
+            </div>
           )}
         </main>
       </div>
