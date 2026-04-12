@@ -86,6 +86,15 @@ export default function Home() {
     mapInstanceRef.current = map
     geocoderRef.current = new google.maps.Geocoder()
     setTilt(0)
+
+    const hListener = map.addListener('heading_changed', () => {
+      setHeading(Math.round(map.getHeading() ?? 0))
+    })
+    const tListener = map.addListener('tilt_changed', () => {
+      setTilt(map.getTilt() ?? 0)
+    })
+    
+    return () => { hListener.remove(); tListener.remove() }
   }, [mapLoaded])
 
   // Removed heading/tilt listeners to prevent sync loops
