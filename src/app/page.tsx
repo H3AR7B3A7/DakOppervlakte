@@ -335,8 +335,8 @@ export default function Home() {
     setHeading(Math.round(next))
 
     // 2. Debounced resize (only resize once, 300ms after rotation stops)
-    if ((window as any).resizeTimer) clearTimeout((window as any).resizeTimer)
-    (window as any).resizeTimer = setTimeout(() => {
+    if ((window as any).resizeTimer) (window as any).clearTimeout((window as any).resizeTimer)
+    (window as any).resizeTimer = (window as any).setTimeout(() => {
        google.maps.event.trigger(map, 'resize')
     }, 300)
   }
