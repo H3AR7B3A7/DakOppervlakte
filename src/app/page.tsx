@@ -340,21 +340,6 @@ export default function Home() {
     }, 300)
   }
 
-  const applyHeading = useCallback((next: number) => {
-    const map = mapInstanceRef.current
-    if (!map) return
-
-    // 1. Update Map directly
-    map.setHeading(next)
-
-    // 2. Debounced resize (only resize once, 300ms after rotation stops)
-    // This was present in the original working logic and is likely crucial.
-    if ((window as any).resizeTimer) (window as any).clearTimeout((window as any).resizeTimer)
-    (window as any).resizeTimer = (window as any).setTimeout(() => {
-       google.maps.event.trigger(map, 'resize')
-    }, 300)
-  }, [])
-
   const rotate = useCallback((delta: number) => {
     const map = mapInstanceRef.current
     if (!map) return
