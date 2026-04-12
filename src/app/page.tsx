@@ -343,12 +343,10 @@ export default function Home() {
 
   const rotate = useCallback((delta: number) => {
     const map = mapInstanceRef.current
-    if (!map) {
-      console.warn('Map instance not available!')
-      return
-    }
-    const current = map.getHeading() ?? 0
-    applyHeading((current + delta + 360) % 360)
+    if (!map) return
+    const currentHeading = map.getHeading() || 0
+    const nextHeading = (currentHeading + delta + 360) % 360
+    applyHeading(nextHeading)
   }, [])
 
   const toggleTilt = () => {
