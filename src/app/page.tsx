@@ -340,34 +340,37 @@ export default function Home() {
     }, 300)
   }
 
+  const applyHeading = useCallback((next: number) => {
+    const map = mapInstanceRef.current
+    if (!map) return
+
+    // 1. Update Map directly
+    map.setHeading(next)
+
+    // 2. Debounced resize (only resize once, 300ms after rotation stops)
+    // This was present in the original working logic and is likely crucial.
+    if ((window as any).resizeTimer) (window as any).clearTimeout((window as any).resizeTimer)
+    (window as any).resizeTimer = (window as any).setTimeout(() => {
+       google.maps.event.trigger(map, 'resize')
+    }, 300)
+  }, [])
+
   const rotate = useCallback((delta: number) => {
     const map = mapInstanceRef.current
-    if (map) {
-      // Ensure tilt is set for rotation to work
-      const currentTilt = map.getTilt() ?? 0
-      if (currentTilt === 0) {
-        map.setTilt(45);
-        setTilt(45);
-        // Trigger a resize event to ensure map updates after tilt change
-        google.maps.event.trigger(map, 'resize');
-      }
-
-      const currentHeading = map.getHeading() || 0
-      map.setHeading((currentHeading + delta + 360) % 360)
-      // Update React state for heading (optional but good for consistency)
-      setHeading(Math.round((currentHeading + delta + 360) % 360));
-    }
-  }, [])
+    if (!map) return
+    const currentHeading = map.getHeading() || 0
+    const nextHeading = (currentHeading + delta + 360) % 360
+    applyHeading(nextHeading)
+  }, [applyHeading]) // Add applyHeading as dependency
 
   const toggleTilt = () => {
     const map = mapInstanceRef.current
-    if (map) {
-      const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
-      map.setTilt(next)
-      setTilt(next)
-      // Trigger resize event to ensure map updates after tilt change
-      google.maps.event.trigger(map, 'resize');
-    }
+    if (!map) return
+    const next = (map.getTilt() ?? 0) === 0 ? 45 : 0
+    map.setTilt(next)
+    setTilt(next)
+    // Keep non-debounced resize for toggleTilt as it might be less sensitive
+    google.maps.event.trigger(map, 'resize');
   }
   const s: Record<string, React.CSSProperties> = {
     page: { minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' },
