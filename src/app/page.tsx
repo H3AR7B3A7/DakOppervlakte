@@ -71,22 +71,51 @@ export default function Home() {
     document.head.appendChild(script)
   }, [])
 
-  useEffect(() => {
-    if (!mapLoaded || !mapRef.current || mapInstanceRef.current) return
-    const map = new google.maps.Map(mapRef.current, {
-      center: { lat: 51.1, lng: 4.4 },
-      zoom: 8,
-      mapTypeId: 'satellite',
-      disableDefaultUI: true,
-      zoomControl: true,
-      gestureHandling: 'greedy',
-      tilt: 0,
-      heading: 0,
-    })
-    mapInstanceRef.current = map
-    geocoderRef.current = new google.maps.Geocoder()
-  }, [mapLoaded])
+  // Ref for map listeners
+  const mapListenersRef = useRef<google.maps.MapsEventListener[]>([])
 
+  useEffect(() => {
+      if (!mapLoaded || !mapRef.current) return;
+
+      // Ensure map instance is created only once
+      if (!mapInstanceRef.current) {
+          const map = new google.maps.Map(mapRef.current, {
+              center: { lat: 51.1, lng: 4.4 },
+              zoom: 8,
+              mapTypeId: 'satellite',
+              disableDefaultUI: true,
+              zoomControl: true,
+              gestureHandling: 'greedy',
+              tilt: 0,
+              heading: 0,
+          });
+          mapInstanceRef.current = map;
+          geocoderRef.current = new google.maps.Geocoder();
+      }
+
+      const map = mapInstanceRef.current;
+
+      // Add listener to sync map orientation with component state
+      const idleListener = map.addListener('idle', () => {
+          const currentHeading = map.getHeading();
+          const currentTilt = map.getTilt();
+
+          // Update state only if the value has changed to prevent infinite loops.
+          if (currentHeading !== undefined && heading !== currentHeading) {
+              setHeading(currentHeading);
+          }
+          if (currentTilt !== undefined && tilt !== currentTilt) {
+              setTilt(currentTilt);
+          }
+      });
+      mapListenersRef.current.push(idleListener);
+
+      // Clean up listeners
+      return () => {
+          mapListenersRef.current.forEach(listener => google.maps.event.removeListener(listener));
+          mapListenersRef.current = [];
+      };
+  }, [mapLoaded]);
   // Sync heading/tilt to map
   useEffect(() => {
     if (!mapInstanceRef.current) return
@@ -325,7 +354,7 @@ export default function Home() {
           <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)' }}>
             <label style={s.label}>Kaarthoek & perspectief</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <button onClick={() => rotate(-15)} title="Roteer links" style={{
+              <button onClick={() => rotate(-30)} title="Roteer links" style={{
                 background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 7,
                 color: 'var(--text)', width: 36, height: 36, fontSize: 16, cursor: 'pointer', flexShrink: 0,
               }}>↺</button>
@@ -337,7 +366,7 @@ export default function Home() {
                   <span>N</span><span>{heading}°</span><span>N</span>
                 </div>
               </div>
-              <button onClick={() => rotate(15)} title="Roteer rechts" style={{
+              <button onClick={() => rotate(30)} title="Roteer rechts" style={{
                 background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 7,
                 color: 'var(--text)', width: 36, height: 36, fontSize: 16, cursor: 'pointer', flexShrink: 0,
               }}>↻</button>
@@ -549,7 +578,7 @@ export default function Home() {
           {/* Map overlay controls */}
           {mapLoaded && (
             <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button onClick={() => rotate(-45)} title="Roteer links" style={{
+              <button onClick={() => rotate(-90)} title="Roteer links" style={{
                 background: 'rgba(17,17,24,0.9)', backdropFilter: 'blur(8px)',
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)',
                 width: 40, height: 40, fontSize: 18, cursor: 'pointer',
@@ -559,7 +588,7 @@ export default function Home() {
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-muted)',
                 width: 40, height: 40, fontSize: 11, cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 700,
               }}>N</button>
-              <button onClick={() => rotate(45)} title="Roteer rechts" style={{
+              <button onClick={() => rotate(90)} title="Roteer rechts" style={{
                 background: 'rgba(17,17,24,0.9)', backdropFilter: 'blur(8px)',
                 border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)',
                 width: 40, height: 40, fontSize: 18, cursor: 'pointer',
