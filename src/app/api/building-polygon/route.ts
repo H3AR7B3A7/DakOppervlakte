@@ -17,9 +17,27 @@ export async function GET(request: Request) {
     const data = await res.json()
 
     if (data.geojson) {
+      let geometry = data.geojson
+      
+      // If it's a Point, generate a 10x10m square around it
+      if (geometry.type === 'Point') {
+        const [lng, lat] = geometry.coordinates
+        const offset = 0.00005 // Approx 5-6 meters
+        geometry = {
+          type: 'Polygon',
+          coordinates: [[
+            [lng - offset, lat - offset],
+            [lng + offset, lat - offset],
+            [lng + offset, lat + offset],
+            [lng - offset, lat + offset],
+            [lng - offset, lat - offset]
+          ]]
+        }
+      }
+
       return NextResponse.json({ 
         type: 'Feature', 
-        geometry: data.geojson 
+        geometry: geometry 
       })
     }
   } catch (e: any) {
