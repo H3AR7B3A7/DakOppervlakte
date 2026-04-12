@@ -80,7 +80,7 @@ export default function Home() {
       disableDefaultUI: true,
       zoomControl: true,
       gestureHandling: 'greedy',
-      tilt: 0,
+      tilt: 45,
       heading: 0,
     })
     mapInstanceRef.current = map
