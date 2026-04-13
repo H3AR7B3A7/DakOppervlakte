@@ -1,13 +1,13 @@
 # DakOppervlakte
 
-DakOppervlakte is een efficiënte tool voor het berekenen van dakoppervlakken voor zonnepanelen of renovatieprojecten, met automatische detectie van gebouwgeometrieën in België.
+DakOppervlakte is a tool designed for efficient calculation of roof areas for solar panel installations or renovation projects. It utilizes automatic building geometry detection for regions in Belgium.
 
 ## Features
 
-- 🏢 **Automatische Gebouwdetectie**: Gebruik van officiële data van Digitaal Vlaanderen (Basisregisters) en UrbIS (Brussel).
-- 🗺 **Kaartintegratie**: Interactieve satellietkaarten met rotatie en tilt-ondersteuning.
-- 📐 **Nauwkeurige Oppervlaktemeting**: Directe berekening van de 2D-voetafdruk.
-- 💾 **Geschiedenis**: Sla uw berekeningen op met integratie via Clerk.
+- 🏢 **Automatic Building Detection**: Leverages official data from Digitaal Vlaanderen (Basisregisters) and UrbIS (Brussels).
+- 🗺 **Map Integration**: Interactive satellite maps with rotation and tilt capabilities.
+- 📐 **Accurate Area Measurement**: Direct calculation of the 2D footprint area.
+- 💾 **History**: Save your calculations with integration via Clerk for user authentication.
 
 ## Tech Stack
 
@@ -20,85 +20,37 @@ DakOppervlakte is een efficiënte tool voor het berekenen van dakoppervlakken vo
 
 ## Setup
 
-1. Clone de repository.
-2. Kopieer `.env.example` naar `.env` en vul de benodigde API-keys in:
+1. Clone the repository.
+2. Copy `.env.example` to `.env.local` and fill in the necessary API keys:
    - `NEXT_PUBLIC_GOOGLE_MAPS_KEY`
    - `DATABASE_URL` (Neon Postgres)
    - `CLERK_SECRET_KEY` & `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-3. Installeer dependencies: `npm install`
-4. Start de ontwikkelserver: `npm run dev`
-5. Voer tests uit: `npm test`
+3. Install dependencies: `npm install`
+4. Start the development server: `npm run dev`
+5. Run tests: `npm test`
 
 ## Deployment
 
-De applicatie is geoptimaliseerd voor Vercel. Zorg dat alle omgevingsvariabelen in het Vercel Dashboard zijn ingesteld.
+The application is optimized for Vercel. Ensure all environment variables are configured in the Vercel Dashboard.
 
 ---
 
-## Project Structure
+## Component Architecture Overview
 
-```
-src/
-  app/                          # Next.js App Router
-    layout.tsx                  # Root layout: ClerkProvider, fonts, metadata
-    page.tsx                    # Thin page shell — renders <DakoppervlakteApp />
-    api/
-      counter/route.ts          # Public: GET/POST global usage counter
-      searches/route.ts         # Protected: GET/POST user search history
-      building-polygon/route.ts # Proxy: Nominatim building geometry
-      init/route.ts             # DB initialisation helper
+DakOppervlakte follows a layered component architecture to ensure maintainability and scalability:
 
-  components/
-    ui/                         # Pure UI — no state, no side effects
-      Button.tsx
-      Input.tsx
-      Spinner.tsx
-      Logo.tsx
-      Badge.tsx
-    map/                        # Map-specific dumb components
-      MapView.tsx               # Renders the Google Maps container
-      MapOverlayControls.tsx    # Rotate / tilt overlay buttons
-      DrawingOverlay.tsx        # Bottom hint bar during drawing
-    sidebar/                    # Sidebar dumb components
-      AddressSearch.tsx
-      RotationControls.tsx
-      PolygonList.tsx
-      TotalAreaDisplay.tsx
-      DrawingHint.tsx
-      StepGuide.tsx
-      SearchHistory.tsx
-      SaveResetControls.tsx
-    DakoppervlakteApp.tsx       # Smart component — all state + orchestration
+| Layer                | Location                                 | Rule                                                                                                                  |
+|----------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| **Pages**            | `app/page.tsx`                           | Server component shell only. No logic, no state.                                                                      |
+| **Smart Components** | `components/DakoppervlakteApp.tsx`       | Manages its own state via hooks, orchestrates child components, and calls custom hooks. Avoids raw JSX styling.       |
+| **Dumb Components**  | `components/sidebar/`, `components/map/` | Receive all data and callbacks through props. They do not make direct API calls or manage global state.               |
+| **Pure UI**          | `components/ui/`                         | Stateless components that accept only primitive props and children. Designed for maximum reusability across projects. |
 
-  hooks/
-    useGoogleMaps.ts            # Script loading + map instance lifecycle
-    usePolygonDrawing.ts        # Drawing FSM: start → place points → finish
-    useUsageCounter.ts          # Fetch count on mount, increment on save
-    useSearchHistory.ts         # Fetch + persist search history
+---
 
-  lib/
-    db.ts                       # Neon client factory
-    types.ts                    # Shared TypeScript types
-    utils.ts                    # Pure helpers (formatArea, generateColor…)
-    init-db.ts                  # One-shot DB schema initialisation script
+## Contribution
 
-  __tests__/
-    __mocks__/
-      googleMaps.ts             # Global Google Maps API stub (jsdom can't load it)
-    hooks/                      # Hook-level tests via renderHook
-    components/                 # Component-level use-case tests
-    api/                        # API route handler tests
-    DakoppervlakteApp.test.tsx  # Full integration / use-case tests
-```
-
-### Component layers
-
-| Layer | Location | Rule |
-|---|---|---|
-| **Pages** | `app/page.tsx` | Server component shell only. No logic, no state. |
-| **Smart components** | `components/DakoppervlakteApp.tsx` | Own state via hooks, orchestrate child components, call hooks. No raw JSX styling. |
-| **Dumb components** | `components/sidebar/`, `components/map/` | Receive all data and callbacks via props. No direct API calls, no global state. |
-| **Pure UI** | `components/ui/` | Stateless. Accept only primitive props + children. Fully reusable across projects. |
+We welcome contributions to DakOppervlakte! Please refer to our contribution guidelines for details on how to submit your changes.
 
 ---
 
@@ -191,53 +143,4 @@ Don't test hooks by inspecting internal variables. Test them by asserting on wha
 
 Import the route handler directly and call it with a real `Request` object. Assert on the `Response` status and JSON body. Do not mock the route handler itself.
 
-### Use cases to test (current scope)
-
-```
-User searches for an address
-  ✓ navigates the map to the address and enters drawing mode
-  ✓ shows an error when the address is not found
-  ✓ disables the search button when the input is empty
-  ✓ disables the search button while a search is in progress
-
-User draws a polygon
-  ✓ shows drawing mode is active after starting
-  ✓ shows how many points have been placed
-  ✓ does not offer a finish button with fewer than 3 points
-  ✓ offers a finish button once 3 points are placed
-  ✓ shows the area after completing a polygon
-  ✓ updates the area when a vertex is dragged
-
-User manages polygons
-  ✓ can rename a polygon by clicking its label
-  ✓ cancels rename on Escape
-  ✓ does not rename if the new label is empty
-  ✓ can delete a polygon; total area updates accordingly
-  ✓ shows a combined total when multiple polygons exist
-
-User saves a result
-  ✓ increments the global usage counter on save
-  ✓ persists the entry to history when signed in
-  ✓ shows a sign-up upsell when signed out
-  ✓ shows a saved confirmation after saving
-
-Map orientation controls
-  ✓ rotates the map when the rotate buttons are clicked
-  ✓ resets heading to north (0°) when N is clicked
-  ✓ toggles 3D perspective tilt between 0° and 45°
-
-Pure utilities
-  ✓ formatArea rounds and localises correctly
-  ✓ generatePolygonColor produces valid HSL in a safe hue range
-  ✓ normalizeHeading wraps heading values to [0, 360)
-
-API: counter
-  ✓ GET returns the current count
-  ✓ POST increments and returns the new count
-
-API: searches
-  ✓ GET returns history for the authenticated user
-  ✓ POST saves a new entry for the authenticated user
-  ✓ GET returns 401 when unauthenticated
-  ✓ POST returns 401 when unauthenticated
-```
+---
