@@ -3,7 +3,7 @@ import getDb from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-async function initDb(sql: any) {
+async function initDb(sql: ReturnType<typeof getDb>) {
   await sql`
     CREATE TABLE IF NOT EXISTS usage_counter (
       id INT PRIMARY KEY DEFAULT 1,
@@ -33,10 +33,10 @@ export async function POST() {
     }
     
     return NextResponse.json({ count: result[0].count })
-  } catch (e: any) {
+  } catch (e) {
     console.error('Counter POST error:', e)
     // If it's a table-not-found error, try to init and retry
-    if (e.message?.includes('does not exist')) {
+    if (e instanceof Error && e.message?.includes('does not exist')) {
       try {
         const sql = getDb()
         await initDb(sql)
@@ -44,11 +44,11 @@ export async function POST() {
           UPDATE usage_counter SET count = count + 1 WHERE id = 1 RETURNING count
         `
         return NextResponse.json({ count: result[0].count })
-      } catch (e2) {
+      } catch {
         return NextResponse.json({ count: null, error: 'Database init failed' }, { status: 500 })
       }
     }
-    return NextResponse.json({ count: null, error: e.message }, { status: 500 })
+    return NextResponse.json({ count: null, error: e instanceof Error ? e.message : String(e) }, { status: 500 })
   }
 }
 
@@ -57,8 +57,8 @@ export async function GET() {
     const sql = getDb()
     const result = await sql`SELECT count FROM usage_counter WHERE id = 1`
     return NextResponse.json({ count: result[0]?.count ?? 0 })
-  } catch (e: any) {
-    if (e.message?.includes('does not exist')) return NextResponse.json({ count: 0 })
-    return NextResponse.json({ count: 0, error: e.message })
+  } catch (e) {
+    if (e instanceof Error && e.message?.includes('does not exist')) return NextResponse.json({ count: 0 })
+    return NextResponse.json({ count: 0, error: e instanceof Error ? e.message : String(e) })
   }
 }

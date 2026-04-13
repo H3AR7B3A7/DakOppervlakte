@@ -1,6 +1,5 @@
 - [x] Add tests
-- [ ] Update CLAUDE/GEMINI/README with vite changes
-- [ ] Add commands to CLAUDE/GEMINI to run single test etc, and instruct to always check tsc build and run linting after a change
+- [x] Add commands to CLAUDE/GEMINI to run single test etc, and instruct to always check tsc build and run linting after a change
 - [ ] Belgium is supposed to have polygons that we can get for the addresses (there's a new api?), so we can make automatic selection of a roof
 - [ ] If we aren't logged in we can push a button and it says we successfully saved.
 - [ ] When logged in and saving, we can't actually ever get that save back anywhere.

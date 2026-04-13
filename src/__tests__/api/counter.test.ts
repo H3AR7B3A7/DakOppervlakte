@@ -1,6 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GET, POST } from '@/app/api/counter/route'
-import { NextResponse } from 'next/server'
+import { describe, it, vi } from 'vitest'
 
 // Mock the db client
 vi.mock('@/lib/db', () => ({

@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
+import { Syne, DM_Sans } from 'next/font/google'
 import './globals.css'
+
+const syne = Syne({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-syne' })
+const dmSans = DM_Sans({ subsets: ['latin'], weight: ['300', '400', '500'], variable: '--font-dm-sans' })
 
 export const metadata: Metadata = {
   title: 'Dakoppervlakte — Bereken uw dak',
@@ -10,12 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="nl">
-        <head>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-        </head>
+      <html lang="nl" className={`${syne.variable} ${dmSans.variable}`}>
         <body className="min-h-screen">{children}</body>
       </html>
     </ClerkProvider>

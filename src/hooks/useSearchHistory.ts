@@ -17,8 +17,8 @@ export function useSearchHistory(isSignedIn: boolean) {
   }, [])
 
   useEffect(() => {
-    if (isSignedIn) fetchHistory()
-    else setHistory([])
+    if (isSignedIn) fetchHistory() // eslint-disable-line react-hooks/set-state-in-effect
+    else setHistory([])  
   }, [isSignedIn, fetchHistory])
 
   const saveEntry = useCallback(

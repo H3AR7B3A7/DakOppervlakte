@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx tsc --noEmit && next build",
     "start": "next start",
     "lint": "eslint --fix",
+    "check": "npx tsc --noEmit && eslint --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

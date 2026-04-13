@@ -16,7 +16,7 @@ export function useGoogleMaps() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (window.google?.maps) {
-      setMapLoaded(true)
+      setMapLoaded(true) // eslint-disable-line react-hooks/set-state-in-effect
       return
     }
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
@@ -24,7 +24,7 @@ export function useGoogleMaps() {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=geometry&loading=async&callback=initMap`
     script.async = true
     script.defer = true
-    window.initMap = () => setMapLoaded(true)
+    ;(window as unknown as { initMap: () => void }).initMap = () => setMapLoaded(true)
     document.head.appendChild(script)
   }, [])
 

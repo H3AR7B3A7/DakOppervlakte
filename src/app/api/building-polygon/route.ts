@@ -40,7 +40,7 @@ export async function GET(request: Request) {
         geometry: geometry 
       })
     }
-  } catch (e: any) {
+  } catch (e) {
     console.error('Nominatim error', e)
   }
 
