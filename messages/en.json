@@ -39,9 +39,13 @@
     "rotateLeftAriaLabel": "Rotate left",
     "rotateRightAriaLabel": "Rotate right",
     "mapDirectionAriaLabel": "Map direction",
+    "cardinalE": "E",
+    "cardinalS": "S",
     "tiltOn": "🏔 Perspective on (45°)",
     "tiltOff": "🗺 Perspective off (top-down)",
-    "tiltAriaLabel": "Toggle 3D perspective"
+    "tiltZoomHint": "Zoom in further to enable 3D mode.",
+    "tiltAriaLabel": "Toggle 3D perspective",
+    "rotationDisabledHint": "Enable 3D mode to rotate the map."
   },
   "Drawing": {
     "hint": "Click on the map to start drawing",
@@ -68,6 +72,7 @@
     "rotateRightAriaLabel": "Rotate map right",
     "resetHeadingAriaLabel": "Reset map direction to north",
     "tiltAriaLabel": "Toggle 3D perspective",
+    "tiltZoomRequiredTooltip": "Zoom in to enable 3D",
     "drawingOverlayInitial": "✏️ Click corners ({count} placed)",
     "drawingOverlayReady": "✏️ {count} points — double click to close"
   },

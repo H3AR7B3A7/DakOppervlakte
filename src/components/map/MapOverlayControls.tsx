@@ -3,6 +3,8 @@ import { useTranslations } from 'next-intl'
 
 interface MapOverlayControlsProps {
   tilt: number
+  is3D: boolean
+  canEnable3D: boolean
   onRotateLeft: () => void
   onRotateRight: () => void
   onResetHeading: () => void
@@ -26,12 +28,21 @@ const overlayBtn: React.CSSProperties = {
 
 export function MapOverlayControls({
   tilt,
+  is3D,
+  canEnable3D,
   onRotateLeft,
   onRotateRight,
   onResetHeading,
   onTiltToggle,
 }: MapOverlayControlsProps) {
   const t = useTranslations('Map')
+
+  const rotationDisabled = !is3D
+  const disabledRotationBtn: React.CSSProperties = {
+    ...overlayBtn,
+    opacity: 0.35,
+    cursor: 'not-allowed',
+  }
 
   return (
     <div
@@ -44,15 +55,21 @@ export function MapOverlayControls({
         gap: 8,
       }}
     >
-      <button onClick={onRotateLeft} aria-label={t('rotateLeftAriaLabel')} style={overlayBtn}>
+      <button
+        onClick={rotationDisabled ? undefined : onRotateLeft}
+        disabled={rotationDisabled}
+        aria-label={t('rotateLeftAriaLabel')}
+        style={rotationDisabled ? disabledRotationBtn : overlayBtn}
+      >
         ↺
       </button>
 
       <button
-        onClick={onResetHeading}
+        onClick={rotationDisabled ? undefined : onResetHeading}
+        disabled={rotationDisabled}
         aria-label={t('resetHeadingAriaLabel')}
         style={{
-          ...overlayBtn,
+          ...(rotationDisabled ? disabledRotationBtn : overlayBtn),
           color: 'var(--text-muted)',
           fontSize: 11,
           fontFamily: 'Syne, sans-serif',
@@ -62,20 +79,29 @@ export function MapOverlayControls({
         N
       </button>
 
-      <button onClick={onRotateRight} aria-label={t('rotateRightAriaLabel')} style={overlayBtn}>
+      <button
+        onClick={rotationDisabled ? undefined : onRotateRight}
+        disabled={rotationDisabled}
+        aria-label={t('rotateRightAriaLabel')}
+        style={rotationDisabled ? disabledRotationBtn : overlayBtn}
+      >
         ↻
       </button>
 
       <button
         onClick={onTiltToggle}
+        disabled={!canEnable3D && !is3D}
         aria-label={t('tiltAriaLabel')}
-        aria-pressed={tilt === 45}
+        aria-pressed={is3D}
+        title={!canEnable3D && !is3D ? t('tiltZoomRequiredTooltip') : undefined}
         style={{
           ...overlayBtn,
-          background: tilt === 45 ? 'rgba(110,231,183,0.2)' : 'rgba(17,17,24,0.9)',
-          border: `1px solid ${tilt === 45 ? 'rgba(110,231,183,0.5)' : 'var(--border)'}`,
-          color: tilt === 45 ? 'var(--accent)' : 'var(--text-muted)',
+          background: is3D ? 'rgba(110,231,183,0.2)' : 'rgba(17,17,24,0.9)',
+          border: `1px solid ${is3D ? 'rgba(110,231,183,0.5)' : 'var(--border)'}`,
+          color: is3D ? 'var(--accent)' : 'var(--text-muted)',
           fontSize: 14,
+          opacity: !canEnable3D && !is3D ? 0.35 : 1,
+          cursor: !canEnable3D && !is3D ? 'not-allowed' : 'pointer',
         }}
       >
         3D

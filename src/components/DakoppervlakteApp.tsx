@@ -52,6 +52,12 @@ export function DakoppervlakteApp() {
   const [saved, setSaved] = useState(false)
   const [heading, setHeading] = useState(0)
   const [tilt, setTilt] = useState(0)
+  const [zoom, setZoom] = useState(8)
+
+  // Google Maps only supports tilt on raster satellite maps at zoom >= 14
+  const TILT_MIN_ZOOM = 14
+  const canEnable3D = zoom >= TILT_MIN_ZOOM
+  const is3D = tilt === 45
 
   const totalArea = polygons.reduce((sum, p) => sum + p.area, 0)
 
@@ -65,19 +71,30 @@ export function DakoppervlakteApp() {
     mapInstanceRef.current?.setTilt(tilt)
   }, [tilt, mapInstanceRef])
 
-  // Keep heading/tilt state in sync when the user drags/pans the map
+  // Keep heading/tilt/zoom state in sync when the user interacts with the map
   const mapListenersRef = useRef<google.maps.MapsEventListener[]>([])
   useEffect(() => {
     if (!mapLoaded || !mapInstanceRef.current) return
     const map = mapInstanceRef.current
 
-    const listener = map.addListener('idle', () => {
+    const onIdle = () => {
       const h = map.getHeading() ?? 0
       const t = map.getTilt() ?? 0
       setHeading((prev) => (prev !== h ? h : prev))
       setTilt((prev) => (prev !== t ? t : prev))
-    })
-    mapListenersRef.current.push(listener)
+    }
+    const onZoomChange = () => {
+      const z = map.getZoom() ?? 8
+      setZoom(z)
+      // If zoom drops below threshold while 3D is active, snap tilt back to 0
+      if (z < TILT_MIN_ZOOM) {
+        setTilt(0)
+      }
+    }
+
+    const idleListener = map.addListener('idle', onIdle)
+    const zoomListener = map.addListener('zoom_changed', onZoomChange)
+    mapListenersRef.current.push(idleListener, zoomListener)
 
     return () => {
       mapListenersRef.current.forEach((l) => google.maps.event.removeListener(l))
@@ -128,8 +145,9 @@ export function DakoppervlakteApp() {
   }, [])
 
   const handleTiltToggle = useCallback(() => {
+    if (!canEnable3D) return
     setTilt((t) => (t === 0 ? 45 : 0))
-  }, [])
+  }, [canEnable3D])
 
   const handleStartDrawing = useCallback(() => {
     setSaved(false)
@@ -252,6 +270,8 @@ export function DakoppervlakteApp() {
           <RotationControls
             heading={heading}
             tilt={tilt}
+            is3D={is3D}
+            canEnable3D={canEnable3D}
             onHeadingChange={(h) => setHeading(normalizeHeading(h))}
             onRotate={handleRotate}
             onTiltToggle={handleTiltToggle}
@@ -321,6 +341,8 @@ export function DakoppervlakteApp() {
         <MapView mapRef={mapRef} mapLoaded={mapLoaded}>
           <MapOverlayControls
             tilt={tilt}
+            is3D={is3D}
+            canEnable3D={canEnable3D}
             onRotateLeft={() => handleRotate(-90)}
             onRotateRight={() => handleRotate(90)}
             onResetHeading={() => setHeading(0)}

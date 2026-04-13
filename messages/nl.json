@@ -39,9 +39,13 @@
     "rotateLeftAriaLabel": "Roteer links",
     "rotateRightAriaLabel": "Roteer rechts",
     "mapDirectionAriaLabel": "Kaartrichting",
+    "cardinalE": "O",
+    "cardinalS": "Z",
     "tiltOn": "🏔 Perspectief aan (45°)",
     "tiltOff": "🗺 Perspectief uit (bovenaanzicht)",
-    "tiltAriaLabel": "Toggle 3D perspectief"
+    "tiltZoomHint": "Zoom verder in op de kaart om 3D-modus te activeren.",
+    "tiltAriaLabel": "Toggle 3D perspectief",
+    "rotationDisabledHint": "Schakel 3D-modus in om de kaart te kunnen roteren."
   },
   "Drawing": {
     "hint": "Klik op de kaart om te beginnen met tekenen",
@@ -68,6 +72,7 @@
     "rotateRightAriaLabel": "Roteer kaart rechts",
     "resetHeadingAriaLabel": "Reset kaartrichting naar noord",
     "tiltAriaLabel": "Toggle 3D perspectief",
+    "tiltZoomRequiredTooltip": "Zoom in om 3D te activeren",
     "drawingOverlayInitial": "✏️ Klik hoekpunten aan ({count} geplaatst)",
     "drawingOverlayReady": "✏️ {count} punten — dubbelklik om te sluiten"
   },
