@@ -63,7 +63,7 @@ Project richtlijnen voor AI-assistenten. Lees dit volledig voordat je code schri
 - **New API data**: add the type to `src/lib/types.ts`, fetch in a hook, pass result as props
 - **New test**: check the use-case list in README.md first; add to the relevant `__tests__/` file; do not mock unless forced to
 - **Debugging**: add a `debug` field to JSON responses, use `console.error` in catch blocks
-- **Development**: After making changes, ALWAYS run `npm run lint` and `npm run build` (or `tsc`) to verify type safety and linting.
+- **Development**: After making changes, ALWAYS run `npm run check` and `npm test` (or `tsc`).
 - **Testing Commands**:
   - Run all tests: `npm test`
   - Run single test file: `npx vitest run <path-to-file>`

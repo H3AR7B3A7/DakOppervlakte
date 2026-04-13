@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import { Button, Input } from '@/components/ui'
 
 interface AddressSearchProps {
@@ -18,6 +19,8 @@ export function AddressSearch({
   searching,
   error,
 }: AddressSearchProps) {
+  const t = useTranslations('Sidebar')
+
   return (
     <div
       style={{
@@ -28,22 +31,22 @@ export function AddressSearch({
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
         <div style={{ flex: 1 }}>
           <Input
-            label="Adres"
+            label={t('addressLabel')}
             id="address-search"
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && onSearch()}
-            placeholder="Meir 1, Antwerpen..."
+            placeholder={t('addressPlaceholder')}
             error={error}
-            aria-label="Zoek een adres"
+            aria-label={t('searchAriaLabel')}
           />
         </div>
         <Button
           variant="accent"
           onClick={onSearch}
           disabled={searching || !value.trim()}
-          aria-label="Zoeken"
+          aria-label={t('searchButtonAriaLabel')}
           style={{ padding: '10px 16px', flexShrink: 0, marginBottom: error ? 22 : 0 }}
         >
           {searching ? '…' : '→'}

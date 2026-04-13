@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 interface MapOverlayControlsProps {
   tilt: number
@@ -30,6 +31,8 @@ export function MapOverlayControls({
   onResetHeading,
   onTiltToggle,
 }: MapOverlayControlsProps) {
+  const t = useTranslations('Map')
+
   return (
     <div
       style={{
@@ -41,13 +44,13 @@ export function MapOverlayControls({
         gap: 8,
       }}
     >
-      <button onClick={onRotateLeft} aria-label="Roteer kaart links" style={overlayBtn}>
+      <button onClick={onRotateLeft} aria-label={t('rotateLeftAriaLabel')} style={overlayBtn}>
         ↺
       </button>
 
       <button
         onClick={onResetHeading}
-        aria-label="Reset kaartrichting naar noord"
+        aria-label={t('resetHeadingAriaLabel')}
         style={{
           ...overlayBtn,
           color: 'var(--text-muted)',
@@ -59,13 +62,13 @@ export function MapOverlayControls({
         N
       </button>
 
-      <button onClick={onRotateRight} aria-label="Roteer kaart rechts" style={overlayBtn}>
+      <button onClick={onRotateRight} aria-label={t('rotateRightAriaLabel')} style={overlayBtn}>
         ↻
       </button>
 
       <button
         onClick={onTiltToggle}
-        aria-label="Toggle 3D perspectief"
+        aria-label={t('tiltAriaLabel')}
         aria-pressed={tilt === 45}
         style={{
           ...overlayBtn,

@@ -1,24 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatArea, generatePolygonColor, normalizeHeading } from '@/lib/utils'
-
-describe('formatArea', () => {
-  it('formats small values with one decimal using Belgian locale', () => {
-    expect(formatArea(12.3)).toBe('12,3')
-  })
-
-  it('rounds values below 1000 to one decimal place', () => {
-    expect(formatArea(45.678)).toBe('45,7')
-  })
-
-  it('rounds values of 1000 or above to the nearest integer', () => {
-    expect(formatArea(1000)).toBe('1.000')
-    expect(formatArea(2345.6)).toBe('2.346')
-  })
-
-  it('formats zero', () => {
-    expect(formatArea(0)).toBe('0')
-  })
-})
+import { generatePolygonColor, normalizeHeading } from '@/lib/utils'
 
 describe('generatePolygonColor', () => {
   it('returns a valid hsl() string', () => {

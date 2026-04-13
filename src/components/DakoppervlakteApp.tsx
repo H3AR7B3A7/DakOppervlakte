@@ -3,6 +3,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { SignInButton, SignUpButton, UserButton, Show, useUser } from '@clerk/nextjs'
 
+import { useTranslations, useFormatter } from 'next-intl'
+
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
 import { useUsageCounter } from '@/hooks/useUsageCounter'
@@ -23,6 +25,8 @@ import {
 } from '@/components/sidebar'
 
 export function DakoppervlakteApp() {
+  const t = useTranslations()
+  const format = useFormatter()
   const { user } = useUser()
   const isSignedIn = !!user
 
@@ -96,7 +100,7 @@ export function DakoppervlakteApp() {
       (results, status) => {
         setSearching(false)
         if (status !== 'OK' || !results?.[0]) {
-          setSearchError('Adres niet gevonden. Probeer een vollediger adres.')
+          setSearchError(t('Errors.addressNotFound'))
           return
         }
         map.setCenter(results[0].geometry.location)
@@ -104,7 +108,7 @@ export function DakoppervlakteApp() {
         setTimeout(() => startDrawing(), 600)
       }
     )
-  }, [address, geocoderRef, mapInstanceRef, startDrawing])
+  }, [address, geocoderRef, mapInstanceRef, startDrawing, t])
 
   const handleSave = useCallback(async () => {
     await increment()
@@ -164,18 +168,18 @@ export function DakoppervlakteApp() {
           {usageCount !== null && (
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               <span style={{ color: 'var(--accent)', fontWeight: 500 }}>
-                {usageCount.toLocaleString('nl-BE')}
+                {format.number(usageCount)}
               </span>{' '}
-              berekeningen
+              {t('Sidebar.calculationsCount', { count: usageCount })}
             </span>
           )}
 
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <Button variant="outline">Aanmelden</Button>
+              <Button variant="outline">{t('Header.signIn')}</Button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <Button variant="accent">Registreren</Button>
+              <Button variant="accent">{t('Common.register')}</Button>
             </SignUpButton>
           </Show>
 
@@ -226,12 +230,12 @@ export function DakoppervlakteApp() {
                 color: 'var(--text)',
               }}
             >
-              Bereken uw
+              {t('App.title')}
               <br />
-              <span style={{ color: 'var(--accent)' }}>dakoppervlakte</span>
+              <span style={{ color: 'var(--accent)' }}>{t('App.titleAccent')}</span>
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.5 }}>
-              Typ een adres en teken de dakcontouren.
+              {t('App.subtitle')}
             </p>
           </div>
 
@@ -271,8 +275,8 @@ export function DakoppervlakteApp() {
               >
                 ✏️{' '}
                 {polygons.length === 0
-                  ? 'Begin met tekenen'
-                  : 'Nog een vlak toevoegen'}
+                  ? t('Sidebar.startDrawing')
+                  : t('Sidebar.addPlane')}
               </Button>
             )}
 

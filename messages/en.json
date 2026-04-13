@@ -1,0 +1,80 @@
+{
+  "Metadata": {
+    "title": "Roof Area — Calculate your roof",
+    "description": "Calculate for free the area of any roof in Belgium by address."
+  },
+  "Header": {
+    "calculations": "calculations",
+    "signIn": "Sign In",
+    "signUp": "Sign Up"
+  },
+  "App": {
+    "title": "Calculate your",
+    "titleAccent": "roof area",
+    "subtitle": "Type an address and draw the roof outlines."
+  },
+  "Sidebar": {
+    "addressLabel": "Address",
+    "addressPlaceholder": "Meir 1, Antwerp...",
+    "searchAriaLabel": "Search for an address",
+    "searchButtonAriaLabel": "Search",
+    "startDrawing": "Start drawing",
+    "addPlane": "Add another plane",
+    "totalArea": "Total area",
+    "unit": "m²",
+    "calculationsCount": "{count, plural, =0 {no calculations} one {1 calculation} other {# calculations}}",
+    "saveToHistory": "💾 Save to history",
+    "updateCounter": "📊 Update counter",
+    "clearAll": "Clear all",
+    "historyUpsell": "📋 Create a free account to keep track of your search history.",
+    "registerFree": "Register for free",
+    "historyTitle": "History",
+    "historyAriaLabel": "Search history",
+    "planesTitle": "Planes",
+    "planeNameAriaLabel": "Plane name",
+    "renamePlaneTitle": "Click to rename",
+    "renamePlaneAriaLabel": "Rename plane: {label}",
+    "deletePlaneAriaLabel": "Delete {label}",
+    "rotationTitle": "Map angle & perspective",
+    "rotateLeftAriaLabel": "Rotate left",
+    "rotateRightAriaLabel": "Rotate right",
+    "mapDirectionAriaLabel": "Map direction",
+    "tiltOn": "🏔 Perspective on (45°)",
+    "tiltOff": "🗺 Perspective off (top-down)",
+    "tiltAriaLabel": "Toggle 3D perspective"
+  },
+  "Drawing": {
+    "hint": "Click on the map to start drawing",
+    "finish": "Finish polygon",
+    "modeActive": "✏️ Drawing mode active",
+    "hint0": "Click points on the map.",
+    "hint1": "1 point — keep going...",
+    "hint2": "2 points — 1 more to go.",
+    "hintN": "{count} points — double click or finish below.",
+    "closeShape": "✓ Close shape"
+  },
+  "Errors": {
+    "addressNotFound": "Address not found. Try a more complete address."
+  },
+  "StepGuide": {
+    "title": "How it works",
+    "step1": "Type an address and click →",
+    "step2": "Rotate the map for a better view",
+    "step3": "Click \"Start drawing\" and click corners",
+    "step4": "Add multiple planes for a total"
+  },
+  "Map": {
+    "rotateLeftAriaLabel": "Rotate map left",
+    "rotateRightAriaLabel": "Rotate map right",
+    "resetHeadingAriaLabel": "Reset map direction to north",
+    "tiltAriaLabel": "Toggle 3D perspective",
+    "drawingOverlayInitial": "✏️ Click corners ({count} placed)",
+    "drawingOverlayReady": "✏️ {count} points — double click to close"
+  },
+  "Common": {
+    "save": "Save",
+    "reset": "Reset",
+    "saved": "Saved",
+    "register": "Register"
+  }
+}

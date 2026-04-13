@@ -1,5 +1,5 @@
 import React from 'react'
-import { formatArea } from '@/lib/utils'
+import { useTranslations, useFormatter } from 'next-intl'
 
 interface TotalAreaDisplayProps {
   totalArea: number
@@ -7,12 +7,15 @@ interface TotalAreaDisplayProps {
 }
 
 export function TotalAreaDisplay({ totalArea, polygonCount }: TotalAreaDisplayProps) {
+  const t = useTranslations('Sidebar')
+  const format = useFormatter()
+
   if (totalArea === 0) return null
 
   return (
     <div
       role="region"
-      aria-label="Totale dakoppervlakte"
+      aria-label={t('totalArea')}
       style={{
         background: 'rgba(110,231,183,0.08)',
         border: '1px solid rgba(110,231,183,0.3)',
@@ -32,7 +35,7 @@ export function TotalAreaDisplay({ totalArea, polygonCount }: TotalAreaDisplayPr
           marginBottom: 4,
         }}
       >
-        {polygonCount > 1 ? `Totaal (${polygonCount} vlakken)` : 'Totale oppervlakte'}
+        {polygonCount > 1 ? `${t('totalArea')} (${polygonCount})` : t('totalArea')}
       </p>
       <p
         aria-live="polite"
@@ -45,9 +48,9 @@ export function TotalAreaDisplay({ totalArea, polygonCount }: TotalAreaDisplayPr
           lineHeight: 1,
         }}
       >
-        {formatArea(totalArea)}
+        {format.number(totalArea, { maximumFractionDigits: 1 })}
       </p>
-      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 4 }}>m²</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 4 }}>{t('unit')}</p>
     </div>
   )
 }

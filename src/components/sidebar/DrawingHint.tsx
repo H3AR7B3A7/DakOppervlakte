@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
 
 interface DrawingHintProps {
@@ -6,15 +7,16 @@ interface DrawingHintProps {
   onFinish: () => void
 }
 
-const hintText = (count: number): string => {
-  if (count === 0) return 'Klik hoekpunten op de kaart.'
-  if (count === 1) return '1 punt — ga verder...'
-  if (count === 2) return '2 punten — nog 1 meer.'
-  return `${count} punten — dubbelklik of klik hieronder.`
-}
-
 export function DrawingHint({ pointCount, onFinish }: DrawingHintProps) {
+  const t = useTranslations('Drawing')
   const canFinish = pointCount >= 3
+
+  const getHintText = () => {
+    if (pointCount === 0) return t('hint0')
+    if (pointCount === 1) return t('hint1')
+    if (pointCount === 2) return t('hint2')
+    return t('hintN', { count: pointCount })
+  }
 
   return (
     <div
@@ -37,7 +39,7 @@ export function DrawingHint({ pointCount, onFinish }: DrawingHintProps) {
           marginBottom: 4,
         }}
       >
-        ✏️ Tekenmode actief
+        {t('modeActive')}
       </p>
       <p
         aria-live="polite"
@@ -48,7 +50,7 @@ export function DrawingHint({ pointCount, onFinish }: DrawingHintProps) {
           marginBottom: canFinish ? 10 : 0,
         }}
       >
-        {hintText(pointCount)}
+        {getHintText()}
       </p>
       {canFinish && (
         <Button
@@ -56,7 +58,7 @@ export function DrawingHint({ pointCount, onFinish }: DrawingHintProps) {
           onClick={onFinish}
           style={{ padding: '7px 16px', fontSize: 12 }}
         >
-          ✓ Vorm sluiten
+          {t('closeShape')}
         </Button>
       )}
     </div>

@@ -1,16 +1,19 @@
 import React from 'react'
-
-const STEPS = [
-  'Typ een adres en klik →',
-  'Roteer de kaart voor een beter zicht',
-  'Klik "Begin met tekenen" en klik hoekpunten',
-  'Voeg meerdere vlakken toe voor een totaal',
-] as const
+import { useTranslations } from 'next-intl'
 
 export function StepGuide() {
+  const t = useTranslations('StepGuide')
+  
+  const STEPS = [
+    t('step1'),
+    t('step2'),
+    t('step3'),
+    t('step4'),
+  ] as const
+
   return (
     <ol
-      aria-label="Hoe het werkt"
+      aria-label={t('title')}
       style={{
         listStyle: 'none',
         display: 'flex',

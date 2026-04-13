@@ -1,14 +1,16 @@
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 interface DrawingOverlayProps {
   pointCount: number
 }
 
 export function DrawingOverlay({ pointCount }: DrawingOverlayProps) {
+  const t = useTranslations('Map')
   const text =
     pointCount < 3
-      ? `✏️ Klik hoekpunten aan (${pointCount} geplaatst)`
-      : `✏️ ${pointCount} punten — dubbelklik om te sluiten`
+      ? t('drawingOverlayInitial', { count: pointCount })
+      : t('drawingOverlayReady', { count: pointCount })
 
   return (
     <div

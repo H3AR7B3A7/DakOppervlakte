@@ -1,17 +1,20 @@
 import React from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import type { Search } from '@/lib/types'
-import { formatArea } from '@/lib/utils'
 
 interface SearchHistoryProps {
   history: Search[]
 }
 
 export function SearchHistory({ history }: SearchHistoryProps) {
+  const t = useTranslations('Sidebar')
+  const format = useFormatter()
+
   if (history.length === 0) return null
 
   return (
     <nav
-      aria-label="Zoekgeschiedenis"
+      aria-label={t('historyAriaLabel')}
       style={{
         borderTop: '1px solid var(--border)',
         padding: '14px 24px',
@@ -30,7 +33,7 @@ export function SearchHistory({ history }: SearchHistoryProps) {
           marginBottom: 8,
         }}
       >
-        Geschiedenis
+        {t('historyTitle')}
       </p>
       <ul style={{ listStyle: 'none' }}>
         {history.map((h, i) => (
@@ -69,7 +72,7 @@ export function SearchHistory({ history }: SearchHistoryProps) {
                 marginLeft: 8,
               }}
             >
-              {formatArea(h.area_m2)} m²
+              {format.number(h.area_m2, { maximumFractionDigits: 1 })} {t('unit')}
             </span>
           </li>
         ))}

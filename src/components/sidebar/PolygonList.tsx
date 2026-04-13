@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import type { PolygonEntry } from '@/lib/types'
 import { Badge } from '@/components/ui'
-import { formatArea } from '@/lib/utils'
 
 interface PolygonListProps {
   polygons: PolygonEntry[]
@@ -12,6 +12,8 @@ interface PolygonListProps {
 }
 
 export function PolygonList({ polygons, onDelete, onRename }: PolygonListProps) {
+  const t = useTranslations('Sidebar')
+  const format = useFormatter()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [pendingLabel, setPendingLabel] = useState('')
 
@@ -42,7 +44,7 @@ export function PolygonList({ polygons, onDelete, onRename }: PolygonListProps) 
           marginBottom: 8,
         }}
       >
-        Vlakken
+        {t('planesTitle')}
       </p>
 
       <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -80,7 +82,7 @@ export function PolygonList({ polygons, onDelete, onRename }: PolygonListProps) 
                     if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                     if (e.key === 'Escape') setEditingId(null)
                   }}
-                  aria-label="Naam van het vlak"
+                  aria-label={t('planeNameAriaLabel')}
                   style={{
                     flex: 1,
                     background: 'var(--bg)',
@@ -95,8 +97,8 @@ export function PolygonList({ polygons, onDelete, onRename }: PolygonListProps) 
               ) : (
                 <button
                   onClick={() => startEdit(p.id, p.label)}
-                  title="Klik om naam te wijzigen"
-                  aria-label={`Hernoem vlak: ${p.label}`}
+                  title={t('renamePlaneTitle')}
+                  aria-label={t('renamePlaneAriaLabel', { label: p.label })}
                   style={{
                     flex: 1,
                     fontSize: 13,
@@ -112,11 +114,11 @@ export function PolygonList({ polygons, onDelete, onRename }: PolygonListProps) 
                 </button>
               )}
 
-              <Badge variant="accent">{formatArea(p.area)} m²</Badge>
+              <Badge variant="accent">{format.number(p.area, { maximumFractionDigits: 1 })} {t('unit')}</Badge>
 
               <button
                 onClick={() => onDelete(p.id)}
-                aria-label={`Verwijder ${p.label}`}
+                aria-label={t('deletePlaneAriaLabel', { label: p.label })}
                 style={{
                   background: 'none',
                   border: 'none',

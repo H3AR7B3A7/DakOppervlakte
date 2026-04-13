@@ -3,6 +3,7 @@
 import React from 'react'
 import { SignUpButton } from '@clerk/nextjs'
 import { Show } from '@clerk/nextjs'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
 
 interface SaveResetControlsProps {
@@ -18,11 +19,13 @@ export function SaveResetControls({
   onSave,
   onReset,
 }: SaveResetControlsProps) {
+  const t = useTranslations()
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {!saved ? (
         <Button variant="accent" fullWidth onClick={onSave}>
-          {isSignedIn ? '💾 Opslaan in geschiedenis' : '📊 Teller bijwerken'}
+          {isSignedIn ? t('Sidebar.saveToHistory') : t('Sidebar.updateCounter')}
         </Button>
       ) : (
         <div
@@ -40,12 +43,12 @@ export function SaveResetControls({
             fontWeight: 600,
           }}
         >
-          ✓ Opgeslagen
+          ✓ {t('Common.saved')}
         </div>
       )}
 
       <Button variant="ghost" fullWidth onClick={onReset} style={{ fontSize: 12 }}>
-        Alles wissen
+        {t('Sidebar.clearAll')}
       </Button>
 
       <Show when="signed-out">
@@ -59,7 +62,7 @@ export function SaveResetControls({
           }}
         >
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, lineHeight: 1.5 }}>
-            📋 Maak een gratis account aan om uw zoekgeschiedenis bij te houden.
+            {t('Sidebar.historyUpsell')}
           </p>
           <SignUpButton mode="modal">
             <button
@@ -76,7 +79,7 @@ export function SaveResetControls({
                 fontWeight: 600,
               }}
             >
-              Gratis registreren
+              {t('Sidebar.registerFree')}
             </button>
           </SignUpButton>
         </div>

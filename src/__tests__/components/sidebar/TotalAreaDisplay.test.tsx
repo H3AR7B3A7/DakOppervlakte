@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen } from '../../test-utils'
 import { TotalAreaDisplay } from '@/components/sidebar/TotalAreaDisplay'
 
 describe('User sees the total roof area', () => {
@@ -24,12 +24,13 @@ describe('User sees the total roof area', () => {
 
   it('shows a combined-total label with polygon count for multiple polygons', () => {
     render(<TotalAreaDisplay totalArea={200} polygonCount={3} />)
-    expect(screen.getByText(/totaal \(3 vlakken\)/i)).toBeInTheDocument()
+    // Updated to match nl.json key Sidebar.totalArea which is "Totale oppervlakte"
+    expect(screen.getByText(/totale oppervlakte \(3\)/i)).toBeInTheDocument()
   })
 
   it('is accessible as a region with a label', () => {
     render(<TotalAreaDisplay totalArea={80} polygonCount={1} />)
-    expect(screen.getByRole('region', { name: /totale dakoppervlakte/i })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: /totale oppervlakte/i })).toBeInTheDocument()
   })
 
   it('announces area updates to assistive technologies', () => {

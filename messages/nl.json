@@ -1,0 +1,80 @@
+{
+  "Metadata": {
+    "title": "Dakoppervlakte — Bereken uw dak",
+    "description": "Bereken gratis de oppervlakte van elk dak in België op adres."
+  },
+  "Header": {
+    "calculations": "berekeningen",
+    "signIn": "Aanmelden",
+    "signUp": "Registreren"
+  },
+  "App": {
+    "title": "Bereken uw",
+    "titleAccent": "dakoppervlakte",
+    "subtitle": "Typ een adres en teken de dakcontouren."
+  },
+  "Sidebar": {
+    "addressLabel": "Adres",
+    "addressPlaceholder": "Meir 1, Antwerpen...",
+    "searchAriaLabel": "Zoek een adres",
+    "searchButtonAriaLabel": "Zoeken",
+    "startDrawing": "Begin met tekenen",
+    "addPlane": "Nog een vlak toevoegen",
+    "totalArea": "Totale oppervlakte",
+    "unit": "m²",
+    "calculationsCount": "{count, plural, =0 {geen berekeningen} one {1 berekening} other {# berekeningen}}",
+    "saveToHistory": "💾 Opslaan in geschiedenis",
+    "updateCounter": "📊 Teller bijwerken",
+    "clearAll": "Alles wissen",
+    "historyUpsell": "📋 Maak een gratis account aan om uw zoekgeschiedenis bij te houden.",
+    "registerFree": "Gratis registreren",
+    "historyTitle": "Geschiedenis",
+    "historyAriaLabel": "Zoekgeschiedenis",
+    "planesTitle": "Vlakken",
+    "planeNameAriaLabel": "Naam van het vlak",
+    "renamePlaneTitle": "Klik om naam te wijzigen",
+    "renamePlaneAriaLabel": "Hernoem vlak: {label}",
+    "deletePlaneAriaLabel": "Verwijder {label}",
+    "rotationTitle": "Kaarthoek & perspectief",
+    "rotateLeftAriaLabel": "Roteer links",
+    "rotateRightAriaLabel": "Roteer rechts",
+    "mapDirectionAriaLabel": "Kaartrichting",
+    "tiltOn": "🏔 Perspectief aan (45°)",
+    "tiltOff": "🗺 Perspectief uit (bovenaanzicht)",
+    "tiltAriaLabel": "Toggle 3D perspectief"
+  },
+  "Drawing": {
+    "hint": "Klik op de kaart om te beginnen met tekenen",
+    "finish": "Vlak voltooien",
+    "modeActive": "✏️ Tekenmode actief",
+    "hint0": "Klik hoekpunten op de kaart.",
+    "hint1": "1 punt — ga verder...",
+    "hint2": "2 punten — nog 1 meer.",
+    "hintN": "{count} punten — dubbelklik of klik hieronder.",
+    "closeShape": "✓ Vorm sluiten"
+  },
+  "Errors": {
+    "addressNotFound": "Adres niet gevonden. Probeer een vollediger adres."
+  },
+  "StepGuide": {
+    "title": "Hoe het werkt",
+    "step1": "Typ een adres en klik →",
+    "step2": "Roteer de kaart voor een beter zicht",
+    "step3": "Klik \"Begin met tekenen\" en klik hoekpunten",
+    "step4": "Voeg meerdere vlakken toe voor een totaal"
+  },
+  "Map": {
+    "rotateLeftAriaLabel": "Roteer kaart links",
+    "rotateRightAriaLabel": "Roteer kaart rechts",
+    "resetHeadingAriaLabel": "Reset kaartrichting naar noord",
+    "tiltAriaLabel": "Toggle 3D perspectief",
+    "drawingOverlayInitial": "✏️ Klik hoekpunten aan ({count} geplaatst)",
+    "drawingOverlayReady": "✏️ {count} punten — dubbelklik om te sluiten"
+  },
+  "Common": {
+    "save": "Opslaan",
+    "reset": "Opnieuw",
+    "saved": "Opgeslagen",
+    "register": "Registreren"
+  }
+}

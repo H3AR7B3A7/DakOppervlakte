@@ -1,0 +1,80 @@
+{
+  "Metadata": {
+    "title": "Surface de Toit — Calculez votre toit",
+    "description": "Calculez gratuitement la surface de n'importe quel toit en Belgique par adresse."
+  },
+  "Header": {
+    "calculations": "calculs",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire"
+  },
+  "App": {
+    "title": "Calculez votre",
+    "titleAccent": "surface de toit",
+    "subtitle": "Tapez une adresse et dessinez les contours du toit."
+  },
+  "Sidebar": {
+    "addressLabel": "Adresse",
+    "addressPlaceholder": "Grand Place 1, Bruxelles...",
+    "searchAriaLabel": "Rechercher une adresse",
+    "searchButtonAriaLabel": "Rechercher",
+    "startDrawing": "Commencer à dessiner",
+    "addPlane": "Ajouter un autre plan",
+    "totalArea": "Surface totale",
+    "unit": "m²",
+    "calculationsCount": "{count, plural, =0 {pas de calculs} one {1 calcul} other {# calculs}}",
+    "saveToHistory": "💾 Enregistrer dans l'historique",
+    "updateCounter": "📊 Mettre à jour le compteur",
+    "clearAll": "Tout effacer",
+    "historyUpsell": "📋 Créez un compte gratuit pour garder une trace de votre historique de recherche.",
+    "registerFree": "S'inscrire gratuitement",
+    "historyTitle": "Historique",
+    "historyAriaLabel": "Historique de recherche",
+    "planesTitle": "Plans",
+    "planeNameAriaLabel": "Nom du plan",
+    "renamePlaneTitle": "Cliquez pour renommer",
+    "renamePlaneAriaLabel": "Renommer le plan : {label}",
+    "deletePlaneAriaLabel": "Supprimer {label}",
+    "rotationTitle": "Angle de la carte & perspective",
+    "rotateLeftAriaLabel": "Pivoter à gauche",
+    "rotateRightAriaLabel": "Pivoter à droite",
+    "mapDirectionAriaLabel": "Direction de la carte",
+    "tiltOn": "🏔 Perspective activée (45°)",
+    "tiltOff": "🗺 Perspective désactivée (vue de dessus)",
+    "tiltAriaLabel": "Basculer la perspective 3D"
+  },
+  "Drawing": {
+    "hint": "Cliquez sur la carte pour commencer à dessiner",
+    "finish": "Terminer le polygone",
+    "modeActive": "✏️ Mode dessin actif",
+    "hint0": "Cliquez sur les points sur la carte.",
+    "hint1": "1 point — continuez...",
+    "hint2": "2 points — encore 1.",
+    "hintN": "{count} points — double-cliquez ou terminez ci-dessous.",
+    "closeShape": "✓ Fermer la forme"
+  },
+  "Errors": {
+    "addressNotFound": "Adresse non trouvée. Essayez une adresse plus complète."
+  },
+  "StepGuide": {
+    "title": "Comment ça marche",
+    "step1": "Tapez une adresse et cliquez →",
+    "step2": "Faites pivoter la carte pour une meilleure vue",
+    "step3": "Cliquez sur \"Commencer à dessiner\" et cliquez sur les coins",
+    "step4": "Ajoutez plusieurs plans pour un total"
+  },
+  "Map": {
+    "rotateLeftAriaLabel": "Pivoter la carte à gauche",
+    "rotateRightAriaLabel": "Pivoter la carte à droite",
+    "resetHeadingAriaLabel": "Réinitialiser la direction de la carte vers le nord",
+    "tiltAriaLabel": "Basculer la perspective 3D",
+    "drawingOverlayInitial": "✏️ Cliquez sur les coins ({count} placés)",
+    "drawingOverlayReady": "✏️ {count} points — double-cliquez pour fermer"
+  },
+  "Common": {
+    "save": "Enregistrer",
+    "reset": "Réinitialiser",
+    "saved": "Enregistré",
+    "register": "S'inscrire"
+  }
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 interface RotationControlsProps {
   heading: number
@@ -17,6 +18,7 @@ export function RotationControls({
   onRotate,
   onTiltToggle,
 }: RotationControlsProps) {
+  const t = useTranslations('Sidebar')
   const iconButtonStyle: React.CSSProperties = {
     background: 'var(--surface2)',
     border: '1px solid var(--border)',
@@ -50,13 +52,13 @@ export function RotationControls({
           marginBottom: 8,
         }}
       >
-        Kaarthoek &amp; perspectief
+        {t('rotationTitle')}
       </p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <button
           onClick={() => onRotate(-90)}
-          aria-label="Roteer links"
+          aria-label={t('rotateLeftAriaLabel')}
           style={iconButtonStyle}
         >
           ↺
@@ -70,7 +72,7 @@ export function RotationControls({
             step="90"
             value={heading}
             onChange={(e) => onHeadingChange(Number(e.target.value))}
-            aria-label="Kaartrichting"
+            aria-label={t('mapDirectionAriaLabel')}
             style={{ width: '100%', accentColor: 'var(--accent)', cursor: 'pointer' }}
           />
           <div
@@ -92,7 +94,7 @@ export function RotationControls({
 
         <button
           onClick={() => onRotate(90)}
-          aria-label="Roteer rechts"
+          aria-label={t('rotateRightAriaLabel')}
           style={iconButtonStyle}
         >
           ↻
@@ -102,7 +104,7 @@ export function RotationControls({
       <button
         onClick={onTiltToggle}
         aria-pressed={tilt === 45}
-        aria-label="Toggle 3D perspectief"
+        aria-label={t('tiltAriaLabel')}
         style={{
           width: '100%',
           background: tilt === 45 ? 'rgba(110,231,183,0.15)' : 'var(--surface2)',
@@ -116,7 +118,7 @@ export function RotationControls({
           fontWeight: 600,
         }}
       >
-        {tilt === 45 ? '🏔 Perspectief aan (45°)' : '🗺 Perspectief uit (bovenaanzicht)'}
+        {tilt === 45 ? t('tiltOn') : t('tiltOff')}
       </button>
     </div>
   )
