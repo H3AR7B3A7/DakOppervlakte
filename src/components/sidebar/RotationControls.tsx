@@ -55,7 +55,7 @@ export function RotationControls({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <button
-          onClick={() => onRotate(-30)}
+          onClick={() => onRotate(-90)}
           aria-label="Roteer links"
           style={iconButtonStyle}
         >
@@ -66,7 +66,8 @@ export function RotationControls({
           <input
             type="range"
             min="0"
-            max="360"
+            max="270"
+            step="90"
             value={heading}
             onChange={(e) => onHeadingChange(Number(e.target.value))}
             aria-label="Kaartrichting"
@@ -79,16 +80,18 @@ export function RotationControls({
               fontSize: 10,
               color: 'var(--text-muted)',
               marginTop: 2,
+              padding: '0 2px',
             }}
           >
             <span>N</span>
-            <span aria-live="polite">{heading}°</span>
-            <span>N</span>
+            <span>O</span>
+            <span>Z</span>
+            <span>W</span>
           </div>
         </div>
 
         <button
-          onClick={() => onRotate(30)}
+          onClick={() => onRotate(90)}
           aria-label="Roteer rechts"
           style={iconButtonStyle}
         >

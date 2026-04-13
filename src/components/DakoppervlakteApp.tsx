@@ -248,7 +248,7 @@ export function DakoppervlakteApp() {
           <RotationControls
             heading={heading}
             tilt={tilt}
-            onHeadingChange={setHeading}
+            onHeadingChange={(h) => setHeading(normalizeHeading(h))}
             onRotate={handleRotate}
             onTiltToggle={handleTiltToggle}
           />

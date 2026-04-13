@@ -8,5 +8,8 @@ out/
 .env.local
 .env
 
+# TypeScript incremental build cache
+*.tsbuildinfo
+
 # clerk configuration (can include secrets)
 /.clerk/

@@ -22,6 +22,10 @@ describe('RotationControls', () => {
     expect(screen.getByText('Kaarthoek & perspectief')).toBeDefined()
     expect(screen.getByLabelText('Roteer links')).toBeDefined()
     expect(screen.getByLabelText('Roteer rechts')).toBeDefined()
+    expect(screen.getByText('N')).toBeDefined()
+    expect(screen.getByText('O')).toBeDefined()
+    expect(screen.getByText('Z')).toBeDefined()
+    expect(screen.getByText('W')).toBeDefined()
     expect(screen.getByText('🗺 Perspectief uit (bovenaanzicht)')).toBeDefined()
   })
 
@@ -38,10 +42,10 @@ describe('RotationControls', () => {
     )
 
     await user.click(screen.getByLabelText('Roteer links'))
-    expect(mockOnRotate).toHaveBeenCalledWith(-30)
+    expect(mockOnRotate).toHaveBeenCalledWith(-90)
 
     await user.click(screen.getByLabelText('Roteer rechts'))
-    expect(mockOnRotate).toHaveBeenCalledWith(30)
+    expect(mockOnRotate).toHaveBeenCalledWith(90)
   })
 
   it('calls onTiltToggle when toggle button is clicked', async () => {

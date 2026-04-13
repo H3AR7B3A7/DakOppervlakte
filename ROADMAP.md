@@ -1,6 +1,6 @@
 # ROADMAP
 
-- [ ] The end of the slider is the same as the beginning 360=0 degrees. Since there are 4 angles, the slider should only have 4 possible positions, no in-betweens.
+- [x] The end of the slider is the same as the beginning 360=0 degrees. Since there are 4 angles, the slider should only have 4 possible positions, no in-betweens.
 - [ ] Translations: French, Dutch and English
 - [ ] If we aren't logged in we can push a button and it says we successfully saved.
 - [ ] When logged in and saving, we can't actually ever get that save back anywhere.
