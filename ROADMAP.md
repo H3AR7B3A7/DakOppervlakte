@@ -2,7 +2,7 @@
 
 - [x] The end of the slider is the same as the beginning 360=0 degrees. Since there are 4 angles, the slider should only have 4 possible positions, no in-betweens.
 - [x] Translations: French, Dutch and English
-- [ ] Add test to check if all i18n resources are translated
+- [x] Add test to check if all i18n resources are translated
 - [ ] Disable the controls when not in 3D
 - [ ] If we aren't logged in we can push a button and it says we successfully saved.
 - [ ] When logged in and saving, we can't actually ever get that save back anywhere.
