@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import { generatePolygonColor, normalizeHeading } from '@/lib/utils'
 
 describe('generatePolygonColor', () => {

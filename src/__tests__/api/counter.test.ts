@@ -1,5 +1,3 @@
-import { describe, it, vi } from 'vitest'
-
 // Mock the db client
 vi.mock('@/lib/db', () => ({
   default: vi.fn(() => ({

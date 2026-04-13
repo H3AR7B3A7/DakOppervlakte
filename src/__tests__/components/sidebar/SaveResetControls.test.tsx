@@ -1,5 +1,4 @@
 import { render, screen } from '../../test-utils'
-import { describe, it, expect, vi } from 'vitest'
 import { SaveResetControls } from '@/components/sidebar/SaveResetControls'
 import userEvent from '@testing-library/user-event'
 

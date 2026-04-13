@@ -1,5 +1,3 @@
-import { vi } from 'vitest'
-
 /**
  * Minimal Google Maps API stub for Vitest / jsdom.
  * Installed once globally via vitest.setup.ts — never mocked per-test.

@@ -1,5 +1,4 @@
 import { render, screen } from '../../test-utils'
-import { describe, it, expect, vi } from 'vitest'
 import { RotationControls } from '@/components/sidebar/RotationControls'
 import userEvent from '@testing-library/user-event'
 

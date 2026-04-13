@@ -1,4 +1,3 @@
-import { describe, it, expect, vi } from 'vitest'
 import { GET } from '@/app/api/searches/route'
 
 // Mock Clerk and DB
