@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { SignInButton, SignUpButton, UserButton, Show, useUser } from '@clerk/nextjs'
 
-import { useTranslations, useFormatter } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
@@ -27,7 +27,7 @@ import {
 
 export function DakoppervlakteApp() {
   const t = useTranslations()
-  const format = useFormatter()
+  // const format = useFormatter()
   const { user } = useUser()
   const isSignedIn = !!user
 
@@ -209,9 +209,10 @@ export function DakoppervlakteApp() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {usageCount !== null && (
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              <span style={{ color: 'var(--accent)', fontWeight: 500 }}>
-                {format.number(usageCount)}
-              </span>{' '}
+              {/*  TODO: we prefer the highlight, but this should prob not be left of the user icon  */}
+              {/*<span style={{ color: 'var(--accent)', fontWeight: 500 }}>*/}
+              {/*  {format.number(usageCount)}*/}
+              {/*</span>{' '}*/}
               {t('Sidebar.calculationsCount', { count: usageCount })}
             </span>
           )}
