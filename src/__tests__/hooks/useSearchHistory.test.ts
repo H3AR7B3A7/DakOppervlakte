@@ -26,17 +26,25 @@ describe('useSearchHistory', () => {
   })
 
   it('clears history when signed out', async () => {
+    const mockHistory = [{ id: 1, address: 'Teststraat 1', area_m2: 100, created_at: '2024-01-01' }]
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
-      json: async () => [],
-      text: async () => '[]',
+      json: async () => mockHistory,
+      text: async () => JSON.stringify(mockHistory),
     } as unknown as Response)
 
     const { result, rerender } = renderHook(({ signedIn }) => useSearchHistory(signedIn), {
       initialProps: { signedIn: true },
     })
 
-    rerender({ signedIn: false })
+    // Wait for initial load
+    await waitFor(() => {
+      expect(result.current.history).toEqual(mockHistory)
+    })
+
+    act(() => {
+      rerender({ signedIn: false })
+    })
     expect(result.current.history).toEqual([])
   })
 

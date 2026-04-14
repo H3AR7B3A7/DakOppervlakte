@@ -1,28 +1,39 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { Search } from '@/lib/types'
+import type { Search, PolygonData } from '@/lib/types'
 
 export function useSearchHistory(isSignedIn: boolean) {
   const [history, setHistory] = useState<Search[]>([])
+
+  // If signed out, ensure history is cleared (avoids cascading render in useEffect)
+  if (!isSignedIn && history.length > 0) {
+    setHistory([])
+  }
 
   const fetchHistory = useCallback(async () => {
     try {
       const res = await fetch('/api/searches')
       if (!res.ok) {
         console.error('[SearchHistory] fetch failed:', res.status, await res.text())
-        return
+        return null
       }
-      const data = await res.json()
-      if (Array.isArray(data)) setHistory(data)
+      return await res.json()
     } catch (err) {
       console.error('[SearchHistory] fetch error:', err)
+      return null
     }
   }, [])
 
   useEffect(() => {
-    if (isSignedIn) fetchHistory()
-    else setHistory([])
+    if (!isSignedIn) return
+    let active = true
+    fetchHistory().then((data) => {
+      if (active && Array.isArray(data)) setHistory(data)
+    })
+    return () => {
+      active = false
+    }
   }, [isSignedIn, fetchHistory])
 
   const saveEntry = useCallback(
@@ -45,7 +56,8 @@ export function useSearchHistory(isSignedIn: boolean) {
           console.error('[SearchHistory] save failed:', res.status, await res.text())
           return
         }
-        await fetchHistory()
+        const data = await fetchHistory()
+        if (Array.isArray(data)) setHistory(data)
       } catch (err) {
         console.error('[SearchHistory] save error:', err)
       }
@@ -64,7 +76,8 @@ export function useSearchHistory(isSignedIn: boolean) {
           console.error('[SearchHistory] delete failed:', res.status, await res.text())
           return
         }
-        await fetchHistory()
+        const data = await fetchHistory()
+        if (Array.isArray(data)) setHistory(data)
       } catch (err) {
         console.error('[SearchHistory] delete error:', err)
       }

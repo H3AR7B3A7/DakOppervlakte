@@ -2,7 +2,6 @@ import React from 'react'
 import { useTranslations } from 'next-intl'
 
 interface MapOverlayControlsProps {
-  tilt: number
   is3D: boolean
   canEnable3D: boolean
   onRotateLeft: () => void
@@ -27,7 +26,6 @@ const overlayBtn: React.CSSProperties = {
 }
 
 export function MapOverlayControls({
-  tilt,
   is3D,
   canEnable3D,
   onRotateLeft,

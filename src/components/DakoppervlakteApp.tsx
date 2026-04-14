@@ -368,7 +368,6 @@ export function DakoppervlakteApp() {
         {/* ── Map ── */}
         <MapView mapRef={mapRef} mapLoaded={mapLoaded}>
           <MapOverlayControls
-            tilt={tilt}
             is3D={is3D}
             canEnable3D={canEnable3D}
             onRotateLeft={() => handleRotate(-90)}

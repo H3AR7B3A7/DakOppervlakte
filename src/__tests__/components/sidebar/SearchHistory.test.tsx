@@ -5,12 +5,14 @@ import { vi } from 'vitest'
 
 const ENTRIES: Search[] = [
   {
+    id: 1,
     address: 'Meir 1, Antwerpen',
     area_m2: 45.5,
     created_at: '2024-01-01T00:00:00Z',
     polygons: [{ id: '1', label: 'Vlak 1', area: 45.5, path: [] }],
   },
   {
+    id: 2,
     address: 'Grote Markt 2, Gent',
     area_m2: 120,
     created_at: '2024-01-02T00:00:00Z',
