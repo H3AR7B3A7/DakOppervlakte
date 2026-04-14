@@ -12,6 +12,8 @@ describe('RotationControls', () => {
       <RotationControls
         heading={0}
         tilt={0}
+        is3D={false}
+        canEnable3D={true}
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
@@ -33,7 +35,9 @@ describe('RotationControls', () => {
     render(
       <RotationControls
         heading={0}
-        tilt={0}
+        tilt={45}
+        is3D={true}
+        canEnable3D={true}
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
@@ -53,6 +57,8 @@ describe('RotationControls', () => {
       <RotationControls
         heading={0}
         tilt={0}
+        is3D={false}
+        canEnable3D={true}
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
@@ -68,6 +74,8 @@ describe('RotationControls', () => {
       <RotationControls
         heading={0}
         tilt={45}
+        is3D={true}
+        canEnable3D={true}
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
@@ -81,6 +89,8 @@ describe('RotationControls', () => {
       <RotationControls
         heading={0}
         tilt={0}
+        is3D={true}
+        canEnable3D={true}
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}

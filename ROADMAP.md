@@ -4,8 +4,9 @@
 - [x] Translations: French, Dutch and English
 - [x] Add test to check if all i18n resources are translated
 - [x] Disable the controls when not in 3D
-- [ ] If we aren't logged in we can push a button and it says we successfully saved.
-- [ ] When logged in and saving, we can't actually ever get that save back anywhere.
+- [x] If we aren't logged in we can push a button and it says we successfully saved.
+- [x] When logged in and saving, we can't actually ever get that save back anywhere.
+- [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json
 - [ ] Add pre commit hook that runs `check` and `test` in package.json
 - [ ] (checkbox?) Belgium is supposed to have polygons that we can get for the addresses (there's a new api?), so we can make automatic selection of a roof
@@ -13,4 +14,3 @@
 - [ ] Use linting to implement architecture rules (direction of dependencies)
 - [ ] Implement e2e tests with playwright (document CLAUDE/GEMINI/README)
 - [ ] Add Storybook for the pure ui components (document CLAUDE/GEMINI/README) and add chromatic visual checks to the github pr process
-- [ ] Remove the init endpoint?

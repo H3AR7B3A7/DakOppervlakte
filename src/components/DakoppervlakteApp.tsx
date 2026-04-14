@@ -10,6 +10,7 @@ import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
 import { useUsageCounter } from '@/hooks/useUsageCounter'
 import { useSearchHistory } from '@/hooks/useSearchHistory'
 import { normalizeHeading } from '@/lib/utils'
+import type { Search } from '@/lib/types'
 
 import { Button, Logo } from '@/components/ui'
 import { MapView, MapOverlayControls, DrawingOverlay } from '@/components/map'
@@ -41,6 +42,8 @@ export function DakoppervlakteApp() {
     deletePolygon,
     renamePolygon,
     resetAll,
+    restorePolygons,
+    serializedPolygons,
   } = usePolygonDrawing({ mapInstanceRef })
   const { count: usageCount, increment } = useUsageCounter()
   const { history, saveEntry } = useSearchHistory(isSignedIn)
@@ -104,7 +107,7 @@ export function DakoppervlakteApp() {
 
   // --- Handlers ---
 
-  const geocodeAndNavigate = useCallback((addr: string) => {
+  const geocodeAndNavigate = useCallback((addr: string, onFinish?: () => void) => {
     const map = mapInstanceRef.current
     const geocoder = geocoderRef.current
     if (!addr.trim() || !geocoder || !map) return
@@ -122,7 +125,11 @@ export function DakoppervlakteApp() {
         }
         map.setCenter(results[0].geometry.location)
         map.setZoom(20)
-        setTimeout(() => startDrawing(), 600)
+        if (onFinish) {
+          onFinish()
+        } else {
+          setTimeout(() => startDrawing(), 600)
+        }
       }
     )
   }, [geocoderRef, mapInstanceRef, startDrawing, t])
@@ -131,19 +138,24 @@ export function DakoppervlakteApp() {
     geocodeAndNavigate(address)
   }, [address, geocodeAndNavigate])
 
-  const handleRestore = useCallback((restoredAddress: string) => {
-    setAddress(restoredAddress)
+  const handleRestore = useCallback((restored: Search) => {
+    setAddress(restored.address)
     resetAll()
     setSaved(false)
     setSearchError('')
-    geocodeAndNavigate(restoredAddress)
-  }, [geocodeAndNavigate, resetAll])
+    geocodeAndNavigate(restored.address, () => {
+      if (restored.polygons) {
+        // Short delay to ensure map is ready/stable before adding polygons
+        setTimeout(() => restorePolygons(restored.polygons!), 500)
+      }
+    })
+  }, [geocodeAndNavigate, resetAll, restorePolygons])
 
   const handleSave = useCallback(async () => {
     await increment()
-    await saveEntry(address, totalArea)
+    await saveEntry(address, totalArea, serializedPolygons)
     setSaved(true)
-  }, [address, increment, saveEntry, totalArea])
+  }, [address, increment, saveEntry, totalArea, serializedPolygons])
 
   const handleReset = useCallback(() => {
     resetAll()

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
-import type { PolygonEntry, DrawingMode } from '@/lib/types'
+import type { PolygonEntry, DrawingMode, PolygonData } from '@/lib/types'
 import { generatePolygonColor } from '@/lib/utils'
 
 interface UsePolygonDrawingOptions {
@@ -19,6 +19,12 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
   const [mode, setMode] = useState<DrawingMode>('idle')
   const [pointCount, setPointCount] = useState(0)
   const [polygons, setPolygons] = useState<PolygonEntry[]>([])
+
+  const serializedPolygons: PolygonData[] = polygons.map((p) => {
+    const pts: { lat: number; lng: number }[] = []
+    p.polygon.getPath().forEach((pt) => pts.push({ lat: pt.lat(), lng: pt.lng() }))
+    return { id: p.id, label: p.label, area: p.area, path: pts }
+  })
 
   const clearDrawingState = useCallback(() => {
     tempMarkersRef.current.forEach((m) => m.setMap(null))
@@ -39,6 +45,53 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
   const syncPolygons = () => {
     setPolygons([...polygonsRef.current])
   }
+
+  const resetAll = useCallback(() => {
+    clearDrawingState()
+    polygonsRef.current.forEach((e) => e.polygon.setMap(null))
+    polygonsRef.current = []
+    syncPolygons()
+    setMode('idle')
+  }, [clearDrawingState])
+
+  const restorePolygons = useCallback(
+    (data: PolygonData[]) => {
+      const map = mapInstanceRef.current
+      if (!map) return
+      resetAll()
+
+      const restored: PolygonEntry[] = data.map((d) => {
+        const polygon = new google.maps.Polygon({
+          paths: d.path,
+          fillColor: generatePolygonColor(),
+          fillOpacity: 0.25,
+          strokeColor: generatePolygonColor(),
+          strokeWeight: 2,
+          editable: true,
+          draggable: false,
+          map,
+        })
+
+        const updateArea = () => {
+          const pts: google.maps.LatLng[] = []
+          polygon.getPath().forEach((p) => pts.push(p))
+          const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
+          polygonsRef.current = polygonsRef.current.map((e) =>
+            e.id === d.id ? { ...e, area: newArea } : e
+          )
+          syncPolygons()
+        }
+        polygon.getPath().addListener('set_at', updateArea)
+        polygon.getPath().addListener('insert_at', updateArea)
+
+        return { id: d.id, label: d.label, area: d.area, polygon }
+      })
+
+      polygonsRef.current = restored
+      syncPolygons()
+    },
+    [mapInstanceRef, resetAll]
+  )
 
   const finishPolygon = useCallback(() => {
     const path = tempPathRef.current
@@ -151,14 +204,6 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     syncPolygons()
   }, [])
 
-  const resetAll = useCallback(() => {
-    clearDrawingState()
-    polygonsRef.current.forEach((e) => e.polygon.setMap(null))
-    polygonsRef.current = []
-    syncPolygons()
-    setMode('idle')
-  }, [clearDrawingState])
-
   return {
     mode,
     pointCount,
@@ -168,5 +213,7 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     deletePolygon,
     renamePolygon,
     resetAll,
+    restorePolygons,
+    serializedPolygons,
   }
 }

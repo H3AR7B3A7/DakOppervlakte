@@ -26,7 +26,7 @@ export function useSearchHistory(isSignedIn: boolean) {
   }, [isSignedIn, fetchHistory])
 
   const saveEntry = useCallback(
-    async (address: string, area_m2: number) => {
+    async (address: string, area_m2: number, polygons: PolygonData[]) => {
       if (!isSignedIn || !address || area_m2 <= 0) {
         console.warn('[SearchHistory] saveEntry skipped — isSignedIn:', isSignedIn, 'address:', address, 'area_m2:', area_m2)
         return
@@ -35,7 +35,11 @@ export function useSearchHistory(isSignedIn: boolean) {
         const res = await fetch('/api/searches', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address, area_m2: Math.round(area_m2 * 10) / 10 }),
+          body: JSON.stringify({
+            address,
+            area_m2: Math.round(area_m2 * 10) / 10,
+            polygons,
+          }),
         })
         if (!res.ok) {
           console.error('[SearchHistory] save failed:', res.status, await res.text())

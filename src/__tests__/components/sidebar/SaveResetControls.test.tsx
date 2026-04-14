@@ -26,23 +26,23 @@ describe('SaveResetControls', () => {
       />
     )
 
-    expect(screen.getByText('📊 Teller bijwerken')).toBeDefined()
+    expect(screen.queryByText('💾 Opslaan in geschiedenis')).toBeNull()
     expect(screen.getByText('Alles wissen')).toBeDefined()
     expect(screen.getByText('Gratis registreren')).toBeDefined()
   })
 
-  it('renders correctly when saved', () => {
+  it('renders correctly when saved and signed in', () => {
     render(
       <SaveResetControls
         saved={true}
-        isSignedIn={false}
+        isSignedIn={true}
         onSave={mockOnSave}
         onReset={mockOnReset}
       />
     )
 
     expect(screen.getByText('✓ Opgeslagen')).toBeDefined()
-    expect(screen.queryByText('📊 Teller bijwerken')).toBeNull()
+    expect(screen.queryByText('💾 Opslaan in geschiedenis')).toBeNull()
   })
 
   it('calls onSave when save button is clicked', async () => {
@@ -50,13 +50,13 @@ describe('SaveResetControls', () => {
     render(
       <SaveResetControls
         saved={false}
-        isSignedIn={false}
+        isSignedIn={true}
         onSave={mockOnSave}
         onReset={mockOnReset}
       />
     )
 
-    await user.click(screen.getByText('📊 Teller bijwerken'))
+    await user.click(screen.getByText('💾 Opslaan in geschiedenis'))
     expect(mockOnSave).toHaveBeenCalledTimes(1)
   })
 

@@ -4,7 +4,7 @@ import type { Search } from '@/lib/types'
 
 interface SearchHistoryProps {
   history: Search[]
-  onRestore: (address: string) => void
+  onRestore: (search: Search) => void
 }
 
 export function SearchHistory({ history, onRestore }: SearchHistoryProps) {
@@ -40,7 +40,7 @@ export function SearchHistory({ history, onRestore }: SearchHistoryProps) {
         {history.map((h, i) => (
           <li key={i}>
             <button
-              onClick={() => onRestore(h.address)}
+              onClick={() => onRestore(h)}
               title={t('historyRestoreTitle')}
               style={{
                 width: '100%',

@@ -14,8 +14,14 @@ async function main() {
       user_id TEXT,
       address TEXT NOT NULL,
       area_m2 FLOAT NOT NULL,
+      polygons JSONB,
       created_at TIMESTAMP DEFAULT NOW()
     )
+  `
+
+  // Ensure polygons column exists for existing tables
+  await sql`
+    ALTER TABLE searches ADD COLUMN IF NOT EXISTS polygons JSONB
   `
 
   await sql`
