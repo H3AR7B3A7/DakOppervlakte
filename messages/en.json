@@ -30,6 +30,7 @@
     "registerFree": "Register for free",
     "historyTitle": "History",
     "historyAriaLabel": "Search history",
+    "historyRestoreTitle": "Restore this search",
     "planesTitle": "Planes",
     "planeNameAriaLabel": "Plane name",
     "renamePlaneTitle": "Click to rename",

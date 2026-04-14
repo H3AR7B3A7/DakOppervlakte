@@ -1,4 +1,9 @@
+import { loadEnvConfig } from '@next/env'
+import { resolve } from 'path'
 import { neon } from '@neondatabase/serverless'
+
+// Load .env.local the same way Next.js does
+loadEnvConfig(resolve(process.cwd()))
 
 const sql = neon(process.env.DATABASE_URL!)
 

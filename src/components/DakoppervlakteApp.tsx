@@ -104,16 +104,16 @@ export function DakoppervlakteApp() {
 
   // --- Handlers ---
 
-  const handleSearch = useCallback(() => {
+  const geocodeAndNavigate = useCallback((addr: string) => {
     const map = mapInstanceRef.current
     const geocoder = geocoderRef.current
-    if (!address.trim() || !geocoder || !map) return
+    if (!addr.trim() || !geocoder || !map) return
 
     setSearching(true)
     setSearchError('')
 
     geocoder.geocode(
-      { address: address + ', Belgium', region: 'BE' },
+      { address: addr + ', Belgium', region: 'BE' },
       (results, status) => {
         setSearching(false)
         if (status !== 'OK' || !results?.[0]) {
@@ -125,7 +125,19 @@ export function DakoppervlakteApp() {
         setTimeout(() => startDrawing(), 600)
       }
     )
-  }, [address, geocoderRef, mapInstanceRef, startDrawing, t])
+  }, [geocoderRef, mapInstanceRef, startDrawing, t])
+
+  const handleSearch = useCallback(() => {
+    geocodeAndNavigate(address)
+  }, [address, geocodeAndNavigate])
+
+  const handleRestore = useCallback((restoredAddress: string) => {
+    setAddress(restoredAddress)
+    resetAll()
+    setSaved(false)
+    setSearchError('')
+    geocodeAndNavigate(restoredAddress)
+  }, [geocodeAndNavigate, resetAll])
 
   const handleSave = useCallback(async () => {
     await increment()
@@ -333,7 +345,7 @@ export function DakoppervlakteApp() {
 
           {/* History (signed-in only) */}
           <Show when="signed-in">
-            <SearchHistory history={history} />
+            <SearchHistory history={history} onRestore={handleRestore} />
           </Show>
         </aside>
 
