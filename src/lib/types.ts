@@ -6,6 +6,7 @@ export type PolygonData = {
 }
 
 export type Search = {
+  id: number
   address: string
   area_m2: number
   created_at: string

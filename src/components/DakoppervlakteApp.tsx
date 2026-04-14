@@ -46,7 +46,7 @@ export function DakoppervlakteApp() {
     serializedPolygons,
   } = usePolygonDrawing({ mapInstanceRef })
   const { count: usageCount, increment } = useUsageCounter()
-  const { history, saveEntry } = useSearchHistory(isSignedIn)
+  const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
 
   // Local UI state
   const [address, setAddress] = useState('')
@@ -357,7 +357,11 @@ export function DakoppervlakteApp() {
 
           {/* History (signed-in only) */}
           <Show when="signed-in">
-            <SearchHistory history={history} onRestore={handleRestore} />
+            <SearchHistory
+              history={history}
+              onRestore={handleRestore}
+              onDelete={deleteEntry}
+            />
           </Show>
         </aside>
 

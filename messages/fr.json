@@ -31,6 +31,7 @@
     "historyTitle": "Historique",
     "historyAriaLabel": "Historique de recherche",
     "historyRestoreTitle": "Restaurer cette recherche",
+    "deleteHistoryAriaLabel": "Supprimer de l'historique",
     "planesTitle": "Plans",
     "planeNameAriaLabel": "Nom du plan",
     "renamePlaneTitle": "Cliquez pour renommer",

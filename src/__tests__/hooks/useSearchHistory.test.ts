@@ -72,4 +72,37 @@ describe('useSearchHistory', () => {
       expect(result.current.history).toHaveLength(1)
     })
   })
+
+  it('deletes entry and refreshes history', async () => {
+    const mockHistory = [{ id: 1, address: 'Teststraat 1', area_m2: 100, created_at: '2024-01-01' }]
+    // Initial fetch
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockHistory,
+      text: async () => JSON.stringify(mockHistory),
+    } as unknown as Response)
+    // Delete fetch
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true }),
+      text: async () => '{"ok":true}',
+    } as unknown as Response)
+    // Refetch history
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+      text: async () => '[]',
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useSearchHistory(true))
+
+    await act(async () => {
+      await result.current.deleteEntry(1)
+    })
+
+    await waitFor(() => {
+      expect(result.current.history).toHaveLength(0)
+    })
+  })
 })

@@ -31,6 +31,7 @@
     "historyTitle": "Geschiedenis",
     "historyAriaLabel": "Zoekgeschiedenis",
     "historyRestoreTitle": "Deze zoekopdracht herstellen",
+    "deleteHistoryAriaLabel": "Verwijder uit geschiedenis",
     "planesTitle": "Vlakken",
     "planeNameAriaLabel": "Naam van het vlak",
     "renamePlaneTitle": "Klik om naam te wijzigen",

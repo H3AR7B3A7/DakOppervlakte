@@ -53,5 +53,24 @@ export function useSearchHistory(isSignedIn: boolean) {
     [isSignedIn, fetchHistory]
   )
 
-  return { history, saveEntry }
+  const deleteEntry = useCallback(
+    async (id: number) => {
+      if (!isSignedIn) return
+      try {
+        const res = await fetch(`/api/searches?id=${id}`, {
+          method: 'DELETE',
+        })
+        if (!res.ok) {
+          console.error('[SearchHistory] delete failed:', res.status, await res.text())
+          return
+        }
+        await fetchHistory()
+      } catch (err) {
+        console.error('[SearchHistory] delete error:', err)
+      }
+    },
+    [isSignedIn, fetchHistory]
+  )
+
+  return { history, saveEntry, deleteEntry }
 }
