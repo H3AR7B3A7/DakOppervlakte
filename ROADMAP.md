@@ -1,14 +1,10 @@
 # ROADMAP
 
-- [x] The end of the slider is the same as the beginning 360=0 degrees. Since there are 4 angles, the slider should only have 4 possible positions, no in-betweens.
-- [x] Translations: French, Dutch and English
-- [x] Add test to check if all i18n resources are translated
-- [x] Disable the controls when not in 3D
-- [x] If we aren't logged in we can push a button and it says we successfully saved.
-- [x] When logged in and saving, we can't actually ever get that save back anywhere.
+- [ ] Save the perspective with the selections / only show selections on the right layer / eye icon?
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json
 - [ ] Add pre commit hook that runs `check` and `test` in package.json
+- [ ] https://dak-oppervlakte.vercel.app/ in README + overall update
 - [ ] (checkbox?) Belgium is supposed to have polygons that we can get for the addresses (there's a new api?), so we can make automatic selection of a roof
 - [ ] Use Biome instead of eslint/prettier, set good rules, vercel / nextjs / no semicolons
 - [ ] Use linting to implement architecture rules (direction of dependencies)
