@@ -31,6 +31,11 @@ export function DakoppervlakteApp() {
   const { user } = useUser()
   const isSignedIn = !!user
 
+  // Perspective state — declared early so usePolygonDrawing can snapshot them
+  const [heading, setHeading] = useState(0)
+  const [tilt, setTilt] = useState(0)
+  const [zoom, setZoom] = useState(8)
+
   // Infrastructure hooks
   const { mapRef, mapInstanceRef, geocoderRef, mapLoaded } = useGoogleMaps()
   const {
@@ -41,28 +46,26 @@ export function DakoppervlakteApp() {
     finishPolygon,
     deletePolygon,
     renamePolygon,
+    togglePolygonExcluded,
     resetAll,
     restorePolygons,
     serializedPolygons,
-  } = usePolygonDrawing({ mapInstanceRef })
+  } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt })
   const { count: usageCount, increment } = useUsageCounter()
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
 
-  // Local UI state
+  // Other local UI state
   const [address, setAddress] = useState('')
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState('')
   const [saved, setSaved] = useState(false)
-  const [heading, setHeading] = useState(0)
-  const [tilt, setTilt] = useState(0)
-  const [zoom, setZoom] = useState(8)
 
   // Google Maps only supports tilt on raster satellite maps at zoom >= 14
   const TILT_MIN_ZOOM = 14
   const canEnable3D = zoom >= TILT_MIN_ZOOM
   const is3D = tilt === 45
 
-  const totalArea = polygons.reduce((sum, p) => sum + p.area, 0)
+  const totalArea = polygons.reduce((sum, p) => (p.excluded ? sum : sum + p.area), 0)
 
   // Sync heading → map
   useEffect(() => {
@@ -332,8 +335,11 @@ export function DakoppervlakteApp() {
             {/* Polygon list */}
             <PolygonList
               polygons={polygons}
+              currentHeading={heading}
+              currentTilt={tilt}
               onDelete={deletePolygon}
               onRename={renamePolygon}
+              onToggleExcluded={togglePolygonExcluded}
             />
 
             {/* Total area */}

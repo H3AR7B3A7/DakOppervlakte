@@ -3,6 +3,10 @@ export type PolygonData = {
   label: string
   area: number
   path: { lat: number; lng: number }[]
+  /** Heading (cardinal direction, 0–360) when the polygon was created */
+  heading?: number
+  /** Tilt (0 or 45) when the polygon was created */
+  tilt?: number
 }
 
 export type Search = {
@@ -19,6 +23,12 @@ export type PolygonEntry = {
   area: number
   /** The actual Google Maps Polygon object – only present in browser context */
   polygon: google.maps.Polygon
+  /** Heading (cardinal direction, 0–360) when the polygon was created */
+  heading: number
+  /** Tilt (0 or 45) when the polygon was created */
+  tilt: number
+  /** Whether this polygon is excluded from the total area calculation */
+  excluded: boolean
 }
 
 export type DrawingMode = 'idle' | 'drawing'

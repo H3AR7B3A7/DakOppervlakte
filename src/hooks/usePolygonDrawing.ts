@@ -1,14 +1,16 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PolygonEntry, DrawingMode, PolygonData } from '@/lib/types'
-import { generatePolygonColor } from '@/lib/utils'
+import { generatePolygonColor, normalizeHeading } from '@/lib/utils'
 
 interface UsePolygonDrawingOptions {
   mapInstanceRef: React.RefObject<google.maps.Map | null>
+  currentHeading: number
+  currentTilt: number
 }
 
-export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) {
+export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt }: UsePolygonDrawingOptions) {
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const dblClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const tempMarkersRef = useRef<google.maps.Marker[]>([])
@@ -20,10 +22,28 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
   const [pointCount, setPointCount] = useState(0)
   const [polygons, setPolygons] = useState<PolygonEntry[]>([])
 
+  // Auto-sync visibility based on orientation
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!map) return
+
+    polygonsRef.current.forEach((p) => {
+      const headingMatch = normalizeHeading(p.heading) === normalizeHeading(currentHeading)
+      const tiltMatch = p.tilt === currentTilt
+      const shouldBeOnMap = headingMatch && tiltMatch
+      
+      if (shouldBeOnMap && p.polygon.getMap() !== map) {
+        p.polygon.setMap(map)
+      } else if (!shouldBeOnMap && p.polygon.getMap() === map) {
+        p.polygon.setMap(null)
+      }
+    })
+  }, [currentHeading, currentTilt, mapInstanceRef, polygons])
+
   const serializedPolygons: PolygonData[] = polygons.map((p) => {
     const pts: { lat: number; lng: number }[] = []
     p.polygon.getPath().forEach((pt) => pts.push({ lat: pt.lat(), lng: pt.lng() }))
-    return { id: p.id, label: p.label, area: p.area, path: pts }
+    return { id: p.id, label: p.label, area: p.area, path: pts, heading: p.heading, tilt: p.tilt }
   })
 
   const clearDrawingState = useCallback(() => {
@@ -53,6 +73,7 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     syncPolygons()
     setMode('idle')
   }, [clearDrawingState])
+
 
   const restorePolygons = useCallback(
     (data: PolygonData[]) => {
@@ -84,7 +105,15 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
         polygon.getPath().addListener('set_at', updateArea)
         polygon.getPath().addListener('insert_at', updateArea)
 
-        return { id: d.id, label: d.label, area: d.area, polygon }
+        return {
+          id: d.id,
+          label: d.label,
+          area: d.area,
+          polygon,
+          heading: d.heading ?? 0,
+          tilt: d.tilt ?? 0,
+          excluded: false,
+        }
       })
 
       polygonsRef.current = restored
@@ -115,12 +144,19 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     const id = crypto.randomUUID()
     const label = `Vlak ${polygonsRef.current.length + 1}`
 
-    const entry: PolygonEntry = { id, label, area, polygon }
+    const entry: PolygonEntry = {
+      id,
+      label,
+      area,
+      polygon,
+      heading: currentHeading,
+      tilt: currentTilt,
+      excluded: false,
+    }
     polygonsRef.current = [...polygonsRef.current, entry]
     syncPolygons()
     setMode('idle')
 
-    // Keep area in sync when user edits vertices
     const updateArea = () => {
       const pts: google.maps.LatLng[] = []
       polygon.getPath().forEach((p) => pts.push(p))
@@ -132,7 +168,7 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     }
     polygon.getPath().addListener('set_at', updateArea)
     polygon.getPath().addListener('insert_at', updateArea)
-  }, [clearDrawingState, mapInstanceRef])
+  }, [clearDrawingState, mapInstanceRef, currentHeading, currentTilt])
 
   const startDrawing = useCallback(() => {
     const map = mapInstanceRef.current
@@ -170,7 +206,6 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
         clickable: true,
       })
 
-      // Clicking the first marker closes the polygon
       if (tempPathRef.current.length === 1) {
         marker.addListener('click', () => {
           if (tempPathRef.current.length >= 3) finishPolygon()
@@ -204,6 +239,14 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     syncPolygons()
   }, [])
 
+  const togglePolygonExcluded = useCallback((id: string) => {
+    polygonsRef.current = polygonsRef.current.map((e) => {
+      if (e.id !== id) return e
+      return { ...e, excluded: !e.excluded }
+    })
+    syncPolygons()
+  }, [])
+
   return {
     mode,
     pointCount,
@@ -212,6 +255,7 @@ export function usePolygonDrawing({ mapInstanceRef }: UsePolygonDrawingOptions) 
     finishPolygon,
     deletePolygon,
     renamePolygon,
+    togglePolygonExcluded,
     resetAll,
     restorePolygons,
     serializedPolygons,

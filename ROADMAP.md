@@ -1,6 +1,6 @@
 # ROADMAP
 
-- [ ] Save the perspective with the selections / only show selections on the right layer / eye icon?
+- [ ] Save the perspective (tilt x cardinal) with the selections / only show selections in the orientation it was created in / use eye icons to indicate if the layer is visible or not in the sidepanel
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json
 - [ ] Add pre commit hook that runs `check` and `test` in package.json
