@@ -11,6 +11,11 @@ export async function POST(req: NextRequest) {
   await sql`
     INSERT INTO searches (user_id, address, area_m2, polygons)
     VALUES (${userId}, ${address}, ${area_m2}, ${JSON.stringify(polygons)})
+    ON CONFLICT (user_id, address) 
+    DO UPDATE SET 
+      area_m2 = EXCLUDED.area_m2,
+      polygons = EXCLUDED.polygons,
+      created_at = NOW()
   `
   return NextResponse.json({ ok: true })
 }

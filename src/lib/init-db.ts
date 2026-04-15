@@ -15,13 +15,31 @@ async function main() {
       address TEXT NOT NULL,
       area_m2 FLOAT NOT NULL,
       polygons JSONB,
-      created_at TIMESTAMP DEFAULT NOW()
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(user_id, address)
     )
   `
 
   // Ensure polygons column exists for existing tables
   await sql`
     ALTER TABLE searches ADD COLUMN IF NOT EXISTS polygons JSONB
+  `
+
+  // Cleanup duplicates before adding constraint
+  await sql`
+    DELETE FROM searches a USING searches b
+    WHERE a.id < b.id AND a.user_id = b.user_id AND a.address = b.address
+  `
+
+  // Add UNIQUE constraint if it doesn't exist
+  await sql`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'searches_user_id_address_key') THEN
+        ALTER TABLE searches ADD CONSTRAINT searches_user_id_address_key UNIQUE (user_id, address);
+      END IF;
+    END;
+    $$;
   `
 
   await sql`

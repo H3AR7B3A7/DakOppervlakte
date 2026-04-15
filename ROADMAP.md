@@ -1,11 +1,12 @@
 # ROADMAP
 
-- [ ] Save the perspective (tilt x cardinal) with the selections / only show selections in the orientation it was created in / use eye icons to indicate if the layer is visible or not in the sidepanel
+- [x] Save the perspective (tilt x cardinal) with the selections / only show selections in the orientation it was created in / use eye icons to indicate if the layer is visible or not in the sidepanel
+- [ ] (checkbox?) Belgium is supposed to have polygons that we can get for the addresses (there's a new api?), so we can make automatic selection of a roof
+- [ ] Test coverage
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json
 - [ ] Add pre commit hook that runs `check` and `test` in package.json
 - [ ] https://dak-oppervlakte.vercel.app/ in README + overall update
-- [ ] (checkbox?) Belgium is supposed to have polygons that we can get for the addresses (there's a new api?), so we can make automatic selection of a roof
 - [ ] Use Biome instead of eslint/prettier, set good rules, vercel / nextjs / no semicolons
 - [ ] Use linting to implement architecture rules (direction of dependencies)
 - [ ] Implement e2e tests with playwright (document CLAUDE/GEMINI/README)
