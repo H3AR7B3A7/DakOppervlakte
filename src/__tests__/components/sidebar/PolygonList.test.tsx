@@ -15,6 +15,9 @@ function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {
     id: crypto.randomUUID(),
     label: 'Vlak 1',
     area: 42.5,
+    heading: 0,
+    tilt: 0,
+    excluded: false,
     polygon: {
       setMap: vi.fn(),
       getPath: vi.fn(() => path),
@@ -28,7 +31,14 @@ function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {
 describe('User manages polygons', () => {
   it('renders nothing when there are no polygons', () => {
     const { container } = render(
-      <PolygonList polygons={[]} onDelete={vi.fn()} onRename={vi.fn()} />,
+      <PolygonList
+        polygons={[]}
+        currentHeading={0}
+        currentTilt={0}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onToggleExcluded={vi.fn()}
+      />,
     )
     expect(container).toBeEmptyDOMElement()
   })
@@ -38,7 +48,16 @@ describe('User manages polygons', () => {
       makeEntry({ label: 'Voordak', area: 38.2 }),
       makeEntry({ label: 'Achterdak', area: 51.0 }),
     ]
-    render(<PolygonList polygons={entries} onDelete={vi.fn()} onRename={vi.fn()} />)
+    render(
+      <PolygonList
+        polygons={entries}
+        currentHeading={0}
+        currentTilt={0}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onToggleExcluded={vi.fn()}
+      />,
+    )
     expect(screen.getByText('Voordak')).toBeInTheDocument()
     expect(screen.getByText('Achterdak')).toBeInTheDocument()
     expect(screen.getByText(/38,2 m²/)).toBeInTheDocument()
@@ -48,7 +67,16 @@ describe('User manages polygons', () => {
   it('calls onDelete with the correct id when the delete button is clicked', async () => {
     const onDelete = vi.fn()
     const entry = makeEntry({ id: 'abc-123', label: 'Vlak 1' })
-    render(<PolygonList polygons={[entry]} onDelete={onDelete} onRename={vi.fn()} />)
+    render(
+      <PolygonList
+        polygons={[entry]}
+        currentHeading={0}
+        currentTilt={0}
+        onDelete={onDelete}
+        onRename={vi.fn()}
+        onToggleExcluded={vi.fn()}
+      />,
+    )
     await userEvent.click(screen.getByRole('button', { name: /verwijder vlak 1/i }))
     expect(onDelete).toHaveBeenCalledWith('abc-123')
   })
@@ -56,7 +84,16 @@ describe('User manages polygons', () => {
   it('lets the user rename a polygon by clicking its label', async () => {
     const onRename = vi.fn()
     const entry = makeEntry({ id: 'xyz', label: 'Oud label' })
-    render(<PolygonList polygons={[entry]} onDelete={vi.fn()} onRename={onRename} />)
+    render(
+      <PolygonList
+        polygons={[entry]}
+        currentHeading={0}
+        currentTilt={0}
+        onDelete={vi.fn()}
+        onRename={onRename}
+        onToggleExcluded={vi.fn()}
+      />,
+    )
 
     await userEvent.click(screen.getByRole('button', { name: /hernoem vlak: oud label/i }))
     const input = screen.getByRole('textbox', { name: /naam van het vlak/i })
@@ -69,7 +106,16 @@ describe('User manages polygons', () => {
   it('does not rename when the new label is empty', async () => {
     const onRename = vi.fn()
     const entry = makeEntry({ label: 'Vlak 1' })
-    render(<PolygonList polygons={[entry]} onDelete={vi.fn()} onRename={onRename} />)
+    render(
+      <PolygonList
+        polygons={[entry]}
+        currentHeading={0}
+        currentTilt={0}
+        onDelete={vi.fn()}
+        onRename={onRename}
+        onToggleExcluded={vi.fn()}
+      />,
+    )
 
     await userEvent.click(screen.getByRole('button', { name: /hernoem/i }))
     await userEvent.clear(screen.getByRole('textbox'))
@@ -81,7 +127,16 @@ describe('User manages polygons', () => {
   it('cancels editing on Escape and keeps the original label', async () => {
     const onRename = vi.fn()
     const entry = makeEntry({ label: 'Vlak 1' })
-    render(<PolygonList polygons={[entry]} onDelete={vi.fn()} onRename={onRename} />)
+    render(
+      <PolygonList
+        polygons={[entry]}
+        currentHeading={0}
+        currentTilt={0}
+        onDelete={vi.fn()}
+        onRename={onRename}
+        onToggleExcluded={vi.fn()}
+      />,
+    )
 
     await userEvent.click(screen.getByRole('button', { name: /hernoem/i }))
     await userEvent.keyboard('{Escape}')

@@ -22,7 +22,9 @@ describe('usePolygonDrawing', () => {
   })
 
   it('starts in idle mode', () => {
-    const { result } = renderHook(() => usePolygonDrawing({ mapInstanceRef }))
+    const { result } = renderHook(() =>
+      usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0 }),
+    )
     expect(result.current.mode).toBe('idle')
   })
 
@@ -30,7 +32,9 @@ describe('usePolygonDrawing', () => {
     // Need a real map instance mock, but this is complicated.
     // For now, let's just test that calling startDrawing doesn't crash
     // even if mapInstanceRef.current is null (it has a guard).
-    const { result } = renderHook(() => usePolygonDrawing({ mapInstanceRef }))
+    const { result } = renderHook(() =>
+      usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0 }),
+    )
     
     act(() => {
       result.current.startDrawing()

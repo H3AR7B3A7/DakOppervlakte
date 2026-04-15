@@ -18,6 +18,7 @@ describe('searches API', () => {
   })
 
   it('GET returns 401 if not signed in', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
     
     const res = await GET()
@@ -25,6 +26,7 @@ describe('searches API', () => {
   })
 
   it('POST returns 401 if not signed in', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
     
     const req = new NextRequest('http://localhost/api/searches', {
@@ -36,12 +38,12 @@ describe('searches API', () => {
   })
 
   it('POST performs UPSERT', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any)
-    const mockSql = (vi.fn() as any)
-    mockSql.mockResolvedValue([])
-    vi.mocked(getDb).mockReturnValue(mockSql as any)
+    const mockSql = vi.fn().mockResolvedValue([])
+    vi.mocked(getDb).mockReturnValue(mockSql as unknown as ReturnType<typeof getDb>)
 
-    const payload = { address: 'Main St 1', area_m2: 100, polygons: [{ id: 1 }] }
+    const payload = { address: 'Main St 1', area_m2: 100, polygons: [{ id: '1' }] }
     const req = new NextRequest('http://localhost/api/searches', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -52,7 +54,7 @@ describe('searches API', () => {
     
     // Check if SQL query contains ON CONFLICT
     const lastCall = mockSql.mock.calls[0]
-    const queryParts = lastCall[0]
+    const queryParts = lastCall[0] as TemplateStringsArray
     const query = queryParts.join('')
     expect(query).toContain('ON CONFLICT (user_id, address)')
     expect(query).toContain('DO UPDATE SET')
@@ -62,6 +64,7 @@ describe('searches API', () => {
   })
 
   it('DELETE requires an ID', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any)
     
     const req = new NextRequest('http://localhost/api/searches')
