@@ -1,7 +1,8 @@
 # ROADMAP
 
 - [x] Save the perspective (tilt x cardinal) with the selections / only show selections in the orientation it was created in / use eye icons to indicate if the layer is visible or not in the sidepanel
-- [ ] (checkbox?) Belgium is supposed to have polygons that we can get for the addresses (there's a new api?), so we can make automatic selection of a roof
+- [ ] Belgium is supposed to have a register of polygons that we can get for the addresses (there's a new api?), so we can autogenerate a selection of the roof, the coordinates don't match exactly, so we might have to allow values within a triangle, under the address search set a checkbox to auto generate.
+- [ ] Mobile support
 - [ ] Test coverage
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json
