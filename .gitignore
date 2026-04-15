@@ -1,15 +1,21 @@
+# JS Project
 .env.local
 .env
-node_modules/
-.next/
-out/
-.vercel/
 *.log
-.env.local
-.env
+out/
+node_modules/
+
+# NextJS
+.next/
+
+# Vercel
+.vercel/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
 
-# clerk configuration (can include secrets)
+# Clerk configuration (can include secrets)
 /.clerk/
+
+# Coverage
+/coverage/
