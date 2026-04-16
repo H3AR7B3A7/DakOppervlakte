@@ -59,4 +59,28 @@ describe('User views their search history', () => {
     fireEvent.click(deleteButtons[0])
     expect(onDelete).toHaveBeenCalledWith(ENTRIES[0].id)
   })
+
+  it('highlights restore button on mouse enter', async () => {
+    render(<SearchHistory history={ENTRIES} onRestore={onRestore} onDelete={onDelete} />)
+    const restoreButton = screen.getByText('Meir 1, Antwerpen').closest('button')!
+
+    fireEvent.mouseEnter(restoreButton)
+    expect(restoreButton.style.borderColor).toBe('var(--accent)')
+
+    fireEvent.mouseLeave(restoreButton)
+    expect(restoreButton.style.borderColor).toBe('transparent')
+  })
+
+  it('highlights delete button on mouse enter', async () => {
+    render(<SearchHistory history={ENTRIES} onRestore={onRestore} onDelete={onDelete} />)
+    const deleteButtons = screen.getAllByLabelText(/verwijder uit geschiedenis/i)
+
+    fireEvent.mouseEnter(deleteButtons[0])
+    expect(deleteButtons[0].style.borderColor).toBe('rgb(248, 113, 113)')
+    expect(deleteButtons[0].style.color).toBe('rgb(239, 68, 68)')
+
+    fireEvent.mouseLeave(deleteButtons[0])
+    expect(deleteButtons[0].style.borderColor).toBe('transparent')
+    expect(deleteButtons[0].style.color).toBe('var(--text-muted)')
+  })
 })
