@@ -11,14 +11,20 @@ flowchart TD
     end
 
     subgraph Smart ["Smart Components"]
-        App["DakoppervlakteApp — State + orchestration"]
+        App["DakoppervlakteApp — Thin orchestrator, wires 6 hooks"]
     end
 
     subgraph Hooks ["Custom Hooks"]
         GM["useGoogleMaps"]
+        MO_HOOK["useMapOrientation"]
+        GEO["useGeocoding"]
         PD["usePolygonDrawing"]
         UC["useUsageCounter"]
         SH["useSearchHistory"]
+    end
+
+    subgraph Extracted ["Extracted Components"]
+        HDR["Header"]
     end
 
     subgraph Sidebar ["Sidebar Components (dumb)"]
@@ -61,14 +67,18 @@ flowchart TD
     end
 
     Page --> App
-    App --> GM & PD & UC & SH
+    App --> GM & MO_HOOK & GEO & PD & UC & SH
+    App --> HDR
     App --> AS & RC & PL & TA & SR & DH & SG & HI
     App --> MV & MO & DO
+    HDR --> LOGO & BTN
     AS --> BTN & INP
     SR & DH --> BTN
     PL --> BDG
     MV --> SPIN
     GM --> GMAP
+    MO_HOOK --> GMAP
+    GEO --> GMAP
     PD --> GMAP
     UC --> CTR
     SH --> SCH
@@ -81,17 +91,39 @@ flowchart TD
 
 ## Data Flow
 
-State lives in `DakoppervlakteApp` and its hooks. There is no global state management library (no Redux, Zustand, etc.). Data flows top-down via props.
+State lives in custom hooks and is wired together by `DakoppervlakteApp` (thin orchestrator). There is no global state management library (no Redux, Zustand, etc.). Data flows top-down via props.
 
 | State | Owner | Description |
 |-------|-------|-------------|
-| `heading`, `tilt`, `zoom` | `DakoppervlakteApp` | Map orientation, synced bidirectionally with the map instance |
-| `address`, `searching`, `searchError` | `DakoppervlakteApp` | Address search form state |
-| `saved` | `DakoppervlakteApp` | Whether current calculation has been persisted |
+| `heading`, `tilt`, `zoom` | `useMapOrientation` | Map orientation, synced bidirectionally with the map instance via `idle` and `zoom_changed` listeners |
+| `canEnable3D`, `is3D` | `useMapOrientation` | Computed: `zoom >= 14` and `tilt === 45` respectively |
+| `address`, `searching`, `searchError` | `useGeocoding` | Address search form state and geocoding lifecycle |
+| `saved` | `DakoppervlakteApp` | Whether current calculation has been persisted (only local state remaining in App) |
 | `mode`, `pointCount`, `polygons` | `usePolygonDrawing` | Drawing FSM state and completed polygon list |
 | `mapRef`, `mapInstanceRef`, `geocoderRef`, `mapLoaded` | `useGoogleMaps` | Google Maps SDK and instance lifecycle |
 | `count` | `useUsageCounter` | Global calculation counter |
 | `history` | `useSearchHistory` | Authenticated user's saved searches |
+
+## Hook Composition
+
+`DakoppervlakteApp` (~240 lines) is a thin orchestrator that wires up six hooks and one extracted component. It holds a single piece of local state (`saved`) and defines five callbacks that coordinate across hooks. See [hook-composition.mermaid](hook-composition.mermaid) for the full diagram.
+
+| Hook | Concern | Depends On |
+|------|---------|------------|
+| `useGoogleMaps` | Script loading, map + geocoder instance creation | -- |
+| `useMapOrientation` | Heading, tilt, zoom state; bidirectional map sync; rotation/tilt callbacks | `useGoogleMaps` (`mapInstanceRef`, `mapLoaded`) |
+| `useGeocoding` | Address search, geocoding API call, error handling | `useGoogleMaps` (`mapInstanceRef`, `geocoderRef`) |
+| `usePolygonDrawing` | Drawing FSM, polygon CRUD, serialization, orientation-based visibility | `useGoogleMaps` (`mapInstanceRef`), `useMapOrientation` (`heading`, `tilt`) |
+| `useUsageCounter` | Global calculation counter fetch + increment | -- |
+| `useSearchHistory` | Per-user search CRUD via `/api/searches` | Clerk `isSignedIn` boolean |
+
+### Extracted components
+
+| Component | Extracted from | Props |
+|-----------|---------------|-------|
+| `Header` | `DakoppervlakteApp` | `usageCount: number \| null` |
+
+`Header` contains the Logo, usage count display, and Clerk auth buttons (SignIn/SignUp/UserButton). It uses `useTranslations()` internally.
 
 ## Key Design Decisions
 

@@ -48,7 +48,7 @@ sequenceDiagram
         PD ->> PD: Add PolygonEntry to polygons[]<br/>(id, label, area, heading, tilt, excluded: false)
 
         PD ->> Map: Clear temp markers + preview line
-        PD ->> Map: setOptions({ draggableCursor: null })
+        PD ->> Map: setOptions({ draggableCursor: '' })
 
         Note over PD: mode = 'idle', pointCount = 0
     end

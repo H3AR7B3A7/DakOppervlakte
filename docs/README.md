@@ -16,11 +16,13 @@ Interactive web application for calculating roof surface areas using Google Maps
 | Restore Search | [restore-search.mermaid](restore-search.mermaid) | User restores a previously saved search |
 | Building Detection | [building-detection.mermaid](building-detection.mermaid) | API detects building geometry from coordinates |
 
-## State Diagrams
+## State & Structure Diagrams
 
 | Entity | Diagram | Description |
 |--------|---------|-------------|
+| Hook Composition | [hook-composition.mermaid](hook-composition.mermaid) | How DakoppervlakteApp delegates to 6 hooks, their dependencies, and state ownership |
 | Drawing Mode | [drawing-mode-states.mermaid](drawing-mode-states.mermaid) | FSM for the polygon drawing lifecycle |
+| Domain Model | [domain-model.mermaid](domain-model.mermaid) | TypeScript types: PolygonData (persisted) vs PolygonEntry (runtime) vs Search |
 
 ## Example Payloads
 
@@ -30,6 +32,26 @@ Interactive web application for calculating roof surface areas using Google Maps
 | Search GET | [search-response.example.json](search-response.example.json) | Response from fetching user search history |
 | Building Polygon | [building-polygon-response.example.json](building-polygon-response.example.json) | Response from building detection API |
 | Error Responses | [error-responses.example.json](error-responses.example.json) | Error response shapes for all API endpoints |
+
+## Testing
+
+The project uses Vitest + jsdom + `@testing-library/react` + `@testing-library/user-event`. Coverage target is 80%+ (currently ~83%, 150 tests across 25 files).
+
+| Aspect | Convention |
+|--------|-----------|
+| Style | BDD-style Given-When-Then, grouped by user scenario (`describe('User draws a polygon')`) |
+| Mocking | Mock only external boundaries: Google Maps API, Clerk, fetch. Never mock own hooks/components/utils |
+| Google Maps stub | Global stub in `src/__tests__/__mocks__/googleMaps.ts`, installed once in `vitest.setup.ts` |
+| Custom render | `src/__tests__/test-utils.tsx` wraps components in `NextIntlClientProvider` (nl locale) |
+| Hook tests with i18n | Use `renderHookWithIntl` helper from test-utils for hooks that call `useTranslations()` |
+| API route tests | Import handler directly, call with `Request`, assert on `Response` status + body |
+| Coverage provider | v8; excludes `src/app/api/**`, `src/lib/init-db.ts`, test files |
+
+```bash
+npm test               # Run all tests with coverage
+npm run test:watch     # Watch mode
+npx vitest run src/__tests__/path/to/file.test.ts   # Single file
+```
 
 ## API Routes
 
@@ -94,3 +116,63 @@ Initializes the database tables (`searches`, `usage_counter`) and seeds the coun
 | Clerk | Authentication, user management | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` |
 | Neon PostgreSQL | Serverless database for searches and usage counter | `DATABASE_URL` |
 | OpenStreetMap Nominatim | Reverse geocoding for building geometry detection | (no key required) |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ (required by React 19 / Next.js 16)
+- A Google Maps API key with **Maps JavaScript API** and **Geocoding API** enabled
+- A Clerk account with a project configured for your domain
+- A Neon PostgreSQL database (or the Vercel Neon integration)
+
+### Local Setup
+
+```bash
+git clone <repo-url> && cd DakOppervlakte
+cp .env.example .env.local          # Fill in all 4 env vars
+npm install
+npm run dev                          # Starts at http://localhost:3000
+```
+
+### Verify Your Setup
+
+1. `npm run dev` -- the app should open at `http://localhost:3000` and display a satellite map of Belgium
+2. Visit `http://localhost:3000/api/init` -- should return `{ "status": "..." }` and create the DB tables
+3. The map should load with satellite imagery. If it's grey/blank, check `NEXT_PUBLIC_GOOGLE_MAPS_KEY` and ensure Maps JavaScript API is enabled in Google Cloud Console
+4. `npm test` -- all ~150 tests should pass with 80%+ coverage
+
+## Deployment
+
+The app is deployed on **Vercel** with the Neon PostgreSQL integration.
+
+**Live:** https://dak-oppervlakte.vercel.app/
+
+### Steps
+
+1. **Import the repo** in the Vercel dashboard
+2. **Configure environment variables** -- add all 4 vars from the Environment Variables table above. If using the Vercel Neon integration, `DATABASE_URL` is auto-injected.
+3. **Initialize the database** -- after the first deploy, visit `https://<your-domain>/api/init` to create the `searches` and `usage_counter` tables. Alternatively, run `npm run db:init` locally with `DATABASE_URL` pointing to the production database.
+4. **Configure Clerk redirect URIs** -- in the Clerk Dashboard, add your Vercel domain to the allowed redirect URLs.
+
+### Database Initialization
+
+There are two ways to initialize the DB schema:
+
+| Method | Command | When to use |
+|--------|---------|-------------|
+| API route | `GET /api/init` | First deploy on Vercel (no local tooling needed) |
+| CLI script | `npm run db:init` | Local development or full schema with migrations |
+
+Note: `npm run db:init` (via `src/lib/init-db.ts`) includes the `polygons JSONB` column and `UNIQUE(user_id, address)` constraint. The `/api/init` route creates a minimal schema -- run `db:init` for the complete setup.
+
+## Troubleshooting
+
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| `relation "searches" does not exist` | DB not initialized | Visit `/api/init` or run `npm run db:init` |
+| Map is grey or blank | Invalid or missing Google Maps key | Check `NEXT_PUBLIC_GOOGLE_MAPS_KEY`; enable Maps JavaScript API + Geocoding API in Google Cloud Console |
+| Auth buttons don't appear | Clerk keys misconfigured | Verify `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` in `.env.local` |
+| Auth redirects fail | Redirect URI not allowed | Add `http://localhost:3000` (dev) or your Vercel domain to Clerk's allowed redirect URLs |
+| Tests fail on fresh clone | Setup file not loading | Ensure `vitest.setup.ts` exists and `vitest.config.mts` references it |
+| `Cannot find module '@/...'` | Path alias issue | Check `tsconfig.json` has `"@/*": ["./src/*"]` and restart the dev server |

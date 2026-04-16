@@ -1,18 +1,21 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { SignInButton, SignUpButton, UserButton, Show, useUser } from '@clerk/nextjs'
+import React, { useCallback, useState } from 'react'
+import { Show, useUser } from '@clerk/nextjs'
 
 import { useTranslations } from 'next-intl'
 
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
+import { useMapOrientation } from '@/hooks/useMapOrientation'
+import { useGeocoding } from '@/hooks/useGeocoding'
 import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
 import { useUsageCounter } from '@/hooks/useUsageCounter'
 import { useSearchHistory } from '@/hooks/useSearchHistory'
 import { normalizeHeading } from '@/lib/utils'
 import type { Search } from '@/lib/types'
 
-import { Button, Logo } from '@/components/ui'
+import { Button } from '@/components/ui'
+import { Header } from '@/components/Header'
 import { MapView, MapOverlayControls, DrawingOverlay } from '@/components/map'
 import {
   AddressSearch,
@@ -27,119 +30,35 @@ import {
 
 export function DakoppervlakteApp() {
   const t = useTranslations()
-  // const format = useFormatter()
   const { user } = useUser()
   const isSignedIn = !!user
 
-  // Perspective state — declared early so usePolygonDrawing can snapshot them
-  const [heading, setHeading] = useState(0)
-  const [tilt, setTilt] = useState(0)
-  const [zoom, setZoom] = useState(8)
-
-  // Infrastructure hooks
   const { mapRef, mapInstanceRef, geocoderRef, mapLoaded } = useGoogleMaps()
   const {
-    mode,
-    pointCount,
-    polygons,
-    startDrawing,
-    finishPolygon,
-    deletePolygon,
-    renamePolygon,
-    togglePolygonExcluded,
-    resetAll,
-    restorePolygons,
-    serializedPolygons,
+    heading, setHeading, tilt, canEnable3D, is3D,
+    handleRotate, handleTiltToggle,
+  } = useMapOrientation({ mapInstanceRef, mapLoaded })
+  const {
+    address, setAddress, searching, searchError, setSearchError,
+    geocodeAndNavigate,
+  } = useGeocoding({ mapInstanceRef, geocoderRef })
+  const {
+    mode, pointCount, polygons, startDrawing, finishPolygon,
+    deletePolygon, renamePolygon, togglePolygonExcluded,
+    resetAll, restorePolygons, serializedPolygons,
   } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt })
   const { count: usageCount, increment } = useUsageCounter()
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
 
-  // Other local UI state
-  const [address, setAddress] = useState('')
-  const [searching, setSearching] = useState(false)
-  const [searchError, setSearchError] = useState('')
   const [saved, setSaved] = useState(false)
-
-  // Google Maps only supports tilt on raster satellite maps at zoom >= 14
-  const TILT_MIN_ZOOM = 14
-  const canEnable3D = zoom >= TILT_MIN_ZOOM
-  const is3D = tilt === 45
 
   const totalArea = polygons.reduce((sum, p) => (p.excluded ? sum : sum + p.area), 0)
 
-  // Sync heading → map
-  useEffect(() => {
-    mapInstanceRef.current?.setHeading(heading)
-  }, [heading, mapInstanceRef])
-
-  // Sync tilt → map
-  useEffect(() => {
-    mapInstanceRef.current?.setTilt(tilt)
-  }, [tilt, mapInstanceRef])
-
-  // Keep heading/tilt/zoom state in sync when the user interacts with the map
-  const mapListenersRef = useRef<google.maps.MapsEventListener[]>([])
-  useEffect(() => {
-    if (!mapLoaded || !mapInstanceRef.current) return
-    const map = mapInstanceRef.current
-
-    const onIdle = () => {
-      const h = map.getHeading() ?? 0
-      const t = map.getTilt() ?? 0
-      setHeading((prev) => (prev !== h ? h : prev))
-      setTilt((prev) => (prev !== t ? t : prev))
-    }
-    const onZoomChange = () => {
-      const z = map.getZoom() ?? 8
-      setZoom(z)
-      // If zoom drops below threshold while 3D is active, snap tilt back to 0
-      if (z < TILT_MIN_ZOOM) {
-        setTilt(0)
-      }
-    }
-
-    const idleListener = map.addListener('idle', onIdle)
-    const zoomListener = map.addListener('zoom_changed', onZoomChange)
-    mapListenersRef.current.push(idleListener, zoomListener)
-
-    return () => {
-      mapListenersRef.current.forEach((l) => google.maps.event.removeListener(l))
-      mapListenersRef.current = []
-    }
-  }, [mapLoaded, mapInstanceRef])
-
-  // --- Handlers ---
-
-  const geocodeAndNavigate = useCallback((addr: string, onFinish?: () => void) => {
-    const map = mapInstanceRef.current
-    const geocoder = geocoderRef.current
-    if (!addr.trim() || !geocoder || !map) return
-
-    setSearching(true)
-    setSearchError('')
-
-    geocoder.geocode(
-      { address: addr + ', Belgium', region: 'BE' },
-      (results, status) => {
-        setSearching(false)
-        if (status !== 'OK' || !results?.[0]) {
-          setSearchError(t('Errors.addressNotFound'))
-          return
-        }
-        map.setCenter(results[0].geometry.location)
-        map.setZoom(20)
-        if (onFinish) {
-          onFinish()
-        } else {
-          setTimeout(() => startDrawing(), 600)
-        }
-      }
-    )
-  }, [geocoderRef, mapInstanceRef, startDrawing, t])
-
   const handleSearch = useCallback(() => {
-    geocodeAndNavigate(address)
-  }, [address, geocodeAndNavigate])
+    geocodeAndNavigate(address, () => {
+      setTimeout(() => startDrawing(), 600)
+    })
+  }, [address, geocodeAndNavigate, startDrawing])
 
   const handleRestore = useCallback((restored: Search) => {
     setAddress(restored.address)
@@ -148,11 +67,10 @@ export function DakoppervlakteApp() {
     setSearchError('')
     geocodeAndNavigate(restored.address, () => {
       if (restored.polygons) {
-        // Short delay to ensure map is ready/stable before adding polygons
         setTimeout(() => restorePolygons(restored.polygons!), 500)
       }
     })
-  }, [geocodeAndNavigate, resetAll, restorePolygons])
+  }, [geocodeAndNavigate, resetAll, restorePolygons, setAddress, setSearchError])
 
   const handleSave = useCallback(async () => {
     await increment()
@@ -165,23 +83,12 @@ export function DakoppervlakteApp() {
     setAddress('')
     setSearchError('')
     setSaved(false)
-  }, [resetAll])
-
-  const handleRotate = useCallback((delta: number) => {
-    setHeading((h) => normalizeHeading(h + delta))
-  }, [])
-
-  const handleTiltToggle = useCallback(() => {
-    if (!canEnable3D) return
-    setTilt((t) => (t === 0 ? 45 : 0))
-  }, [canEnable3D])
+  }, [resetAll, setAddress, setSearchError])
 
   const handleStartDrawing = useCallback(() => {
     setSaved(false)
     startDrawing()
   }, [startDrawing])
-
-  // --- Render ---
 
   return (
     <div
@@ -192,52 +99,8 @@ export function DakoppervlakteApp() {
         flexDirection: 'column',
       }}
     >
-      {/* ── Header ── */}
-      <header
-        style={{
-          borderBottom: '1px solid var(--border)',
-          padding: '0 24px',
-          height: 60,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'var(--surface)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <Logo />
+      <Header usageCount={usageCount} />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {usageCount !== null && (
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              {/*  TODO: we prefer the highlight, but this should prob not be left of the user icon  */}
-              {/*<span style={{ color: 'var(--accent)', fontWeight: 500 }}>*/}
-              {/*  {format.number(usageCount)}*/}
-              {/*</span>{' '}*/}
-              {t('Sidebar.calculationsCount', { count: usageCount })}
-            </span>
-          )}
-
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <Button variant="outline">{t('Header.signIn')}</Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button variant="accent">{t('Common.register')}</Button>
-            </SignUpButton>
-          </Show>
-
-          <Show when="signed-in">
-            <UserButton
-              appearance={{ elements: { avatarBox: { width: 32, height: 32 } } }}
-            />
-          </Show>
-        </div>
-      </header>
-
-      {/* ── Body ── */}
       <div
         style={{
           display: 'flex',
@@ -246,7 +109,6 @@ export function DakoppervlakteApp() {
           height: 'calc(100vh - 60px)',
         }}
       >
-        {/* ── Sidebar ── */}
         <aside
           style={{
             width: 360,
@@ -258,7 +120,6 @@ export function DakoppervlakteApp() {
             flexShrink: 0,
           }}
         >
-          {/* Title */}
           <div
             style={{
               padding: '24px 24px 16px',
@@ -285,7 +146,6 @@ export function DakoppervlakteApp() {
             </p>
           </div>
 
-          {/* Address search */}
           <AddressSearch
             value={address}
             onChange={setAddress}
@@ -294,7 +154,6 @@ export function DakoppervlakteApp() {
             error={searchError}
           />
 
-          {/* Rotation controls */}
           <RotationControls
             heading={heading}
             tilt={tilt}
@@ -305,7 +164,6 @@ export function DakoppervlakteApp() {
             onTiltToggle={handleTiltToggle}
           />
 
-          {/* Scrollable main content */}
           <div
             style={{
               padding: '16px 24px',
@@ -313,7 +171,6 @@ export function DakoppervlakteApp() {
               overflowY: 'auto',
             }}
           >
-            {/* Drawing controls */}
             {mode === 'idle' && (
               <Button
                 variant="accent"
@@ -332,7 +189,6 @@ export function DakoppervlakteApp() {
               <DrawingHint pointCount={pointCount} onFinish={finishPolygon} />
             )}
 
-            {/* Polygon list */}
             <PolygonList
               polygons={polygons}
               currentHeading={heading}
@@ -342,13 +198,11 @@ export function DakoppervlakteApp() {
               onToggleExcluded={togglePolygonExcluded}
             />
 
-            {/* Total area */}
             <TotalAreaDisplay
               totalArea={totalArea}
               polygonCount={polygons.length}
             />
 
-            {/* Save / reset */}
             {polygons.length > 0 && mode === 'idle' && (
               <SaveResetControls
                 saved={saved}
@@ -358,11 +212,9 @@ export function DakoppervlakteApp() {
               />
             )}
 
-            {/* Empty state guide */}
             {polygons.length === 0 && mode === 'idle' && <StepGuide />}
           </div>
 
-          {/* History (signed-in only) */}
           <Show when="signed-in">
             <SearchHistory
               history={history}
@@ -372,7 +224,6 @@ export function DakoppervlakteApp() {
           </Show>
         </aside>
 
-        {/* ── Map ── */}
         <MapView mapRef={mapRef} mapLoaded={mapLoaded}>
           <MapOverlayControls
             is3D={is3D}

@@ -4,6 +4,7 @@ sequenceDiagram
     participant User
     participant App as DakoppervlakteApp
     participant AS as AddressSearch
+    participant GEO as useGeocoding
     participant GC as google.maps.Geocoder
     participant Map as google.maps.Map
     participant PD as usePolygonDrawing
@@ -14,25 +15,31 @@ sequenceDiagram
     deactivate AS
 
     activate App
-    App ->> App: setSearching(true), setSearchError('')
+    App ->> GEO: geocodeAndNavigate(address, onComplete)
+    activate GEO
 
-    App ->> GC: geocode({ address: address + ', Belgium', region: 'BE' })
+    GEO ->> GEO: setSearching(true), setSearchError('')
+
+    GEO ->> GC: geocode({ address: address + ', Belgium', region: 'BE' })
     activate GC
 
     alt Geocoding succeeds
-        GC -->> App: results[0].geometry.location
+        GC -->> GEO: results[0].geometry.location
         deactivate GC
 
-        App ->> Map: setCenter(location)
-        App ->> Map: setZoom(20)
-        App ->> App: setSearching(false)
+        GEO ->> Map: setCenter(location)
+        GEO ->> Map: setZoom(20)
+        GEO ->> GEO: setSearching(false)
+        GEO -->> App: onComplete()
+        deactivate GEO
 
         Note over App,PD: 600ms delay before auto-starting drawing mode
         App ->> PD: startDrawing()
 
     else Geocoding fails or no results
-        GC -->> App: error or empty results
-        App ->> App: setSearchError(t('Errors.addressNotFound'))
-        App ->> App: setSearching(false)
+        GC -->> GEO: error or empty results
+        GEO ->> GEO: setSearchError(t('Errors.addressNotFound'))
+        GEO ->> GEO: setSearching(false)
+        deactivate GEO
     end
     deactivate App

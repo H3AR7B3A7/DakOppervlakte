@@ -1,0 +1,52 @@
+classDiagram
+    class PolygonData {
+        +string id
+        +string label
+        +number area
+        +LatLng[] path
+        +number? heading
+        +number? tilt
+    }
+
+    class Search {
+        +number id
+        +string address
+        +number area_m2
+        +string created_at
+        +PolygonData[]? polygons
+    }
+
+    class PolygonEntry {
+        +string id
+        +string label
+        +number area
+        +google.maps.Polygon polygon
+        +number heading
+        +number tilt
+        +boolean excluded
+    }
+
+    class DrawingMode {
+        <<enumeration>>
+        idle
+        drawing
+    }
+
+    class LatLng {
+        +number lat
+        +number lng
+    }
+
+    Search "1" *-- "0..*" PolygonData : polygons (persisted)
+    PolygonData "1" *-- "3..*" LatLng : path
+    PolygonEntry ..> PolygonData : serializes to
+    PolygonEntry "1" --> "1" google_maps_Polygon : live map object
+
+    class google_maps_Polygon {
+        <<external>>
+        +getPath()
+        +setMap()
+    }
+
+    note for PolygonData "Serializable. Stored as JSONB\nin the searches table."
+    note for PolygonEntry "Runtime only. Wraps PolygonData\nwith a live Maps Polygon + excluded flag."

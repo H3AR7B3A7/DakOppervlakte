@@ -113,4 +113,94 @@ describe('useSearchHistory', () => {
       expect(result.current.history).toHaveLength(0)
     })
   })
+
+  it('handles fetch failure gracefully', async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'))
+
+    const { result } = renderHook(() => useSearchHistory(true))
+
+    await waitFor(() => {
+      expect(result.current.history).toEqual([])
+    })
+  })
+
+  it('handles save failure gracefully', async () => {
+    // Initial fetch
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+      text: async () => '[]',
+    } as unknown as Response)
+    // Save fails
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: async () => 'Internal Server Error',
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useSearchHistory(true))
+
+    await act(async () => {
+      await result.current.saveEntry('Meir 1', 100, [])
+    })
+
+    expect(result.current.history).toEqual([])
+  })
+
+  it('skips save when address is empty', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+      text: async () => '[]',
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useSearchHistory(true))
+
+    await act(async () => {
+      await result.current.saveEntry('', 100, [])
+    })
+
+    // Only the initial fetch, no POST
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('skips save when area is 0', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => [],
+      text: async () => '[]',
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useSearchHistory(true))
+
+    await act(async () => {
+      await result.current.saveEntry('Meir 1', 0, [])
+    })
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('handles delete failure gracefully', async () => {
+    const mockHistory = [{ id: 1, address: 'Test', area_m2: 100, created_at: '2024-01-01' }]
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockHistory,
+      text: async () => JSON.stringify(mockHistory),
+    } as unknown as Response)
+    // Delete fails
+    vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'))
+
+    const { result } = renderHook(() => useSearchHistory(true))
+
+    await waitFor(() => {
+      expect(result.current.history).toHaveLength(1)
+    })
+
+    await act(async () => {
+      await result.current.deleteEntry(1)
+    })
+
+    // Original history intact after failed delete
+    expect(result.current.history).toHaveLength(1)
+  })
 })
