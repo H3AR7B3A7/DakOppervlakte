@@ -30,11 +30,13 @@ const makePath = () => {
   }
 }
 
-export const MockPolygon = vi.fn().mockImplementation(({ fillColor } = {}) => {
+export const MockPolygon = vi.fn().mockImplementation(function ({ fillColor }: { fillColor?: string } = {}) {
   const path = makePath()
   const stored: Record<string, unknown> = { fillColor }
+  let currentMap: unknown = null
   return {
-    setMap: vi.fn(),
+    setMap: vi.fn((m: unknown) => { currentMap = m }),
+    getMap: vi.fn(() => currentMap),
     getPath: () => path,
     get: (key: string) => stored[key],
     set: (key: string, val: unknown) => {
@@ -43,21 +45,25 @@ export const MockPolygon = vi.fn().mockImplementation(({ fillColor } = {}) => {
   }
 })
 
-export const MockPolyline = vi.fn().mockImplementation(() => ({
-  setMap: vi.fn(),
-  setPath: vi.fn(),
-}))
+export const MockPolyline = vi.fn().mockImplementation(function () {
+  return {
+    setMap: vi.fn(),
+    setPath: vi.fn(),
+  }
+})
 
-export const MockMarker = vi.fn().mockImplementation(() => {
+export const MockMarker = vi.fn().mockImplementation(function () {
   const et = makeEventTarget()
   return { setMap: vi.fn(), addListener: et.addListener }
 })
 
-export const MockGeocoder = vi.fn().mockImplementation(() => ({
-  geocode: vi.fn(),
-}))
+export const MockGeocoder = vi.fn().mockImplementation(function () {
+  return {
+    geocode: vi.fn(),
+  }
+})
 
-export const MockMap = vi.fn().mockImplementation(() => {
+export const MockMap = vi.fn().mockImplementation(function () {
   const et = makeEventTarget()
   return {
     setCenter: vi.fn(),
@@ -86,7 +92,6 @@ export const MockMap = vi.fn().mockImplementation(() => {
     },
     geometry: {
       spherical: {
-        // Returns 100 m² by default; override per-test with vi.mocked(...).mockReturnValue
         computeArea: vi.fn(() => 100),
       },
     },
