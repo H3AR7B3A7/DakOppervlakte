@@ -51,7 +51,9 @@
     "tiltOff": "🗺 Perspective off (top-down)",
     "tiltZoomHint": "Zoom in further to enable 3D mode.",
     "tiltAriaLabel": "Toggle 3D perspective",
-    "rotationDisabledHint": "Enable 3D mode to rotate the map."
+    "rotationDisabledHint": "Enable 3D mode to rotate the map.",
+    "autoGenerate": "Auto-generate roof selection",
+    "noBuildingFound": "No building found — draw manually"
   },
   "Drawing": {
     "hint": "Click on the map to start drawing",

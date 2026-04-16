@@ -51,7 +51,9 @@
     "tiltOff": "🗺 Perspective désactivée (vue de dessus)",
     "tiltZoomHint": "Zoomez davantage pour activer le mode 3D.",
     "tiltAriaLabel": "Basculer la perspective 3D",
-    "rotationDisabledHint": "Activez le mode 3D pour pouvoir faire pivoter la carte."
+    "rotationDisabledHint": "Activez le mode 3D pour pouvoir faire pivoter la carte.",
+    "autoGenerate": "Générer automatiquement la sélection du toit",
+    "noBuildingFound": "Aucun bâtiment trouvé — dessinez manuellement"
   },
   "Drawing": {
     "hint": "Cliquez sur la carte pour commencer à dessiner",
