@@ -1,0 +1,55 @@
+sequenceDiagram
+    autonumber
+
+    participant User
+    participant App as DakoppervlakteApp
+    participant PD as usePolygonDrawing
+    participant Map as google.maps.Map
+    participant Geo as google.maps.geometry.spherical
+
+    User ->> App: Clicks "Start drawing" button
+    App ->> PD: startDrawing()
+    activate PD
+
+    PD ->> Map: setOptions({ draggableCursor: 'crosshair' })
+    PD ->> Map: addListener('click', handler)
+    PD ->> Map: addListener('dblclick', handler)
+
+    Note over PD: mode = 'drawing', pointCount = 0
+
+    loop User clicks on map (each point)
+        User ->> Map: Click on map
+        Map ->> PD: click event (latLng)
+        PD ->> Map: new google.maps.Marker<br/>(green circle, size 5, white border)
+        PD ->> PD: tempPathRef.push(latLng), pointCount++
+
+        alt First marker and pointCount >= 3
+            Note over PD: First marker gets click listener to finish polygon
+        end
+
+        PD ->> Map: Update preview Polyline<br/>(green, showing current path)
+    end
+
+    alt User double-clicks or clicks first marker (pointCount >= 3)
+        User ->> PD: finishPolygon()
+
+        PD ->> Geo: computeArea(path)
+        activate Geo
+        Geo -->> PD: area (m²)
+        deactivate Geo
+
+        PD ->> PD: area = Math.round(area * 10) / 10
+        PD ->> PD: color = generatePolygonColor()
+
+        PD ->> Map: new google.maps.Polygon<br/>(path, fillColor, editable: true)
+
+        Note over PD: Attaches path edit listeners<br/>to recalculate area on vertex drag
+
+        PD ->> PD: Add PolygonEntry to polygons[]<br/>(id, label, area, heading, tilt, excluded: false)
+
+        PD ->> Map: Clear temp markers + preview line
+        PD ->> Map: setOptions({ draggableCursor: '' })
+
+        Note over PD: mode = 'idle', pointCount = 0
+    end
+    deactivate PD

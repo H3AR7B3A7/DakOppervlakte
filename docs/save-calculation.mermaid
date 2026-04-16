@@ -1,0 +1,60 @@
+sequenceDiagram
+    autonumber
+
+    participant User
+    participant App as DakoppervlakteApp
+    participant SR as SaveResetControls
+    participant UC as useUsageCounter
+    participant CounterAPI as POST /api/counter
+    participant SH as useSearchHistory
+    participant API as POST /api/searches
+    participant Clerk as Clerk auth()
+    participant DB as Neon PostgreSQL
+
+    User ->> SR: Clicks "Save to history"
+    SR ->> App: onSave()
+    activate App
+
+    App ->> UC: increment()
+    activate UC
+    UC ->> CounterAPI: POST /api/counter
+    activate CounterAPI
+    CounterAPI -->> UC: { count }
+    deactivate CounterAPI
+    UC -->> App: void
+    deactivate UC
+
+    App ->> SH: saveEntry(address, totalArea, serializedPolygons)
+    activate SH
+
+    SH ->> API: POST { address, area_m2, polygons }
+    activate API
+
+    API ->> Clerk: auth()
+    activate Clerk
+    Clerk -->> API: { userId }
+    deactivate Clerk
+
+    alt userId is null
+        API -->> SH: 401 { error: 'Unauthorized' }
+    else userId is valid
+        API ->> DB: INSERT INTO searches<br/>(user_id, address, area_m2, polygons)<br/>ON CONFLICT (user_id, address)<br/>DO UPDATE SET area_m2, polygons, created_at
+        activate DB
+        DB -->> API: OK
+        deactivate DB
+
+        API -->> SH: 200 { ok: true }
+    end
+    deactivate API
+
+    SH ->> API: GET /api/searches
+    Note over SH: Refreshes full history after save
+    API -->> SH: Search[]
+
+    SH -->> App: void
+    deactivate SH
+
+    App ->> App: setSaved(true)
+    deactivate App
+
+    Note over SR: UI shows checkmark confirmation

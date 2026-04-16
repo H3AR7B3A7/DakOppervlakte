@@ -1,0 +1,49 @@
+flowchart TD
+    subgraph App ["DakoppervlakteApp (thin orchestrator)"]
+        LOCAL["Local state: saved"]
+        CB["Callbacks: handleSearch, handleRestore,<br/>handleSave, handleReset, handleStartDrawing"]
+    end
+
+    subgraph Hooks ["Hook Composition"]
+        GM["useGoogleMaps<br/>─────────────<br/>mapRef, mapInstanceRef,<br/>geocoderRef, mapLoaded"]
+
+        MO["useMapOrientation<br/>─────────────<br/>heading, setHeading, tilt, zoom,<br/>canEnable3D, is3D,<br/>handleRotate, handleTiltToggle"]
+
+        GEO["useGeocoding<br/>─────────────<br/>address, setAddress, searching,<br/>searchError, setSearchError,<br/>geocodeAndNavigate()"]
+
+        PD["usePolygonDrawing<br/>─────────────<br/>mode, pointCount, polygons,<br/>startDrawing, finishPolygon,<br/>deletePolygon, renamePolygon,<br/>togglePolygonExcluded,<br/>resetAll, restorePolygons,<br/>serializedPolygons"]
+
+        UC["useUsageCounter<br/>─────────────<br/>count, increment"]
+
+        SH["useSearchHistory<br/>─────────────<br/>history, saveEntry,<br/>deleteEntry"]
+    end
+
+    subgraph Components ["Rendered Components"]
+        HDR["Header"]
+        SIDEBAR["Sidebar: AddressSearch,<br/>RotationControls, PolygonList,<br/>TotalAreaDisplay, SaveResetControls,<br/>DrawingHint, StepGuide,<br/>SearchHistory"]
+        MAP["Map: MapView,<br/>MapOverlayControls,<br/>DrawingOverlay"]
+    end
+
+    %% Hook dependency chain
+    GM -->|mapInstanceRef, mapLoaded| MO
+    GM -->|mapInstanceRef, geocoderRef| GEO
+    GM -->|mapInstanceRef| PD
+    MO -->|heading, tilt| PD
+
+    %% App wires hooks to components
+    App --> GM & MO & GEO & PD & UC & SH
+    UC -->|usageCount| HDR
+    MO -->|heading, tilt, is3D, canEnable3D| SIDEBAR
+    MO -->|is3D, canEnable3D, handleRotate, handleTiltToggle| MAP
+    GEO -->|address, searching, searchError| SIDEBAR
+    PD -->|mode, pointCount, polygons| SIDEBAR
+    PD -->|mode, pointCount| MAP
+    SH -->|history| SIDEBAR
+
+    %% External dependencies
+    GM -.->|loads| GMAP["Google Maps API"]
+    MO -.->|idle, zoom_changed listeners| GMAP
+    GEO -.->|geocode()| GMAP
+    PD -.->|click listeners, Polygon, Marker| GMAP
+    UC -.->|fetch| API_CTR["/api/counter"]
+    SH -.->|fetch| API_SCH["/api/searches"]

@@ -14,7 +14,7 @@ Project richtlijnen voor AI-assistenten. Lees dit volledig voordat je code schri
 
 | Layer | Where | Rule |
 |---|---|---|
-| Pages | `app/page.tsx` | Shell only. No logic, no state. |
+| Pages | `app/[locale]/page.tsx` | Shell only. No logic, no state. |
 | Smart components | `components/DakoppervlakteApp.tsx` | State lives here via hooks. No raw style objects. |
 | Dumb components | `components/sidebar/`, `components/map/` | Props-only. No API calls, no global state. |
 | Pure UI | `components/ui/` | Stateless. Primitives + children only. |
@@ -23,8 +23,11 @@ Project richtlijnen voor AI-assistenten. Lees dit volledig voordat je code schri
 
 ## Key files
 
-- `src/components/DakoppervlakteApp.tsx` — main smart component, all orchestration
+- `src/components/DakoppervlakteApp.tsx` — thin orchestrator, wires 6 hooks + Header
+- `src/components/Header.tsx` — logo, usage count, Clerk auth buttons
 - `src/hooks/useGoogleMaps.ts` — Google Maps script + instance lifecycle
+- `src/hooks/useMapOrientation.ts` — heading/tilt/zoom state, bidirectional map sync
+- `src/hooks/useGeocoding.ts` — address lookup, geocoding API, error state
 - `src/hooks/usePolygonDrawing.ts` — drawing FSM (idle → drawing → finish)
 - `src/hooks/useUsageCounter.ts` — global counter fetch + increment
 - `src/hooks/useSearchHistory.ts` — user history fetch + persist
