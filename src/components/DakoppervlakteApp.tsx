@@ -52,7 +52,7 @@ export function DakoppervlakteApp() {
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
 
   const [saved, setSaved] = useState(false)
-  const [autoGenerate, setAutoGenerate] = useState(false)
+  const [autoGenerate, setAutoGenerate] = useState(true)
   const [autoGenerateError, setAutoGenerateError] = useState('')
 
   const totalArea = polygons.reduce((sum, p) => (p.excluded ? sum : sum + p.area), 0)
