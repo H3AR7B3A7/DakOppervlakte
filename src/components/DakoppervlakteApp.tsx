@@ -59,6 +59,8 @@ export function DakoppervlakteApp() {
 
   const handleSearch = useCallback(() => {
     setAutoGenerateError('')
+    setSaved(false)
+    if (autoGenerate) resetAll()
     geocodeAndNavigate(address, () => {
       if (!autoGenerate) {
         setTimeout(() => startDrawing(), 600)
@@ -89,7 +91,7 @@ export function DakoppervlakteApp() {
           setTimeout(() => startDrawing(), 600)
         })
     })
-  }, [address, autoGenerate, geocodeAndNavigate, startDrawing, addPolygonFromPath, mapInstanceRef, t])
+  }, [address, autoGenerate, geocodeAndNavigate, startDrawing, addPolygonFromPath, mapInstanceRef, resetAll, t])
 
   const handleRestore = useCallback((restored: Search) => {
     setAddress(restored.address)

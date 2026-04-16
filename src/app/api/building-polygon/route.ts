@@ -93,8 +93,12 @@ export async function GET(request: Request) {
 
   try {
     for (const source of WFS_SOURCES) {
-      const features = await queryWfs(source.url, source.typeName, latNum, lngNum)
-      const match = pickClosestBuilding(features, latNum, lngNum)
+      const allFeatures = await queryWfs(source.url, source.typeName, latNum, lngNum)
+      const features = allFeatures.filter((f) => {
+        const type = f.properties?.TYPE ?? f.properties?.type
+        return type === undefined || type === 1
+      })
+      const match = pickClosestBuilding(features.length > 0 ? features : allFeatures, latNum, lngNum)
       if (match) {
         return NextResponse.json({
           type: 'Feature',
