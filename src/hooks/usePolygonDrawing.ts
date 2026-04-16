@@ -13,7 +13,7 @@ interface UsePolygonDrawingOptions {
 export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt }: UsePolygonDrawingOptions) {
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const dblClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
-  const tempMarkersRef = useRef<google.maps.Marker[]>([])
+  const tempMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
   const tempPathRef = useRef<google.maps.LatLng[]>([])
   const previewPolyRef = useRef<google.maps.Polyline | null>(null)
   const polygonsRef = useRef<PolygonEntry[]>([])
@@ -47,7 +47,7 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
   })
 
   const clearDrawingState = useCallback(() => {
-    tempMarkersRef.current.forEach((m) => m.setMap(null))
+    tempMarkersRef.current.forEach((m) => { m.map = null })
     tempMarkersRef.current = []
     tempPathRef.current = []
     if (previewPolyRef.current) {
@@ -192,18 +192,14 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
       tempPathRef.current.push(pt)
       setPointCount(tempPathRef.current.length)
 
-      const marker = new google.maps.Marker({
+      const dot = document.createElement('div')
+      dot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:#6ee7b7;border:1.5px solid #fff;box-sizing:border-box'
+
+      const marker = new google.maps.marker.AdvancedMarkerElement({
         position: pt,
         map,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 5,
-          fillColor: '#6ee7b7',
-          fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 1.5,
-        },
-        clickable: true,
+        content: dot,
+        gmpClickable: true,
       })
 
       if (tempPathRef.current.length === 1) {

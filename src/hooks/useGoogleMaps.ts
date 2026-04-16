@@ -21,7 +21,7 @@ export function useGoogleMaps() {
     }
     const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
     const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=geometry&loading=async&callback=initMap`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=geometry,marker&loading=async&callback=initMap`
     script.async = true
     script.defer = true
     ;(window as unknown as { initMap: () => void }).initMap = () => setMapLoaded(true)
@@ -41,6 +41,7 @@ export function useGoogleMaps() {
       gestureHandling: 'greedy',
       tilt: 0,
       heading: 0,
+      mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID ?? 'DEMO_MAP_ID',
     })
 
     geocoderRef.current = new google.maps.Geocoder()

@@ -48,9 +48,9 @@ export const MockPolyline = vi.fn().mockImplementation(() => ({
   setPath: vi.fn(),
 }))
 
-export const MockMarker = vi.fn().mockImplementation(() => {
+export const MockAdvancedMarkerElement = vi.fn().mockImplementation(() => {
   const et = makeEventTarget()
-  return { setMap: vi.fn(), addListener: et.addListener }
+  return { map: null, addListener: et.addListener }
 })
 
 export const MockGeocoder = vi.fn().mockImplementation(() => ({
@@ -77,9 +77,10 @@ export const MockMap = vi.fn().mockImplementation(() => {
     Map: MockMap,
     Polygon: MockPolygon,
     Polyline: MockPolyline,
-    Marker: MockMarker,
     Geocoder: MockGeocoder,
-    SymbolPath: { CIRCLE: 0 },
+    marker: {
+      AdvancedMarkerElement: MockAdvancedMarkerElement,
+    },
     event: {
       removeListener: vi.fn(),
     },
