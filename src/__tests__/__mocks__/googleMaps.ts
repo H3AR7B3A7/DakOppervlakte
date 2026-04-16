@@ -67,6 +67,7 @@ export const MockMap = vi.fn().mockImplementation(() => {
     setTilt: vi.fn(),
     getHeading: vi.fn(() => 0),
     getTilt: vi.fn(() => 0),
+    getZoom: vi.fn(() => 8),
     addListener: et.addListener,
     _trigger: et._trigger,
   }
