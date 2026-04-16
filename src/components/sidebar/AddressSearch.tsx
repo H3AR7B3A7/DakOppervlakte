@@ -10,6 +10,8 @@ interface AddressSearchProps {
   onSearch: () => void
   searching: boolean
   error: string
+  autoGenerate: boolean
+  onAutoGenerateChange: (value: boolean) => void
 }
 
 export function AddressSearch({
@@ -18,6 +20,8 @@ export function AddressSearch({
   onSearch,
   searching,
   error,
+  autoGenerate,
+  onAutoGenerateChange,
 }: AddressSearchProps) {
   const t = useTranslations('Sidebar')
 
@@ -52,6 +56,25 @@ export function AddressSearch({
           {searching ? '…' : '→'}
         </Button>
       </div>
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginTop: 10,
+          fontSize: 13,
+          color: 'var(--text-muted)',
+          cursor: 'pointer',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={autoGenerate}
+          onChange={(e) => onAutoGenerateChange(e.target.checked)}
+          style={{ accentColor: 'var(--accent)' }}
+        />
+        {t('autoGenerate')}
+      </label>
     </div>
   )
 }

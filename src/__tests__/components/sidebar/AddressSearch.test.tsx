@@ -9,6 +9,8 @@ function setup(overrides: Partial<React.ComponentProps<typeof AddressSearch>> = 
     onSearch: vi.fn(),
     searching: false,
     error: '',
+    autoGenerate: false,
+    onAutoGenerateChange: vi.fn(),
     ...overrides,
   }
   render(<AddressSearch {...props} />)
@@ -60,5 +62,24 @@ describe('User searches for an address', () => {
   it('shows no error message in the happy path', () => {
     setup()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  describe('Auto-generate checkbox', () => {
+    it('renders the auto-generate checkbox', () => {
+      setup()
+      expect(screen.getByRole('checkbox', { name: /automatisch/i })).toBeInTheDocument()
+    })
+
+    it('reflects the autoGenerate prop value', () => {
+      setup({ autoGenerate: true })
+      expect(screen.getByRole('checkbox', { name: /automatisch/i })).toBeChecked()
+    })
+
+    it('calls onAutoGenerateChange when toggled', async () => {
+      const onAutoGenerateChange = vi.fn()
+      setup({ onAutoGenerateChange })
+      await userEvent.click(screen.getByRole('checkbox', { name: /automatisch/i }))
+      expect(onAutoGenerateChange).toHaveBeenCalledWith(true)
+    })
   })
 })
