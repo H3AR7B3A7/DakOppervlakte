@@ -36,7 +36,7 @@ async function queryWfs(
   lat: number,
   lng: number
 ): Promise<GeoJsonFeature[]> {
-  const bbox = `${lat - BBOX_OFFSET},${lng - BBOX_OFFSET},${lat + BBOX_OFFSET},${lng + BBOX_OFFSET},EPSG:4326`
+  const bbox = `${lng - BBOX_OFFSET},${lat - BBOX_OFFSET},${lng + BBOX_OFFSET},${lat + BBOX_OFFSET},EPSG:4326`
   const params = new URLSearchParams({
     service: 'WFS',
     version: '2.0.0',
