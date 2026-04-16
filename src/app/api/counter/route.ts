@@ -23,19 +23,17 @@ export async function POST() {
     let result = await sql`
       UPDATE usage_counter SET count = count + 1 WHERE id = 1 RETURNING count
     `
-    
+
     if (result.length === 0) {
-      // Counter doesn't exist? Try to init and retry once
       await initDb(sql)
       result = await sql`
         UPDATE usage_counter SET count = count + 1 WHERE id = 1 RETURNING count
       `
     }
-    
+
     return NextResponse.json({ count: result[0].count })
   } catch (e) {
     console.error('Counter POST error:', e)
-    // If it's a table-not-found error, try to init and retry
     if (e instanceof Error && e.message?.includes('does not exist')) {
       try {
         const sql = getDb()
@@ -45,10 +43,10 @@ export async function POST() {
         `
         return NextResponse.json({ count: result[0].count })
       } catch {
-        return NextResponse.json({ count: null, error: 'Database init failed' }, { status: 500 })
+        return NextResponse.json({ count: null, debug: 'init-retry-failed' }, { status: 500 })
       }
     }
-    return NextResponse.json({ count: null, error: e instanceof Error ? e.message : String(e) }, { status: 500 })
+    return NextResponse.json({ count: null, debug: e instanceof Error ? e.message : String(e) }, { status: 500 })
   }
 }
 
@@ -59,6 +57,6 @@ export async function GET() {
     return NextResponse.json({ count: result[0]?.count ?? 0 })
   } catch (e) {
     if (e instanceof Error && e.message?.includes('does not exist')) return NextResponse.json({ count: 0 })
-    return NextResponse.json({ count: 0, error: e instanceof Error ? e.message : String(e) })
+    return NextResponse.json({ count: 0, debug: e instanceof Error ? e.message : String(e) })
   }
 }

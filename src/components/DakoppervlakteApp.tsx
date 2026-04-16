@@ -48,8 +48,8 @@ export function DakoppervlakteApp() {
     deletePolygon, renamePolygon, togglePolygonExcluded,
     resetAll, restorePolygons, serializedPolygons,
   } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt })
-  const { count: usageCount, increment } = useUsageCounter()
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
+  const { count: usageCount, increment: incrementSearchCount } = useUsageCounter()
 
   const [saved, setSaved] = useState(false)
   const [autoGenerate, setAutoGenerate] = useState(true)
@@ -62,6 +62,7 @@ export function DakoppervlakteApp() {
     setSaved(false)
     if (autoGenerate) resetAll()
     geocodeAndNavigate(address, () => {
+      incrementSearchCount(address)
       if (!autoGenerate) {
         setTimeout(() => startDrawing(), 600)
         return
@@ -91,7 +92,7 @@ export function DakoppervlakteApp() {
           setTimeout(() => startDrawing(), 600)
         })
     })
-  }, [address, autoGenerate, geocodeAndNavigate, startDrawing, addPolygonFromPath, mapInstanceRef, resetAll, t])
+  }, [address, autoGenerate, geocodeAndNavigate, incrementSearchCount, startDrawing, addPolygonFromPath, mapInstanceRef, resetAll, t])
 
   const handleRestore = useCallback((restored: Search) => {
     setAddress(restored.address)
@@ -106,10 +107,9 @@ export function DakoppervlakteApp() {
   }, [geocodeAndNavigate, resetAll, restorePolygons, setAddress, setSearchError])
 
   const handleSave = useCallback(async () => {
-    await increment()
     await saveEntry(address, totalArea, serializedPolygons)
     setSaved(true)
-  }, [address, increment, saveEntry, totalArea, serializedPolygons])
+  }, [address, saveEntry, totalArea, serializedPolygons])
 
   const handleReset = useCallback(() => {
     resetAll()

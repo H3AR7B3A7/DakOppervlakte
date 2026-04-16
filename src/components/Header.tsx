@@ -30,9 +30,9 @@ export function Header({ usageCount }: HeaderProps) {
       <Logo />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {usageCount !== null && (
+        {usageCount !== null && usageCount > 0 && (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            {t('Sidebar.calculationsCount', { count: usageCount })}
+            {t('Sidebar.searchesCount', { count: usageCount })}
           </span>
         )}
 

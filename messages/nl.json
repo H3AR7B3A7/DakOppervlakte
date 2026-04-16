@@ -4,7 +4,7 @@
     "description": "Bereken gratis de oppervlakte van elk dak in België op adres."
   },
   "Header": {
-    "calculations": "berekeningen",
+    "searches": "zoekopdrachten",
     "signIn": "Aanmelden",
     "signUp": "Registreren"
   },
@@ -22,7 +22,7 @@
     "addPlane": "Nog een vlak toevoegen",
     "totalArea": "Totale oppervlakte",
     "unit": "m²",
-    "calculationsCount": "{count, plural, =0 {geen berekeningen} one {1 berekening} other {# berekeningen}}",
+    "searchesCount": "{count, plural, =0 {geen zoekopdrachten} one {1 zoekopdracht} other {# zoekopdrachten}}",
     "saveToHistory": "💾 Opslaan in geschiedenis",
     "updateCounter": "📊 Teller bijwerken",
     "clearAll": "Alles wissen",
