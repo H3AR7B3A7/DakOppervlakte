@@ -52,7 +52,7 @@ describe('useGeocoding', () => {
 
     it('sets searching to true during geocode and false after', async () => {
       const { mapInstanceRef, geocoderRef, geocoder } = setup()
-      geocoder.geocode.mockImplementation((_req: unknown, cb: Function) => {
+      geocoder.geocode.mockImplementation((_req: unknown, cb: (...args: unknown[]) => void) => {
         cb([{ geometry: { location: { lat: () => 51, lng: () => 4 } } }], 'OK')
       })
 
@@ -68,7 +68,7 @@ describe('useGeocoding', () => {
     it('centers and zooms the map on a successful result', () => {
       const { map, mapInstanceRef, geocoderRef, geocoder } = setup()
       const location = { lat: () => 51.2, lng: () => 4.4 }
-      geocoder.geocode.mockImplementation((_req: unknown, cb: Function) => {
+      geocoder.geocode.mockImplementation((_req: unknown, cb: (...args: unknown[]) => void) => {
         cb([{ geometry: { location } }], 'OK')
       })
 
@@ -84,7 +84,7 @@ describe('useGeocoding', () => {
 
     it('sets an error when the address is not found', () => {
       const { mapInstanceRef, geocoderRef, geocoder } = setup()
-      geocoder.geocode.mockImplementation((_req: unknown, cb: Function) => {
+      geocoder.geocode.mockImplementation((_req: unknown, cb: (...args: unknown[]) => void) => {
         cb(null, 'ZERO_RESULTS')
       })
 
@@ -111,7 +111,7 @@ describe('useGeocoding', () => {
 
     it('calls onComplete callback after successful navigation', () => {
       const { mapInstanceRef, geocoderRef, geocoder } = setup()
-      geocoder.geocode.mockImplementation((_req: unknown, cb: Function) => {
+      geocoder.geocode.mockImplementation((_req: unknown, cb: (...args: unknown[]) => void) => {
         cb([{ geometry: { location: { lat: () => 51, lng: () => 4 } } }], 'OK')
       })
       const onComplete = vi.fn()
@@ -127,7 +127,7 @@ describe('useGeocoding', () => {
 
     it('does not call onComplete when geocode fails', () => {
       const { mapInstanceRef, geocoderRef, geocoder } = setup()
-      geocoder.geocode.mockImplementation((_req: unknown, cb: Function) => {
+      geocoder.geocode.mockImplementation((_req: unknown, cb: (...args: unknown[]) => void) => {
         cb(null, 'ZERO_RESULTS')
       })
       const onComplete = vi.fn()
@@ -156,7 +156,7 @@ describe('useGeocoding', () => {
 
     it('appends Belgium suffix to geocode request', () => {
       const { mapInstanceRef, geocoderRef, geocoder } = setup()
-      geocoder.geocode.mockImplementation((_req: unknown, cb: Function) => {
+      geocoder.geocode.mockImplementation((_req: unknown, cb: (...args: unknown[]) => void) => {
         cb([{ geometry: { location: { lat: () => 51, lng: () => 4 } } }], 'OK')
       })
 

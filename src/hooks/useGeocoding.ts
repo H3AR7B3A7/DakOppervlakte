@@ -25,10 +25,7 @@ export function useGeocoding({ mapInstanceRef, geocoderRef }: UseGeocodingOption
 
       geocoder.geocode(
         { address: addr + ', Belgium', region: 'BE' },
-        (
-          results: google.maps.GeocoderResult[] | null,
-          status: google.maps.GeocoderStatus
-        ) => {
+        (results, status) => {
           setSearching(false)
           if (status !== 'OK' || !results?.[0]) {
             setSearchError(t('Errors.addressNotFound'))
