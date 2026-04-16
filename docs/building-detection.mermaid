@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+
+    participant Client
+    participant API as GET /api/building-polygon
+    participant OSM as OpenStreetMap Nominatim
+
+    Client ->> API: GET /api/building-polygon?lat=51.1&lng=4.4
+    activate API
+
+    API ->> API: Validate lat, lng query params
+
+    alt Missing lat or lng
+        API -->> Client: 400 { error: 'Missing lat/lng' }
+    else Valid coordinates
+        API ->> OSM: GET /reverse?format=jsonv2<br/>&lat=51.1&lon=4.4<br/>&polygon_geojson=1&zoom=18
+        activate OSM
+
+        Note over API,OSM: User-Agent: 'DakOppervlakte/1.0'
+
+        OSM -->> API: { geojson: { type, coordinates } }
+        deactivate OSM
+
+        alt GeoJSON type is Polygon
+            API -->> Client: 200 { type: 'Feature',<br/>geometry: { type: 'Polygon', coordinates } }
+
+        else GeoJSON type is Point (no building outline)
+            API ->> API: Generate 10x10m fallback square<br/>(±5-6m offset from center)
+            API -->> Client: 200 { type: 'Feature',<br/>geometry: { type: 'Polygon', coordinates: [square] } }
+
+        else No geojson in response
+            API -->> Client: 200 { features: [],<br/>debug: { lat, lng, msg: 'No building found...' } }
+        end
+    end
+    deactivate API

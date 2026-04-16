@@ -1,0 +1,56 @@
+[
+  {
+    "id": 42,
+    "address": "Grote Markt 1, Antwerpen",
+    "area_m2": 245.7,
+    "polygons": [
+      {
+        "id": "poly-abc123",
+        "label": "Hoofddak",
+        "area": 180.3,
+        "path": [
+          { "lat": 51.2211, "lng": 4.3997 },
+          { "lat": 51.2212, "lng": 4.4001 },
+          { "lat": 51.2210, "lng": 4.4002 },
+          { "lat": 51.2209, "lng": 4.3998 }
+        ],
+        "heading": 0,
+        "tilt": 0
+      },
+      {
+        "id": "poly-def456",
+        "label": "Uitbouw",
+        "area": 65.4,
+        "path": [
+          { "lat": 51.2209, "lng": 4.3999 },
+          { "lat": 51.2210, "lng": 4.4001 },
+          { "lat": 51.2209, "lng": 4.4002 }
+        ],
+        "heading": 0,
+        "tilt": 0
+      }
+    ],
+    "created_at": "2026-04-15T10:30:00.000Z"
+  },
+  {
+    "id": 38,
+    "address": "Meir 50, Antwerpen",
+    "area_m2": 312.1,
+    "polygons": [
+      {
+        "id": "poly-ghi789",
+        "label": "Polygon 1",
+        "area": 312.1,
+        "path": [
+          { "lat": 51.2177, "lng": 4.4104 },
+          { "lat": 51.2178, "lng": 4.4108 },
+          { "lat": 51.2176, "lng": 4.4109 },
+          { "lat": 51.2175, "lng": 4.4105 }
+        ],
+        "heading": 90,
+        "tilt": 45
+      }
+    ],
+    "created_at": "2026-04-14T14:15:00.000Z"
+  }
+]

@@ -1,0 +1,42 @@
+sequenceDiagram
+    autonumber
+
+    participant User
+    participant HI as SearchHistory
+    participant App as DakoppervlakteApp
+    participant PD as usePolygonDrawing
+    participant GC as google.maps.Geocoder
+    participant Map as google.maps.Map
+
+    User ->> HI: Clicks history entry
+    HI ->> App: onRestore(search)
+    activate App
+
+    App ->> App: setAddress(search.address)
+    App ->> PD: resetAll()
+
+    Note over PD: Clears all polygons, markers,<br/>preview line from map
+
+    App ->> GC: geocode({ address: search.address + ', Belgium' })
+    activate GC
+    GC -->> App: results[0].geometry.location
+    deactivate GC
+
+    App ->> Map: setCenter(location)
+    App ->> Map: setZoom(20)
+
+    Note over App,PD: 500ms delay for map to settle
+
+    App ->> PD: restorePolygons(search.polygons)
+    activate PD
+
+    loop For each PolygonData in search.polygons
+        PD ->> Map: new google.maps.Polygon<br/>(path from saved data, editable: true)
+
+        Note over PD: Attaches path edit listeners<br/>for live area recalculation
+
+        PD ->> PD: Add PolygonEntry with saved<br/>id, label, area, heading, tilt
+    end
+
+    deactivate PD
+    deactivate App

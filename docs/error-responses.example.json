@@ -1,0 +1,54 @@
+{
+  "/api/searches": {
+    "401_unauthorized_GET": {
+      "error": "Unauthorized"
+    },
+    "401_unauthorized_POST": {
+      "error": "Unauthorized"
+    },
+    "401_unauthorized_DELETE": {
+      "error": "Unauthorized"
+    },
+    "400_missing_id_DELETE": {
+      "error": "Missing ID"
+    }
+  },
+  "/api/counter": {
+    "500_database_init_failed_POST": {
+      "count": null,
+      "error": "Database init failed"
+    },
+    "500_generic_error_POST": {
+      "count": null,
+      "error": "relation \"usage_counter\" does not exist"
+    },
+    "fallback_GET_on_table_missing": {
+      "count": 0
+    },
+    "fallback_GET_on_generic_error": {
+      "count": 0,
+      "error": "connection timeout"
+    }
+  },
+  "/api/building-polygon": {
+    "400_missing_params": {
+      "error": "Missing lat/lng"
+    },
+    "no_building_found": {
+      "features": [],
+      "debug": {
+        "lat": "51.1",
+        "lng": "4.4",
+        "msg": "No building found via Nominatim"
+      }
+    }
+  },
+  "/api/init": {
+    "500_database_url_not_set": {
+      "error": "DATABASE_URL not set"
+    },
+    "500_generic_error": {
+      "error": "connection refused"
+    }
+  }
+}

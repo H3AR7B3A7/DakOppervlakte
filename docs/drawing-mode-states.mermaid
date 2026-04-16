@@ -1,0 +1,28 @@
+stateDiagram-v2
+    [*] --> idle
+
+    idle --> drawing : startDrawing()
+    note right of idle
+        No click listeners on map.
+        Cursor is default.
+        User can browse the map freely.
+    end note
+
+    drawing --> idle : finishPolygon() [pointCount >= 3]
+    drawing --> idle : resetAll()
+
+    note right of drawing
+        Cursor set to crosshair.
+        Click listener adds markers.
+        Double-click or first-marker click
+        triggers finishPolygon().
+    end note
+
+    state drawing {
+        [*] --> placing_points
+        placing_points --> placing_points : map click (add marker, pointCount++)
+        placing_points --> can_finish : pointCount >= 3
+
+        can_finish --> can_finish : map click (add more markers)
+        can_finish --> [*] : double-click or click first marker
+    }
