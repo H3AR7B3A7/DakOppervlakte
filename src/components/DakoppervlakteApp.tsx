@@ -44,6 +44,7 @@ export function DakoppervlakteApp() {
   } = useGeocoding({ mapInstanceRef, geocoderRef })
   const {
     mode, pointCount, polygons, startDrawing, finishPolygon,
+    addPolygonFromPath,
     deletePolygon, renamePolygon, togglePolygonExcluded,
     resetAll, restorePolygons, serializedPolygons,
   } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt })
@@ -51,14 +52,44 @@ export function DakoppervlakteApp() {
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
 
   const [saved, setSaved] = useState(false)
+  const [autoGenerate, setAutoGenerate] = useState(false)
+  const [autoGenerateError, setAutoGenerateError] = useState('')
 
   const totalArea = polygons.reduce((sum, p) => (p.excluded ? sum : sum + p.area), 0)
 
   const handleSearch = useCallback(() => {
+    setAutoGenerateError('')
     geocodeAndNavigate(address, () => {
-      setTimeout(() => startDrawing(), 600)
+      if (!autoGenerate) {
+        setTimeout(() => startDrawing(), 600)
+        return
+      }
+      const map = mapInstanceRef.current
+      if (!map) return
+      const center = map.getCenter()
+      if (!center) return
+      const lat = center.lat()
+      const lng = center.lng()
+      fetch(`/api/building-polygon?lat=${lat}&lng=${lng}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.type === 'Feature' && data.geometry?.coordinates) {
+            const coords = data.geometry.coordinates[0] as [number, number][]
+            const path = coords.map(([lng, lat]) => ({ lat, lng }))
+            addPolygonFromPath(path)
+          } else {
+            setAutoGenerateError(t('Sidebar.noBuildingFound'))
+            setTimeout(() => setAutoGenerateError(''), 5000)
+            setTimeout(() => startDrawing(), 600)
+          }
+        })
+        .catch(() => {
+          setAutoGenerateError(t('Sidebar.noBuildingFound'))
+          setTimeout(() => setAutoGenerateError(''), 5000)
+          setTimeout(() => startDrawing(), 600)
+        })
     })
-  }, [address, geocodeAndNavigate, startDrawing])
+  }, [address, autoGenerate, geocodeAndNavigate, startDrawing, addPolygonFromPath, mapInstanceRef, t])
 
   const handleRestore = useCallback((restored: Search) => {
     setAddress(restored.address)
@@ -151,7 +182,9 @@ export function DakoppervlakteApp() {
             onChange={setAddress}
             onSearch={handleSearch}
             searching={searching}
-            error={searchError}
+            error={searchError || autoGenerateError}
+            autoGenerate={autoGenerate}
+            onAutoGenerateChange={setAutoGenerate}
           />
 
           <RotationControls
