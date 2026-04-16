@@ -170,6 +170,54 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     polygon.getPath().addListener('insert_at', updateArea)
   }, [clearDrawingState, mapInstanceRef, currentHeading, currentTilt])
 
+  const addPolygonFromPath = useCallback(
+    (path: { lat: number; lng: number }[]) => {
+      const map = mapInstanceRef.current
+      if (!map || path.length < 3) return
+
+      const color = generatePolygonColor()
+      const polygon = new google.maps.Polygon({
+        paths: path,
+        fillColor: color,
+        fillOpacity: 0.25,
+        strokeColor: color,
+        strokeWeight: 2,
+        editable: true,
+        draggable: false,
+        map,
+      })
+
+      const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath())
+      const area = Math.round(areaSqM * 10) / 10
+      const id = crypto.randomUUID()
+
+      const entry: PolygonEntry = {
+        id,
+        label: 'Auto',
+        area,
+        polygon,
+        heading: currentHeading,
+        tilt: currentTilt,
+        excluded: false,
+      }
+      polygonsRef.current = [...polygonsRef.current, entry]
+      syncPolygons()
+
+      const updateArea = () => {
+        const pts: google.maps.LatLng[] = []
+        polygon.getPath().forEach((p) => pts.push(p))
+        const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
+        polygonsRef.current = polygonsRef.current.map((e) =>
+          e.id === id ? { ...e, area: newArea } : e
+        )
+        syncPolygons()
+      }
+      polygon.getPath().addListener('set_at', updateArea)
+      polygon.getPath().addListener('insert_at', updateArea)
+    },
+    [mapInstanceRef, currentHeading, currentTilt]
+  )
+
   const startDrawing = useCallback(() => {
     const map = mapInstanceRef.current
     if (!map) return
@@ -249,6 +297,7 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     polygons,
     startDrawing,
     finishPolygon,
+    addPolygonFromPath,
     deletePolygon,
     renamePolygon,
     togglePolygonExcluded,

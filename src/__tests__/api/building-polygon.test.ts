@@ -80,7 +80,8 @@ describe('building-polygon API', () => {
     }
     mockFetch.mockResolvedValueOnce(makeWfsResponse([farBuilding, nearBuilding]))
 
-    const res = await GET(makeRequest('51.0004', '3.0004'))
+    // Point is just west of nearBuilding (outside polygon) but within 50m of its centroid
+    const res = await GET(makeRequest('51.0005', '2.9999'))
     const body = await res.json()
 
     expect(body.geometry.coordinates[0][0][0]).toBe(3.0)

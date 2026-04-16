@@ -344,4 +344,52 @@ describe('User draws and manages roof polygons', () => {
       expect(serialized[0]).toHaveProperty('tilt', 0)
     })
   })
+
+  describe('Auto-generated polygon from external path', () => {
+    it('adds a polygon from a coordinate path without entering drawing mode', () => {
+      const { result } = setup()
+
+      act(() => {
+        result.current.addPolygonFromPath([
+          { lat: 51.0, lng: 3.0 },
+          { lat: 51.001, lng: 3.0 },
+          { lat: 51.001, lng: 3.001 },
+          { lat: 51.0, lng: 3.001 },
+        ])
+      })
+
+      expect(result.current.mode).toBe('idle')
+      expect(result.current.polygons).toHaveLength(1)
+      expect(result.current.polygons[0].label).toBe('Auto')
+    })
+
+    it('calculates the area of the auto-generated polygon', () => {
+      const { result } = setup()
+
+      act(() => {
+        result.current.addPolygonFromPath([
+          { lat: 51.0, lng: 3.0 },
+          { lat: 51.001, lng: 3.0 },
+          { lat: 51.001, lng: 3.001 },
+          { lat: 51.0, lng: 3.001 },
+        ])
+      })
+
+      expect(google.maps.geometry.spherical.computeArea).toHaveBeenCalled()
+      expect(result.current.polygons[0].area).toBe(100)
+    })
+
+    it('does nothing with fewer than 3 points', () => {
+      const { result } = setup()
+
+      act(() => {
+        result.current.addPolygonFromPath([
+          { lat: 51.0, lng: 3.0 },
+          { lat: 51.001, lng: 3.0 },
+        ])
+      })
+
+      expect(result.current.polygons).toHaveLength(0)
+    })
+  })
 })
