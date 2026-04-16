@@ -16,6 +16,12 @@ export default defineConfig({
       exclude: [
         'src/**/*.d.ts',
         'src/app/api/**',
+        'src/app/[locale]/layout.tsx',
+        'src/app/[locale]/page.tsx',
+        'src/proxy.ts',
+        'src/i18n/**',
+        'src/lib/db.ts',
+        'src/lib/types.ts',
         'src/lib/init-db.ts',
         'src/__tests__/**',
       ],
