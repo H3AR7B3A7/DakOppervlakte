@@ -127,6 +127,7 @@ export function DakoppervlakteApp() {
     setSearchError('')
     setSaved(false)
     setSearchFormCollapsed(false)
+    setDrawerOpen(false)
   }, [resetAll, setAddress, setSearchError])
 
   const handleStartDrawing = useCallback(() => {

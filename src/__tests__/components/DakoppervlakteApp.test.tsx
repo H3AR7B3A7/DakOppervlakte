@@ -102,6 +102,12 @@ describe('User opens the app for the first time', () => {
 
   it('Given the app loads, when user types an address and searches, then the map navigates', async () => {
     render(<DakoppervlakteApp />)
+    const geocoder = MockGeocoder.mock.results[MockGeocoder.mock.results.length - 1].value
+    geocoder.geocode.mockImplementation(
+      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
+        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
+      },
+    )
     await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1, Antwerpen')
     await user.click(screen.getByRole('button', { name: /zoeken/i }))
     await waitFor(() => {
@@ -294,6 +300,13 @@ describe('Responsive layout — collapsible search form', () => {
     render(<DakoppervlakteApp />)
     await waitFor(() => expect(MockGeocoder).toHaveBeenCalled())
 
+    const geocoder = MockGeocoder.mock.results[MockGeocoder.mock.results.length - 1].value
+    geocoder.geocode.mockImplementation(
+      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
+        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
+      },
+    )
+
     await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1')
     await user.click(screen.getByRole('button', { name: /zoeken/i }))
 
@@ -351,6 +364,13 @@ describe('Responsive layout — mobile drawer', () => {
     render(<DakoppervlakteApp />)
     await waitFor(() => expect(MockGeocoder).toHaveBeenCalled())
 
+    const geocoder = MockGeocoder.mock.results[MockGeocoder.mock.results.length - 1].value
+    geocoder.geocode.mockImplementation(
+      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
+        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
+      },
+    )
+
     await user.click(screen.getByRole('button', { name: /menu openen/i }))
     await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1')
     await user.click(screen.getByRole('button', { name: /zoeken/i }))
@@ -363,6 +383,13 @@ describe('Responsive layout — mobile drawer', () => {
   it('shows polygon chips at the bottom of the map after drawing', async () => {
     render(<DakoppervlakteApp />)
     await waitFor(() => expect(MockGeocoder).toHaveBeenCalled())
+
+    const geocoder = MockGeocoder.mock.results[MockGeocoder.mock.results.length - 1].value
+    geocoder.geocode.mockImplementation(
+      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
+        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
+      },
+    )
 
     // Open drawer, search, start drawing from drawer
     await user.click(screen.getByRole('button', { name: /menu openen/i }))

@@ -64,11 +64,7 @@ export const MockAdvancedMarkerElement = vi.fn().mockImplementation(function () 
 
 export const MockGeocoder = vi.fn().mockImplementation(function () {
   return {
-    geocode: vi.fn(
-      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
-        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
-      }
-    ),
+    geocode: vi.fn(),
   }
 })
 
