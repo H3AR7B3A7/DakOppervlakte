@@ -12,7 +12,7 @@ interface HeaderProps {
   drawerId?: string
 }
 
-export function Header({ usageCount, onMenuClick, drawerOpen = false, drawerId = 'sidebar-drawer' }: HeaderProps) {
+export function Header({ usageCount, onMenuClick, drawerOpen = false, drawerId }: HeaderProps) {
   const t = useTranslations()
 
   return (

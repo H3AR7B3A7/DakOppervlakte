@@ -4,7 +4,7 @@ interface HamburgerButtonProps {
   ariaLabel: string
   onClick: () => void
   expanded: boolean
-  controls: string
+  controls?: string
   className?: string
 }
 

@@ -50,7 +50,9 @@ describe('Header', () => {
   describe('Mobile menu button', () => {
     it('renders the hamburger when onMenuClick is provided', () => {
       render(<Header usageCount={0} onMenuClick={vi.fn()} drawerOpen={false} />)
-      expect(screen.getByRole('button', { name: /menu openen/i })).toBeInTheDocument()
+      const btn = screen.getByRole('button', { name: /menu openen/i })
+      expect(btn).toBeInTheDocument()
+      expect(btn).toHaveAttribute('aria-expanded', 'false')
     })
 
     it('omits the hamburger when onMenuClick is not provided', () => {
