@@ -10,9 +10,8 @@ describe('HamburgerButton', () => {
 
   it('exposes aria-expanded and aria-controls for screen readers', () => {
     render(<HamburgerButton ariaLabel="Menu openen" onClick={vi.fn()} expanded={true} controls="drawer-id" />)
-    const btn = screen.getByRole('button')
-    expect(btn).toHaveAttribute('aria-expanded', 'true')
-    expect(btn).toHaveAttribute('aria-controls', 'drawer-id')
+    expect(screen.getByRole('button', { expanded: true })).toBeInTheDocument()
+    expect(screen.getByRole('button')).toHaveAttribute('aria-controls', 'drawer-id')
   })
 
   it('calls onClick when tapped', async () => {
