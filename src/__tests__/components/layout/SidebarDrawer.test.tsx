@@ -2,12 +2,14 @@ import { render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { SidebarDrawer } from '@/components/layout/SidebarDrawer'
 
-function setMobileViewport() {
+const originalMatchMedia = window.matchMedia
+
+function setMatches(isMobile: boolean) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     configurable: true,
     value: (query: string) => ({
-      matches: !query.includes('min-width: 768px'),
+      matches: query.includes('min-width: 768px') ? !isMobile : false,
       media: query,
       onchange: null,
       addListener: vi.fn(),
@@ -19,26 +21,13 @@ function setMobileViewport() {
   })
 }
 
-function setDesktopViewport() {
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    configurable: true,
-    value: (query: string) => ({
-      matches: query.includes('min-width: 768px'),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }),
-  })
-}
+afterEach(() => {
+  window.matchMedia = originalMatchMedia
+})
 
 describe('SidebarDrawer', () => {
   describe('On mobile', () => {
-    beforeEach(setMobileViewport)
+    beforeEach(() => setMatches(true))
 
     it('renders the drawer with dialog role when open', () => {
       render(
@@ -110,7 +99,7 @@ describe('SidebarDrawer', () => {
   })
 
   describe('On desktop', () => {
-    beforeEach(setDesktopViewport)
+    beforeEach(() => setMatches(false))
 
     it('renders children without backdrop or dialog role', () => {
       render(

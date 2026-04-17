@@ -9,6 +9,9 @@ interface SidebarDrawerProps {
   children: React.ReactNode
 }
 
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
 function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(false)
 
@@ -26,6 +29,7 @@ function useIsMobile(): boolean {
 export function SidebarDrawer({ open, onClose, titleId, children }: SidebarDrawerProps) {
   const isMobile = useIsMobile()
   const drawerRef = useRef<HTMLElement>(null)
+  const wasOpenRef = useRef(false)
 
   useEffect(() => {
     if (!isMobile || !open) return
@@ -37,19 +41,24 @@ export function SidebarDrawer({ open, onClose, titleId, children }: SidebarDrawe
   }, [isMobile, open, onClose])
 
   useEffect(() => {
-    if (!isMobile) return
-    document.body.style.overflow = open ? 'hidden' : ''
+    if (!isMobile || !open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = prev
     }
   }, [isMobile, open])
 
   useEffect(() => {
-    if (!isMobile || !open) return
-    const firstFocusable = drawerRef.current?.querySelector<HTMLElement>(
-      'button, [href], input, [tabindex]:not([tabindex="-1"])',
-    )
-    firstFocusable?.focus()
+    if (!isMobile) {
+      wasOpenRef.current = open
+      return
+    }
+    if (open && !wasOpenRef.current) {
+      const firstFocusable = drawerRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+      firstFocusable?.focus()
+    }
+    wasOpenRef.current = open
   }, [isMobile, open])
 
   if (!isMobile) {
