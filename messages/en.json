@@ -53,7 +53,11 @@
     "tiltAriaLabel": "Toggle 3D perspective",
     "rotationDisabledHint": "Enable 3D mode to rotate the map.",
     "autoGenerate": "Auto-generate roof selection",
-    "noBuildingFound": "No building found — draw manually"
+    "noBuildingFound": "No building found — draw manually",
+    "newSearch": "New search",
+    "currentAddressLabel": "Current address",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "Drawing": {
     "hint": "Click on the map to start drawing",
@@ -83,6 +87,12 @@
     "tiltZoomRequiredTooltip": "Zoom in to enable 3D",
     "drawingOverlayInitial": "✏️ Click corners ({count} placed)",
     "drawingOverlayReady": "✏️ {count} points — double click to close"
+  },
+  "ChipBar": {
+    "totalLabel": "Σ",
+    "toggleChipAriaLabel": "Toggle plane {label} ({area} m²)",
+    "deleteChipAriaLabel": "Delete {label}",
+    "renameChipAriaLabel": "Rename {label}"
   },
   "Common": {
     "save": "Save",

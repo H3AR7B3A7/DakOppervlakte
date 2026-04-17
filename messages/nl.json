@@ -53,7 +53,11 @@
     "tiltAriaLabel": "Toggle 3D perspectief",
     "rotationDisabledHint": "Schakel 3D-modus in om de kaart te kunnen roteren.",
     "autoGenerate": "Automatisch dakoppervlak genereren",
-    "noBuildingFound": "Geen gebouw gevonden — teken handmatig"
+    "noBuildingFound": "Geen gebouw gevonden — teken handmatig",
+    "newSearch": "Nieuwe zoekopdracht",
+    "currentAddressLabel": "Huidig adres",
+    "openMenu": "Menu openen",
+    "closeMenu": "Menu sluiten"
   },
   "Drawing": {
     "hint": "Klik op de kaart om te beginnen met tekenen",
@@ -83,6 +87,12 @@
     "tiltZoomRequiredTooltip": "Zoom in om 3D te activeren",
     "drawingOverlayInitial": "✏️ Klik hoekpunten aan ({count} geplaatst)",
     "drawingOverlayReady": "✏️ {count} punten — dubbelklik om te sluiten"
+  },
+  "ChipBar": {
+    "totalLabel": "Σ",
+    "toggleChipAriaLabel": "Schakel vlak {label} in of uit ({area} m²)",
+    "deleteChipAriaLabel": "Verwijder {label}",
+    "renameChipAriaLabel": "Hernoem {label}"
   },
   "Common": {
     "save": "Opslaan",

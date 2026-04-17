@@ -53,7 +53,11 @@
     "tiltAriaLabel": "Basculer la perspective 3D",
     "rotationDisabledHint": "Activez le mode 3D pour pouvoir faire pivoter la carte.",
     "autoGenerate": "Générer automatiquement la sélection du toit",
-    "noBuildingFound": "Aucun bâtiment trouvé — dessinez manuellement"
+    "noBuildingFound": "Aucun bâtiment trouvé — dessinez manuellement",
+    "newSearch": "Nouvelle recherche",
+    "currentAddressLabel": "Adresse actuelle",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
   },
   "Drawing": {
     "hint": "Cliquez sur la carte pour commencer à dessiner",
@@ -83,6 +87,12 @@
     "tiltZoomRequiredTooltip": "Zoomez pour activer le 3D",
     "drawingOverlayInitial": "✏️ Cliquez sur les coins ({count} placés)",
     "drawingOverlayReady": "✏️ {count} points — double-cliquez pour fermer"
+  },
+  "ChipBar": {
+    "totalLabel": "Σ",
+    "toggleChipAriaLabel": "Basculer le plan {label} ({area} m²)",
+    "deleteChipAriaLabel": "Supprimer {label}",
+    "renameChipAriaLabel": "Renommer {label}"
   },
   "Common": {
     "save": "Enregistrer",
