@@ -1,4 +1,4 @@
-import { act, render, screen } from '../../test-utils'
+import { act, fireEvent, render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { PolygonChipBar } from '@/components/map/PolygonChipBar'
 import type { PolygonEntry } from '@/lib/types'
@@ -111,24 +111,48 @@ describe('PolygonChipBar', () => {
 
       const chip = screen.getByRole('button', { name: /schakel vlak vlak 1 in of uit/i })
 
-      // Simulate long-press: pointerdown → advance time → pointerup
-      act(() => {
-        chip.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
-      })
-      act(() => {
-        vi.advanceTimersByTime(600)
-      })
-      act(() => {
-        chip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
-      })
+      fireEvent.pointerDown(chip)
+      act(() => { vi.advanceTimersByTime(600) })
+      fireEvent.pointerUp(chip)
+      vi.useRealTimers()
 
       const input = await screen.findByRole('textbox', { name: /hernoem vlak 1/i })
-      vi.useRealTimers()
 
       await userEvent.clear(input)
       await userEvent.type(input, 'Nieuw label{Enter}')
 
       expect(onRename).toHaveBeenCalledWith('x', 'Nieuw label')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('does not rename when Escape is pressed during rename', async () => {
+    vi.useFakeTimers()
+    try {
+      const onRename = vi.fn()
+      render(
+        <PolygonChipBar
+          polygons={[makeEntry({ id: 'x', label: 'Vlak 1' })]}
+          onDelete={vi.fn()}
+          onRename={onRename}
+          onToggleExcluded={vi.fn()}
+        />,
+      )
+
+      const chip = screen.getByRole('button', { name: /schakel vlak vlak 1 in of uit/i })
+
+      fireEvent.pointerDown(chip)
+      act(() => { vi.advanceTimersByTime(600) })
+      fireEvent.pointerUp(chip)
+      vi.useRealTimers()
+
+      const input = await screen.findByRole('textbox', { name: /hernoem vlak 1/i })
+
+      await userEvent.clear(input)
+      await userEvent.type(input, 'Discarded{Escape}')
+
+      expect(onRename).not.toHaveBeenCalled()
     } finally {
       vi.useRealTimers()
     }

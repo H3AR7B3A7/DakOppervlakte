@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslations, useFormatter } from 'next-intl'
 import type { PolygonEntry } from '@/lib/types'
 
@@ -21,6 +21,11 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
   const [pendingLabel, setPendingLabel] = useState('')
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suppressClickRef = useRef(false)
+  const skipCommitRef = useRef(false)
+
+  useEffect(() => () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current)
+  }, [])
 
   if (polygons.length === 0) return null
 
@@ -101,10 +106,22 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
                   aria-label={t('renameChipAriaLabel', { label: p.label })}
                   value={pendingLabel}
                   onChange={(e) => setPendingLabel(e.target.value)}
-                  onBlur={() => commitEdit(p.id)}
+                  onBlur={() => {
+                    if (skipCommitRef.current) {
+                      skipCommitRef.current = false
+                      return
+                    }
+                    commitEdit(p.id)
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
-                    if (e.key === 'Escape') setEditingId(null)
+                    if (e.key === 'Enter') {
+                      skipCommitRef.current = false
+                      ;(e.target as HTMLInputElement).blur()
+                    }
+                    if (e.key === 'Escape') {
+                      skipCommitRef.current = true
+                      setEditingId(null)
+                    }
                   }}
                   style={{
                     background: 'var(--bg)',

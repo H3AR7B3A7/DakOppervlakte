@@ -19,12 +19,3 @@ if (typeof window !== 'undefined' && typeof window.PointerEvent === 'undefined')
   globalThis.PointerEvent = PointerEventPolyfill
 }
 
-// @testing-library/dom's `waitFor` only detects fake timers when `jest` is a
-// defined global (see jestFakeTimersAreEnabled in helpers.js). Vitest does not
-// expose a `jest` global, so tests that call `vi.useFakeTimers()` and then
-// rely on `findBy*` / `waitFor` hang forever. Provide a minimal shim so
-// testing-library notices the fake timers and uses the sync detection path.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(globalThis as any).jest = {
-  advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms),
-}
