@@ -16,7 +16,8 @@ import type { Search } from '@/lib/types'
 
 import { Button } from '@/components/ui'
 import { Header } from '@/components/Header'
-import { MapView, MapOverlayControls, DrawingOverlay } from '@/components/map'
+import { SidebarDrawer } from '@/components/layout'
+import { MapView, MapOverlayControls, DrawingOverlay, PolygonChipBar } from '@/components/map'
 import {
   AddressSearch,
   RotationControls,
@@ -27,6 +28,8 @@ import {
   SearchHistory,
   SaveResetControls,
 } from '@/components/sidebar'
+
+const DRAWER_TITLE_ID = 'sidebar-drawer-title'
 
 export function DakoppervlakteApp() {
   const t = useTranslations()
@@ -54,6 +57,8 @@ export function DakoppervlakteApp() {
   const [saved, setSaved] = useState(false)
   const [autoGenerate, setAutoGenerate] = useState(true)
   const [autoGenerateError, setAutoGenerateError] = useState('')
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [searchFormCollapsed, setSearchFormCollapsed] = useState(false)
 
   const totalArea = polygons.reduce((sum, p) => (p.excluded ? sum : sum + p.area), 0)
 
@@ -63,6 +68,8 @@ export function DakoppervlakteApp() {
     if (autoGenerate) resetAll()
     geocodeAndNavigate(address, () => {
       incrementSearchCount(address)
+      setSearchFormCollapsed(true)
+      setDrawerOpen(false)
       if (!autoGenerate) {
         setTimeout(() => startDrawing(), 600)
         return
@@ -99,6 +106,8 @@ export function DakoppervlakteApp() {
     resetAll()
     setSaved(false)
     setSearchError('')
+    setSearchFormCollapsed(true)
+    setDrawerOpen(false)
     geocodeAndNavigate(restored.address, () => {
       if (restored.polygons) {
         setTimeout(() => restorePolygons(restored.polygons!), 500)
@@ -109,6 +118,7 @@ export function DakoppervlakteApp() {
   const handleSave = useCallback(async () => {
     await saveEntry(address, totalArea, serializedPolygons)
     setSaved(true)
+    setDrawerOpen(false)
   }, [address, saveEntry, totalArea, serializedPolygons])
 
   const handleReset = useCallback(() => {
@@ -116,12 +126,17 @@ export function DakoppervlakteApp() {
     setAddress('')
     setSearchError('')
     setSaved(false)
+    setSearchFormCollapsed(false)
   }, [resetAll, setAddress, setSearchError])
 
   const handleStartDrawing = useCallback(() => {
     setSaved(false)
     startDrawing()
   }, [startDrawing])
+
+  const handleExpandSearch = useCallback(() => {
+    setSearchFormCollapsed(false)
+  }, [])
 
   return (
     <div
@@ -132,7 +147,12 @@ export function DakoppervlakteApp() {
         flexDirection: 'column',
       }}
     >
-      <Header usageCount={usageCount} />
+      <Header
+        usageCount={usageCount}
+        onMenuClick={() => setDrawerOpen((o) => !o)}
+        drawerOpen={drawerOpen}
+        drawerId={DRAWER_TITLE_ID}
+      />
 
       <div
         style={{
@@ -140,26 +160,23 @@ export function DakoppervlakteApp() {
           flex: 1,
           overflow: 'hidden',
           height: 'calc(100vh - 60px)',
+          position: 'relative',
         }}
       >
-        <aside
-          style={{
-            width: 360,
-            background: 'var(--surface)',
-            borderRight: '1px solid var(--border)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            flexShrink: 0,
-          }}
+        <SidebarDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          titleId={DRAWER_TITLE_ID}
         >
           <div
             style={{
               padding: '24px 24px 16px',
               borderBottom: '1px solid var(--border)',
+              flexShrink: 0,
             }}
           >
             <h1
+              id={DRAWER_TITLE_ID}
               style={{
                 fontFamily: 'Syne, sans-serif',
                 fontWeight: 800,
@@ -179,30 +196,37 @@ export function DakoppervlakteApp() {
             </p>
           </div>
 
-          <AddressSearch
-            value={address}
-            onChange={setAddress}
-            onSearch={handleSearch}
-            searching={searching}
-            error={searchError || autoGenerateError}
-            autoGenerate={autoGenerate}
-            onAutoGenerateChange={setAutoGenerate}
-          />
+          <div style={{ flexShrink: 0 }}>
+            <AddressSearch
+              value={address}
+              onChange={setAddress}
+              onSearch={handleSearch}
+              searching={searching}
+              error={searchError || autoGenerateError}
+              autoGenerate={autoGenerate}
+              onAutoGenerateChange={setAutoGenerate}
+              collapsed={searchFormCollapsed}
+              onExpand={handleExpandSearch}
+            />
+          </div>
 
-          <RotationControls
-            heading={heading}
-            tilt={tilt}
-            is3D={is3D}
-            canEnable3D={canEnable3D}
-            onHeadingChange={(h) => setHeading(normalizeHeading(h))}
-            onRotate={handleRotate}
-            onTiltToggle={handleTiltToggle}
-          />
+          <div className="hidden md:block" style={{ flexShrink: 0 }}>
+            <RotationControls
+              heading={heading}
+              tilt={tilt}
+              is3D={is3D}
+              canEnable3D={canEnable3D}
+              onHeadingChange={(h) => setHeading(normalizeHeading(h))}
+              onRotate={handleRotate}
+              onTiltToggle={handleTiltToggle}
+            />
+          </div>
 
           <div
             style={{
               padding: '16px 24px',
               flex: 1,
+              minHeight: 0,
               overflowY: 'auto',
             }}
           >
@@ -224,19 +248,21 @@ export function DakoppervlakteApp() {
               <DrawingHint pointCount={pointCount} onFinish={finishPolygon} />
             )}
 
-            <PolygonList
-              polygons={polygons}
-              currentHeading={heading}
-              currentTilt={tilt}
-              onDelete={deletePolygon}
-              onRename={renamePolygon}
-              onToggleExcluded={togglePolygonExcluded}
-            />
+            <div className="hidden md:block">
+              <PolygonList
+                polygons={polygons}
+                currentHeading={heading}
+                currentTilt={tilt}
+                onDelete={deletePolygon}
+                onRename={renamePolygon}
+                onToggleExcluded={togglePolygonExcluded}
+              />
 
-            <TotalAreaDisplay
-              totalArea={totalArea}
-              polygonCount={polygons.length}
-            />
+              <TotalAreaDisplay
+                totalArea={totalArea}
+                polygonCount={polygons.length}
+              />
+            </div>
 
             {polygons.length > 0 && mode === 'idle' && (
               <SaveResetControls
@@ -251,13 +277,15 @@ export function DakoppervlakteApp() {
           </div>
 
           <Show when="signed-in">
-            <SearchHistory
-              history={history}
-              onRestore={handleRestore}
-              onDelete={deleteEntry}
-            />
+            <div style={{ flexShrink: 0 }}>
+              <SearchHistory
+                history={history}
+                onRestore={handleRestore}
+                onDelete={deleteEntry}
+              />
+            </div>
           </Show>
-        </aside>
+        </SidebarDrawer>
 
         <MapView mapRef={mapRef} mapLoaded={mapLoaded}>
           <MapOverlayControls
@@ -270,6 +298,15 @@ export function DakoppervlakteApp() {
           />
 
           {mode === 'drawing' && <DrawingOverlay pointCount={pointCount} />}
+
+          {mode !== 'drawing' && (
+            <PolygonChipBar
+              polygons={polygons}
+              onDelete={deletePolygon}
+              onRename={renamePolygon}
+              onToggleExcluded={togglePolygonExcluded}
+            />
+          )}
         </MapView>
       </div>
     </div>

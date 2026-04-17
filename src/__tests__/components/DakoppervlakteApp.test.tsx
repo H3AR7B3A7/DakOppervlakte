@@ -104,7 +104,11 @@ describe('User opens the app for the first time', () => {
     render(<DakoppervlakteApp />)
     await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1, Antwerpen')
     await user.click(screen.getByRole('button', { name: /zoeken/i }))
-    expect(screen.getByRole('textbox', { name: /adres/i })).toHaveValue('Meir 1, Antwerpen')
+    await waitFor(() => {
+      expect(screen.getByText('Meir 1, Antwerpen')).toBeInTheDocument()
+    })
+    const map = getMapInstance()
+    expect(map.setCenter).toHaveBeenCalled()
   })
 
   it('Given a successful search, then drawing starts automatically', async () => {
@@ -150,7 +154,7 @@ describe('User draws a polygon', () => {
     render(<DakoppervlakteApp />)
     await drawOnePolygon(user)
 
-    expect(screen.getByText('Vlak 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Vlak 1').length).toBeGreaterThan(0)
     expect(screen.getByRole('region', { name: /totale oppervlakte/i })).toBeInTheDocument()
     expect(screen.queryByRole('list', { name: /hoe het werkt/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /nog een vlak toevoegen/i })).toBeInTheDocument()
@@ -235,7 +239,9 @@ describe('Signed-in user saves and views history', () => {
 
     await user.click(screen.getByTitle('Deze zoekopdracht herstellen'))
 
-    expect(screen.getByRole('textbox', { name: /adres/i })).toHaveValue('Grote Markt 1, Brussel')
+    await waitFor(() => {
+      expect(screen.getAllByText('Grote Markt 1, Brussel').length).toBeGreaterThan(0)
+    })
   })
 
   it('Given a history entry with polygons is restored, then polygons reappear', async () => {
@@ -271,7 +277,101 @@ describe('Signed-in user saves and views history', () => {
 
     await act(async () => { await vi.advanceTimersByTimeAsync(600) })
 
-    expect(screen.getByText('Dak A')).toBeInTheDocument()
+    expect(screen.getAllByText('Dak A').length).toBeGreaterThan(0)
     vi.useRealTimers()
+  })
+})
+
+describe('Responsive layout — collapsible search form', () => {
+  const user = userEvent.setup()
+  beforeEach(() => {
+    mockUserRef.current = null
+    setupFetch()
+  })
+  afterEach(() => vi.clearAllMocks())
+
+  it('collapses the search form after a successful search and lets the user re-expand it', async () => {
+    render(<DakoppervlakteApp />)
+    await waitFor(() => expect(MockGeocoder).toHaveBeenCalled())
+
+    await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1')
+    await user.click(screen.getByRole('button', { name: /zoeken/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('textbox', { name: /adres/i })).not.toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /nieuwe zoekopdracht/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /nieuwe zoekopdracht/i }))
+    expect(screen.getByRole('textbox', { name: /adres/i })).toBeInTheDocument()
+  })
+})
+
+describe('Responsive layout — mobile drawer', () => {
+  const user = userEvent.setup()
+
+  function setMobileViewport() {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: (query: string) => ({
+        matches: !query.includes('min-width: 768px'),
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }),
+    })
+  }
+
+  beforeEach(() => {
+    mockUserRef.current = null
+    setupFetch()
+    setMobileViewport()
+  })
+  afterEach(() => vi.clearAllMocks())
+
+  it('shows a hamburger button that opens and closes the drawer', async () => {
+    render(<DakoppervlakteApp />)
+
+    const hamburger = screen.getByRole('button', { name: /menu openen/i })
+    await user.click(hamburger)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await user.click(screen.getByTestId('sidebar-drawer-backdrop'))
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+  })
+
+  it('auto-closes the drawer after a successful search', async () => {
+    render(<DakoppervlakteApp />)
+    await waitFor(() => expect(MockGeocoder).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: /menu openen/i }))
+    await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1')
+    await user.click(screen.getByRole('button', { name: /zoeken/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+  })
+
+  it('shows polygon chips at the bottom of the map after drawing', async () => {
+    render(<DakoppervlakteApp />)
+    await waitFor(() => expect(MockGeocoder).toHaveBeenCalled())
+
+    // Open drawer, search, start drawing from drawer
+    await user.click(screen.getByRole('button', { name: /menu openen/i }))
+    await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1')
+    await user.click(screen.getByRole('button', { name: /zoeken/i }))
+
+    await user.click(screen.getByRole('button', { name: /menu openen/i }))
+    await drawOnePolygon(user)
+
+    expect(screen.getByTestId('chip-bar-total')).toBeInTheDocument()
   })
 })
