@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
-import { flushSync } from 'react-dom'
 import { useTranslations, useFormatter } from 'next-intl'
 import type { PolygonEntry } from '@/lib/types'
 
@@ -31,12 +30,8 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
     suppressClickRef.current = false
     longPressTimer.current = setTimeout(() => {
       suppressClickRef.current = true
-      // flushSync so that synchronous code dispatching a pointerup (e.g. in
-      // tests, or rapid touch release) immediately sees the rename input.
-      flushSync(() => {
-        setEditingId(id)
-        setPendingLabel(label)
-      })
+      setEditingId(id)
+      setPendingLabel(label)
     }, LONG_PRESS_MS)
   }
 

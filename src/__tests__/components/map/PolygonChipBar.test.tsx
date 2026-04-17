@@ -1,4 +1,4 @@
-import { render, screen } from '../../test-utils'
+import { act, render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { PolygonChipBar } from '@/components/map/PolygonChipBar'
 import type { PolygonEntry } from '@/lib/types'
@@ -112,9 +112,15 @@ describe('PolygonChipBar', () => {
       const chip = screen.getByRole('button', { name: /schakel vlak vlak 1 in of uit/i })
 
       // Simulate long-press: pointerdown → advance time → pointerup
-      chip.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
-      vi.advanceTimersByTime(600)
-      chip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
+      act(() => {
+        chip.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+      })
+      act(() => {
+        vi.advanceTimersByTime(600)
+      })
+      act(() => {
+        chip.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
+      })
 
       const input = await screen.findByRole('textbox', { name: /hernoem vlak 1/i })
       vi.useRealTimers()
