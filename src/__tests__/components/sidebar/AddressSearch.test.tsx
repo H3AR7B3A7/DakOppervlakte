@@ -11,6 +11,8 @@ function setup(overrides: Partial<React.ComponentProps<typeof AddressSearch>> = 
     error: '',
     autoGenerate: false,
     onAutoGenerateChange: vi.fn(),
+    collapsed: false,
+    onExpand: vi.fn(),
     ...overrides,
   }
   render(<AddressSearch {...props} />)
@@ -81,5 +83,28 @@ describe('User searches for an address', () => {
       await userEvent.click(screen.getByRole('checkbox', { name: /automatisch/i }))
       expect(onAutoGenerateChange).toHaveBeenCalledWith(true)
     })
+  })
+})
+
+describe('Collapsible search form', () => {
+  it('shows the full form by default (expanded)', () => {
+    setup({ collapsed: false, value: 'Meir 1' })
+    expect(screen.getByRole('textbox', { name: /adres/i })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /automatisch/i })).toBeInTheDocument()
+  })
+
+  it('shows only the address label and a "New search" button when collapsed', () => {
+    setup({ collapsed: true, value: 'Meir 1, Antwerpen' })
+    expect(screen.queryByRole('textbox', { name: /adres/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: /automatisch/i })).not.toBeInTheDocument()
+    expect(screen.getByText('Meir 1, Antwerpen')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /nieuwe zoekopdracht/i })).toBeInTheDocument()
+  })
+
+  it('calls onExpand when the "New search" button is clicked', async () => {
+    const onExpand = vi.fn()
+    setup({ collapsed: true, value: 'Meir 1', onExpand })
+    await userEvent.click(screen.getByRole('button', { name: /nieuwe zoekopdracht/i }))
+    expect(onExpand).toHaveBeenCalledTimes(1)
   })
 })

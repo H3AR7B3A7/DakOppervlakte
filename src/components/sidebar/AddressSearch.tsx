@@ -12,6 +12,8 @@ interface AddressSearchProps {
   error: string
   autoGenerate: boolean
   onAutoGenerateChange: (value: boolean) => void
+  collapsed?: boolean
+  onExpand?: () => void
 }
 
 export function AddressSearch({
@@ -22,8 +24,59 @@ export function AddressSearch({
   error,
   autoGenerate,
   onAutoGenerateChange,
+  collapsed = false,
+  onExpand,
 }: AddressSearchProps) {
   const t = useTranslations('Sidebar')
+
+  if (collapsed) {
+    return (
+      <div
+        style={{
+          padding: '16px 24px',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          gap: 12,
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              fontFamily: 'Syne, sans-serif',
+              marginBottom: 2,
+            }}
+          >
+            {t('currentAddressLabel')}
+          </p>
+          <p
+            title={value}
+            style={{
+              fontSize: 13,
+              color: 'var(--text)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {value}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={onExpand}
+          style={{ flexShrink: 0, padding: '6px 12px', fontSize: 12 }}
+        >
+          {t('newSearch')}
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div
