@@ -13,6 +13,8 @@ interface UsePolygonDrawingOptions {
 export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt }: UsePolygonDrawingOptions) {
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const dblClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
+  const rightClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
+  const contextMenuHandlerRef = useRef<((e: Event) => void) | null>(null)
   const tempMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
   const tempPathRef = useRef<google.maps.LatLng[]>([])
   const previewPolyRef = useRef<google.maps.Polyline | null>(null)
@@ -58,9 +60,25 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     clickListenerRef.current = null
     dblClickListenerRef.current?.remove()
     dblClickListenerRef.current = null
+    rightClickListenerRef.current?.remove()
+    rightClickListenerRef.current = null
+    if (contextMenuHandlerRef.current && mapInstanceRef.current?.getDiv) {
+      mapInstanceRef.current.getDiv().removeEventListener('contextmenu', contextMenuHandlerRef.current)
+    }
+    contextMenuHandlerRef.current = null
     mapInstanceRef.current?.setOptions({ draggableCursor: '' })
     setPointCount(0)
   }, [mapInstanceRef])
+
+  const undoLastPoint = useCallback(() => {
+    const path = tempPathRef.current
+    if (path.length === 0) return
+    const lastMarker = tempMarkersRef.current.pop()
+    if (lastMarker) lastMarker.map = null
+    path.pop()
+    setPointCount(path.length)
+    previewPolyRef.current?.setPath(path)
+  }, [])
 
   const syncPolygons = () => {
     setPolygons([...polygonsRef.current])
@@ -267,7 +285,21 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
         if (tempPathRef.current.length >= 3) finishPolygon()
       }
     )
-  }, [clearDrawingState, finishPolygon, mapInstanceRef])
+
+    rightClickListenerRef.current = map.addListener(
+      'rightclick',
+      (e: google.maps.MapMouseEvent) => {
+        e.stop?.()
+        undoLastPoint()
+      }
+    )
+
+    if (map.getDiv) {
+      const onContextMenu = (e: Event) => e.preventDefault()
+      map.getDiv().addEventListener('contextmenu', onContextMenu)
+      contextMenuHandlerRef.current = onContextMenu
+    }
+  }, [clearDrawingState, finishPolygon, mapInstanceRef, undoLastPoint])
 
   const deletePolygon = useCallback((id: string) => {
     const entry = polygonsRef.current.find((e) => e.id === id)
@@ -297,6 +329,7 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     polygons,
     startDrawing,
     finishPolygon,
+    undoLastPoint,
     addPolygonFromPath,
     deletePolygon,
     renamePolygon,

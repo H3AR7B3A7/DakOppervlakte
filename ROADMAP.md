@@ -3,8 +3,11 @@
 - [x] Save the perspective (tilt x cardinal) with the selections / only show selections in the orientation it was created in / use eye icons to indicate if the layer is visible or not in the sidepanel
 - [x] Test coverage
 - [x] Belgium is supposed to have a register of polygons that we can get for the addresses (there's a new api?), so we can autogenerate a selection of the roof, the coordinates don't match exactly, so we might have to allow values within a diamond shape or something when trying to detect the actual building, under the address search set a checkbox to auto generate.
-- [ ] Sidebar is overall too large and growing, making the map bigger than the screen, it should always fit the screen, add a scrollbar for the selection
-- [ ] Mobile support: Sidebar hamburger, with toggles for the layers
+- [x] Sidebar is overall too large and growing when adding features, this is making the map bigger than the screen when the sidebar grows outside the window vertically, it should always fit the screen, some ideas to save space:
+  - add a scrollbar for the selection section
+  - hide the search form when the user has made a search and show a "new search" button instead that scrolls up and shows the form again
+  - or just have tabs for search / orientate / history
+- [x] Mobile support: Sidebar hamburger, with smaller ui toggles for the layers as an overlay over the map
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json
 - [ ] Add pre commit hook that runs `check` and `test` in package.json

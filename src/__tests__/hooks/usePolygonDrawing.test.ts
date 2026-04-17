@@ -231,6 +231,34 @@ describe('User draws and manages roof polygons', () => {
     })
   })
 
+  describe('User undoes the last placed point while drawing', () => {
+    it('right-clicking the map removes the most recent point', () => {
+      const { result, map } = setup()
+      act(() => result.current.startDrawing())
+      act(() => {
+        map._trigger('click', { latLng: { lat: () => 51, lng: () => 4 } })
+        map._trigger('click', { latLng: { lat: () => 51.1, lng: () => 4.1 } })
+      })
+      expect(result.current.pointCount).toBe(2)
+
+      act(() => {
+        map._trigger('rightclick', { stop: vi.fn() })
+      })
+
+      expect(result.current.pointCount).toBe(1)
+    })
+
+    it('undoing with no placed points is a no-op', () => {
+      const { result } = setup()
+      act(() => result.current.startDrawing())
+      expect(result.current.pointCount).toBe(0)
+
+      act(() => result.current.undoLastPoint())
+
+      expect(result.current.pointCount).toBe(0)
+    })
+  })
+
   describe('User manages existing polygons', () => {
     function setupWithPolygon() {
       const ctx = setup()

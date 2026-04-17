@@ -31,7 +31,7 @@ describe('Header', () => {
   describe('Brand', () => {
     it('renders the logo', () => {
       render(<Header usageCount={0} />)
-      expect(screen.getByText('oppervlakte')).toBeInTheDocument()
+      expect(screen.getAllByText('oppervlakte').length).toBeGreaterThan(0)
     })
   })
 

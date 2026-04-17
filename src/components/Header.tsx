@@ -40,24 +40,41 @@ export function Header({ usageCount, onMenuClick, drawerOpen = false, drawerId }
             controls={drawerId}
           />
         )}
+        <div className="hidden md:block">
+          <Logo />
+        </div>
+      </div>
+
+      <div
+        className="md:hidden"
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          pointerEvents: 'none',
+        }}
+      >
         <Logo />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {usageCount !== null && usageCount > 0 && (
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            {t('Sidebar.searchesCount', { count: usageCount })}
-          </span>
-        )}
+        <div className="hidden md:flex" style={{ alignItems: 'center', gap: 12 }}>
+          {usageCount !== null && usageCount > 0 && (
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              {t('Sidebar.searchesCount', { count: usageCount })}
+            </span>
+          )}
 
-        <Show when="signed-out">
-          <SignInButton mode="modal">
-            <Button variant="outline">{t('Header.signIn')}</Button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <Button variant="accent">{t('Common.register')}</Button>
-          </SignUpButton>
-        </Show>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <Button variant="outline">{t('Header.signIn')}</Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button variant="accent">{t('Common.register')}</Button>
+            </SignUpButton>
+          </Show>
+        </div>
 
         <Show when="signed-in">
           <UserButton

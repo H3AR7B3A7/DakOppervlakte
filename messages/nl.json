@@ -26,8 +26,6 @@
     "saveToHistory": "💾 Opslaan in geschiedenis",
     "updateCounter": "📊 Teller bijwerken",
     "clearAll": "Alles wissen",
-    "historyUpsell": "📋 Maak een gratis account aan om uw zoekgeschiedenis bij te houden.",
-    "registerFree": "Gratis registreren",
     "historyTitle": "Geschiedenis",
     "historyAriaLabel": "Zoekgeschiedenis",
     "historyRestoreTitle": "Deze zoekopdracht herstellen",
@@ -86,7 +84,8 @@
     "tiltAriaLabel": "Toggle 3D perspectief",
     "tiltZoomRequiredTooltip": "Zoom in om 3D te activeren",
     "drawingOverlayInitial": "✏️ Klik hoekpunten aan ({count} geplaatst)",
-    "drawingOverlayReady": "✏️ {count} punten — dubbelklik om te sluiten"
+    "drawingOverlayReady": "✏️ {count} punten — dubbelklik om te sluiten",
+    "undoLastPoint": "Laatste punt ongedaan maken"
   },
   "ChipBar": {
     "totalLabel": "Σ",

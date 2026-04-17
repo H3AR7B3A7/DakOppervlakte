@@ -70,6 +70,7 @@ export const MockGeocoder = vi.fn().mockImplementation(function () {
 
 export const MockMap = vi.fn().mockImplementation(function () {
   const et = makeEventTarget()
+  const div = document.createElement('div')
   return {
     setCenter: vi.fn(),
     setZoom: vi.fn(),
@@ -80,6 +81,7 @@ export const MockMap = vi.fn().mockImplementation(function () {
     getTilt: vi.fn(() => 0),
     getCenter: vi.fn(() => ({ lat: () => 51.1, lng: () => 4.4 })),
     getZoom: vi.fn(() => 8),
+    getDiv: vi.fn(() => div),
     addListener: et.addListener,
     _trigger: et._trigger,
   }

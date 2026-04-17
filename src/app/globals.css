@@ -20,3 +20,15 @@ body {
 }
 
 .cl-formButtonPrimary { background: var(--accent) !important; color: #000 !important; }
+
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.thin-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

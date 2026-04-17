@@ -26,8 +26,6 @@
     "saveToHistory": "💾 Save to history",
     "updateCounter": "📊 Update counter",
     "clearAll": "Clear all",
-    "historyUpsell": "📋 Create a free account to keep track of your search history.",
-    "registerFree": "Register for free",
     "historyTitle": "History",
     "historyAriaLabel": "Search history",
     "historyRestoreTitle": "Restore this search",
@@ -86,7 +84,8 @@
     "tiltAriaLabel": "Toggle 3D perspective",
     "tiltZoomRequiredTooltip": "Zoom in to enable 3D",
     "drawingOverlayInitial": "✏️ Click corners ({count} placed)",
-    "drawingOverlayReady": "✏️ {count} points — double click to close"
+    "drawingOverlayReady": "✏️ {count} points — double click to close",
+    "undoLastPoint": "Undo last point"
   },
   "ChipBar": {
     "totalLabel": "Σ",

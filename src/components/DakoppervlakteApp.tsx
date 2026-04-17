@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useState } from 'react'
-import { Show, useUser } from '@clerk/nextjs'
+import { Show, SignInButton, SignUpButton, useUser } from '@clerk/nextjs'
 
 import { useTranslations } from 'next-intl'
 
@@ -46,7 +46,7 @@ export function DakoppervlakteApp() {
     geocodeAndNavigate,
   } = useGeocoding({ mapInstanceRef, geocoderRef })
   const {
-    mode, pointCount, polygons, startDrawing, finishPolygon,
+    mode, pointCount, polygons, startDrawing, finishPolygon, undoLastPoint,
     addPolygonFromPath,
     deletePolygon, renamePolygon, togglePolygonExcluded,
     resetAll, restorePolygons, serializedPolygons,
@@ -132,6 +132,7 @@ export function DakoppervlakteApp() {
 
   const handleStartDrawing = useCallback(() => {
     setSaved(false)
+    setDrawerOpen(false)
     startDrawing()
   }, [startDrawing])
 
@@ -142,7 +143,8 @@ export function DakoppervlakteApp() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        height: '100vh',
+        overflow: 'hidden',
         background: 'var(--bg)',
         display: 'flex',
         flexDirection: 'column',
@@ -197,6 +199,34 @@ export function DakoppervlakteApp() {
             </p>
           </div>
 
+          <div
+            className="flex md:hidden"
+            style={{
+              padding: '12px 24px',
+              borderBottom: '1px solid var(--border)',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              flexShrink: 0,
+            }}
+          >
+            {usageCount !== null && usageCount > 0 && (
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {t('Sidebar.searchesCount', { count: usageCount })}
+              </span>
+            )}
+            <Show when="signed-out">
+              <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+                <SignInButton mode="modal">
+                  <Button variant="outline">{t('Header.signIn')}</Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button variant="accent">{t('Common.register')}</Button>
+                </SignUpButton>
+              </div>
+            </Show>
+          </div>
+
           <div style={{ flexShrink: 0 }}>
             <AddressSearch
               value={address}
@@ -224,6 +254,7 @@ export function DakoppervlakteApp() {
           </div>
 
           <div
+            className="thin-scrollbar"
             style={{
               padding: '16px 24px',
               flex: 1,
@@ -249,21 +280,19 @@ export function DakoppervlakteApp() {
               <DrawingHint pointCount={pointCount} onFinish={finishPolygon} />
             )}
 
-            <div className="hidden md:block">
-              <PolygonList
-                polygons={polygons}
-                currentHeading={heading}
-                currentTilt={tilt}
-                onDelete={deletePolygon}
-                onRename={renamePolygon}
-                onToggleExcluded={togglePolygonExcluded}
-              />
+            <PolygonList
+              polygons={polygons}
+              currentHeading={heading}
+              currentTilt={tilt}
+              onDelete={deletePolygon}
+              onRename={renamePolygon}
+              onToggleExcluded={togglePolygonExcluded}
+            />
 
-              <TotalAreaDisplay
-                totalArea={totalArea}
-                polygonCount={polygons.length}
-              />
-            </div>
+            <TotalAreaDisplay
+              totalArea={totalArea}
+              polygonCount={polygons.length}
+            />
 
             {polygons.length > 0 && mode === 'idle' && (
               <SaveResetControls
@@ -298,7 +327,9 @@ export function DakoppervlakteApp() {
             onTiltToggle={handleTiltToggle}
           />
 
-          {mode === 'drawing' && <DrawingOverlay pointCount={pointCount} />}
+          {mode === 'drawing' && (
+            <DrawingOverlay pointCount={pointCount} onUndo={undoLastPoint} />
+          )}
 
           {mode !== 'drawing' && (
             <PolygonChipBar

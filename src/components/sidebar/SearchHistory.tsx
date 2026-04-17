@@ -17,6 +17,7 @@ export function SearchHistory({ history, onRestore, onDelete }: SearchHistoryPro
   return (
     <nav
       aria-label={t('historyAriaLabel')}
+      className="thin-scrollbar"
       style={{
         borderTop: '1px solid var(--border)',
         padding: '14px 24px',
@@ -138,7 +139,6 @@ export function SearchHistory({ history, onRestore, onDelete }: SearchHistoryPro
           </li>
         ))}
       </ul>
-      <style>{`::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }`}</style>
     </nav>
   )
 }

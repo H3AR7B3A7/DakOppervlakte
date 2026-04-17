@@ -78,7 +78,7 @@ describe('User opens the app for the first time', () => {
 
   it('Given the app loads, then they see the header, sidebar, and map', () => {
     render(<DakoppervlakteApp />)
-    expect(screen.getByText('oppervlakte')).toBeInTheDocument()
+    expect(screen.getAllByText('oppervlakte').length).toBeGreaterThan(0)
     expect(screen.getByRole('heading', { name: /bereken uw/i })).toBeInTheDocument()
     expect(screen.getByRole('main', { name: /interactieve kaart/i })).toBeInTheDocument()
   })
@@ -90,8 +90,8 @@ describe('User opens the app for the first time', () => {
 
   it('Given the user is signed out, then sign-in and register buttons are shown', () => {
     render(<DakoppervlakteApp />)
-    expect(screen.getByText('Aanmelden')).toBeInTheDocument()
-    expect(screen.getByText('Registreren')).toBeInTheDocument()
+    expect(screen.getAllByText('Aanmelden').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Registreren').length).toBeGreaterThan(0)
   })
 
   it('Given the app loads, when user clicks start drawing, then drawing mode activates', async () => {
@@ -397,7 +397,18 @@ describe('Responsive layout — mobile drawer', () => {
     await user.click(screen.getByRole('button', { name: /zoeken/i }))
 
     await user.click(screen.getByRole('button', { name: /menu openen/i }))
-    await drawOnePolygon(user)
+    await user.click(screen.getByRole('button', { name: /begin met tekenen/i }))
+    const map = getMapInstance()
+    for (let i = 0; i < 3; i++) {
+      await act(async () => {
+        map._trigger('click', {
+          latLng: { lat: () => 51.1 + i * 0.01, lng: () => 4.4 + i * 0.01 },
+        })
+      })
+    }
+    // Drawer closed when drawing started — reopen to reach the finish button.
+    await user.click(screen.getByRole('button', { name: /menu openen/i }))
+    await user.click(screen.getByRole('button', { name: /vorm sluiten/i }))
 
     expect(screen.getByTestId('chip-bar-total')).toBeInTheDocument()
   })

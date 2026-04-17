@@ -58,7 +58,17 @@ export function PolygonList({
         {t('planesTitle')}
       </p>
 
-      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <ul
+        className="thin-scrollbar"
+        style={{
+          listStyle: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          maxHeight: 168,
+          overflowY: 'auto',
+        }}
+      >
         {polygons.map((p) => {
           const headingMatch = normalizeHeading(p.heading) === normalizeHeading(currentHeading)
           const tiltMatch = p.tilt === currentTilt

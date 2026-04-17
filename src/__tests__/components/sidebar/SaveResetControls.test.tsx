@@ -2,16 +2,6 @@ import { render, screen } from '../../test-utils'
 import { SaveResetControls } from '@/components/sidebar/SaveResetControls'
 import userEvent from '@testing-library/user-event'
 
-// Mock Clerk components
-vi.mock('@clerk/nextjs', () => ({
-  SignUpButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Show: ({ when, children }: { when: string; children: React.ReactNode }) => {
-    // In test environment, assume we are always signed out unless explicitly mocked differently
-    // For this test, we test the signed-out state
-    return when === 'signed-out' ? <div>{children}</div> : null
-  },
-}))
-
 describe('SaveResetControls', () => {
   const mockOnSave = vi.fn()
   const mockOnReset = vi.fn()
@@ -28,7 +18,6 @@ describe('SaveResetControls', () => {
 
     expect(screen.queryByText('💾 Opslaan in geschiedenis')).toBeNull()
     expect(screen.getByText('Alles wissen')).toBeDefined()
-    expect(screen.getByText('Gratis registreren')).toBeDefined()
   })
 
   it('renders correctly when saved and signed in', () => {
