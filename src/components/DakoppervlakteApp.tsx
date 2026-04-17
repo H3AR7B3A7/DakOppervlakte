@@ -3,7 +3,7 @@
 import React, { useCallback, useState } from 'react'
 import { Show, SignInButton, SignUpButton, useUser } from '@clerk/nextjs'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
 import { useMapOrientation } from '@/hooks/useMapOrientation'
@@ -33,6 +33,7 @@ const DRAWER_TITLE_ID = 'sidebar-drawer-title'
 
 export function DakoppervlakteApp() {
   const t = useTranslations()
+  const locale = useLocale()
   const { user } = useUser()
   const isSignedIn = !!user
 
@@ -50,9 +51,13 @@ export function DakoppervlakteApp() {
     addPolygonFromPath,
     deletePolygon, renamePolygon, togglePolygonExcluded,
     resetAll, restorePolygons, serializedPolygons,
-  } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt })
+  } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt, locale })
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
   const { count: usageCount, increment: incrementSearchCount } = useUsageCounter()
+  const { count: autogenCount, increment: incrementAutogenCount } = useUsageCounter({
+    endpoint: '/api/autogen-counter',
+    storageKey: 'dakoppervlakte_autogen_addresses',
+  })
 
   const [saved, setSaved] = useState(false)
   const [autoGenerate, setAutoGenerate] = useState(true)
@@ -87,6 +92,7 @@ export function DakoppervlakteApp() {
             const coords = data.geometry.coordinates[0] as [number, number][]
             const path = coords.map(([lng, lat]) => ({ lat, lng }))
             addPolygonFromPath(path)
+            incrementAutogenCount(address)
           } else {
             setAutoGenerateError(t('Sidebar.noBuildingFound'))
             setTimeout(() => setAutoGenerateError(''), 5000)
@@ -99,7 +105,7 @@ export function DakoppervlakteApp() {
           setTimeout(() => startDrawing(), 600)
         })
     })
-  }, [address, autoGenerate, geocodeAndNavigate, incrementSearchCount, startDrawing, addPolygonFromPath, mapInstanceRef, resetAll, t])
+  }, [address, autoGenerate, geocodeAndNavigate, incrementSearchCount, incrementAutogenCount, startDrawing, addPolygonFromPath, mapInstanceRef, resetAll, t])
 
   const handleRestore = useCallback((restored: Search) => {
     setAddress(restored.address)
@@ -152,6 +158,7 @@ export function DakoppervlakteApp() {
     >
       <Header
         usageCount={usageCount}
+        autogenCount={autogenCount}
         onMenuClick={() => setDrawerOpen((o) => !o)}
         drawerOpen={drawerOpen}
         drawerId={DRAWER_TITLE_ID}
@@ -168,6 +175,7 @@ export function DakoppervlakteApp() {
       >
         <SidebarDrawer
           open={drawerOpen}
+          onOpen={() => setDrawerOpen(true)}
           onClose={() => setDrawerOpen(false)}
           titleId={DRAWER_TITLE_ID}
         >
@@ -197,34 +205,6 @@ export function DakoppervlakteApp() {
             <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.5 }}>
               {t('App.subtitle')}
             </p>
-          </div>
-
-          <div
-            className="flex md:hidden"
-            style={{
-              padding: '12px 24px',
-              borderBottom: '1px solid var(--border)',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-              flexShrink: 0,
-            }}
-          >
-            {usageCount !== null && usageCount > 0 && (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {t('Sidebar.searchesCount', { count: usageCount })}
-              </span>
-            )}
-            <Show when="signed-out">
-              <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                <SignInButton mode="modal">
-                  <Button variant="outline">{t('Header.signIn')}</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button variant="accent">{t('Common.register')}</Button>
-                </SignUpButton>
-              </div>
-            </Show>
           </div>
 
           <div style={{ flexShrink: 0 }}>
@@ -315,6 +295,34 @@ export function DakoppervlakteApp() {
               />
             </div>
           </Show>
+
+          <div
+            className="flex md:hidden"
+            style={{
+              padding: '12px 24px',
+              borderTop: '1px solid var(--border)',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+              gap: 10,
+              flexShrink: 0,
+            }}
+          >
+            {usageCount !== null && usageCount > 0 && (
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
+                {t('Sidebar.statsBoast', { search: usageCount, autogen: autogenCount ?? 0 })}
+              </span>
+            )}
+            <Show when="signed-out">
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                <SignInButton mode="modal">
+                  <Button variant="outline">{t('Header.signIn')}</Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button variant="accent">{t('Common.register')}</Button>
+                </SignUpButton>
+              </div>
+            </Show>
+          </div>
         </SidebarDrawer>
 
         <MapView mapRef={mapRef} mapLoaded={mapLoaded}>

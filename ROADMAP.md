@@ -8,6 +8,7 @@
   - hide the search form when the user has made a search and show a "new search" button instead that scrolls up and shows the form again
   - or just have tabs for search / orientate / history
 - [x] Mobile support: Sidebar hamburger, with smaller ui toggles for the layers as an overlay over the map
+- [x] Add distances between polygon points on selection lines. This should be possible frontend.
 - [ ] Potentially increase accuracy of auto generation of roof selection, by using the larger polygon that we are filtering right now
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
 - [ ] Add github action that runs `build` and `test` in package.json

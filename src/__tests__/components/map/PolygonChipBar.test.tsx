@@ -3,6 +3,23 @@ import userEvent from '@testing-library/user-event'
 import { PolygonChipBar } from '@/components/map/PolygonChipBar'
 import type { PolygonEntry } from '@/lib/types'
 
+beforeEach(() => {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches: !query.includes('min-width: 768px'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  })
+})
+
 function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {
   return {
     id: crypto.randomUUID(),
@@ -17,6 +34,7 @@ function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {
       get: vi.fn((key: string) => (key === 'fillColor' ? '#6ee7b7' : undefined)),
       set: vi.fn(),
     } as unknown as google.maps.Polygon,
+    edgeLabels: { update: vi.fn(), setMap: vi.fn(), clear: vi.fn() },
     ...overrides,
   }
 }
@@ -26,6 +44,33 @@ describe('PolygonChipBar', () => {
     const { container } = render(
       <PolygonChipBar
         polygons={[]}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onToggleExcluded={vi.fn()}
+      />,
+    )
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing on desktop viewport even with polygons', () => {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: (query: string) => ({
+        matches: query.includes('min-width: 768px'),
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    })
+
+    const { container } = render(
+      <PolygonChipBar
+        polygons={[makeEntry({ label: 'Vlak 1' })]}
         onDelete={vi.fn()}
         onRename={vi.fn()}
         onToggleExcluded={vi.fn()}

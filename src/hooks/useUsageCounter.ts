@@ -2,50 +2,61 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-const STORAGE_KEY = 'dakoppervlakte_searched_addresses'
+export interface UsageCounterOptions {
+  endpoint?: string
+  storageKey?: string
+}
 
-function getStoredAddresses(): string[] {
+const DEFAULTS = {
+  endpoint: '/api/counter',
+  storageKey: 'dakoppervlakte_searched_addresses',
+}
+
+function getStoredAddresses(storageKey: string): string[] {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    return JSON.parse(localStorage.getItem(storageKey) || '[]')
   } catch {
     return []
   }
 }
 
-function hasSearched(address: string): boolean {
-  return getStoredAddresses().includes(address.trim().toLowerCase())
+function hasSeen(storageKey: string, address: string): boolean {
+  return getStoredAddresses(storageKey).includes(address.trim().toLowerCase())
 }
 
-function markSearched(address: string) {
-  const addresses = getStoredAddresses()
+function markSeen(storageKey: string, address: string) {
+  const addresses = getStoredAddresses(storageKey)
   const normalized = address.trim().toLowerCase()
   if (!addresses.includes(normalized)) {
     addresses.push(normalized)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(addresses))
+    localStorage.setItem(storageKey, JSON.stringify(addresses))
   }
 }
 
-export function useUsageCounter() {
+export function useUsageCounter(options: UsageCounterOptions = {}) {
+  const endpoint = options.endpoint ?? DEFAULTS.endpoint
+  const storageKey = options.storageKey ?? DEFAULTS.storageKey
+
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
-    fetch('/api/counter')
+    fetch(endpoint)
       .then((r) => r.json())
       .then((d) => setCount(d.count ?? null))
       .catch(() => {})
-  }, [])
+  }, [endpoint])
 
   const increment = useCallback(async (address: string) => {
-    if (!address.trim() || hasSearched(address)) return
-    markSearched(address)
+    if (!address.trim() || hasSeen(storageKey, address)) return
+    markSeen(storageKey, address)
     try {
-      const res = await fetch('/api/counter', { method: 'POST' })
+      const res = await fetch(endpoint, { method: 'POST' })
       const data = await res.json()
       setCount(data.count ?? null)
     } catch {
       // non-critical
     }
-  }, [])
+  }, [endpoint, storageKey])
 
   return { count, increment }
 }

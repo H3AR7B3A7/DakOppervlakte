@@ -57,9 +57,9 @@ export const MockMarker = vi.fn().mockImplementation(function () {
   return { setMap: vi.fn(), addListener: et.addListener }
 })
 
-export const MockAdvancedMarkerElement = vi.fn().mockImplementation(function () {
+export const MockAdvancedMarkerElement = vi.fn().mockImplementation(function ({ map = null, position = null, content = null }: { map?: unknown; position?: unknown; content?: unknown } = {}) {
   const et = makeEventTarget()
-  return { map: null, addListener: et.addListener }
+  return { map, position, content, addListener: et.addListener }
 })
 
 export const MockGeocoder = vi.fn().mockImplementation(function () {
@@ -104,6 +104,8 @@ export const MockMap = vi.fn().mockImplementation(function () {
     geometry: {
       spherical: {
         computeArea: vi.fn(() => 100),
+        computeDistanceBetween: vi.fn(() => 5),
+        interpolate: vi.fn((a: unknown) => a),
       },
     },
   },

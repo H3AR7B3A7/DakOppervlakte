@@ -23,9 +23,19 @@ vi.mock('@clerk/nextjs', () => ({
 const fetchMock = vi.fn()
 vi.stubGlobal('fetch', fetchMock)
 
-function setupFetch(history: unknown[] = []) {
+function setupFetch(
+  history: unknown[] = [],
+  opts: { buildingPolygon?: unknown } = {},
+) {
   fetchMock.mockImplementation((url: string, options?: RequestInit) => {
     const method = options?.method ?? 'GET'
+    if (url.includes('/api/autogen-counter')) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ count: method === 'POST' ? 8 : 7 }),
+        text: async () => JSON.stringify({ count: method === 'POST' ? 8 : 7 }),
+      })
+    }
     if (url.includes('/api/counter')) {
       return Promise.resolve({
         ok: true,
@@ -45,6 +55,13 @@ function setupFetch(history: unknown[] = []) {
         ok: true,
         json: async () => ({ id: 1 }),
         text: async () => '{"id":1}',
+      })
+    }
+    if (url.includes('/api/building-polygon') && opts.buildingPolygon) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => opts.buildingPolygon,
+        text: async () => JSON.stringify(opts.buildingPolygon),
       })
     }
     return Promise.resolve({ ok: true, json: async () => ({}), text: async () => '{}' })
@@ -285,6 +302,72 @@ describe('Signed-in user saves and views history', () => {
 
     expect(screen.getAllByText('Dak A').length).toBeGreaterThan(0)
     vi.useRealTimers()
+  })
+})
+
+describe('Successful building autogeneration', () => {
+  const user = userEvent.setup()
+  beforeEach(() => {
+    mockUserRef.current = null
+    localStorage.clear()
+  })
+  afterEach(() => vi.clearAllMocks())
+
+  it('increments the autogen counter when the building lookup returns a polygon', async () => {
+    setupFetch([], {
+      buildingPolygon: {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[4.4, 51.1], [4.41, 51.1], [4.41, 51.11], [4.4, 51.1]]],
+        },
+      },
+    })
+    render(<DakoppervlakteApp />)
+
+    const geocoder = MockGeocoder.mock.results[MockGeocoder.mock.results.length - 1].value
+    geocoder.geocode.mockImplementation(
+      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
+        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
+      },
+    )
+
+    await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1, Antwerpen')
+    await user.click(screen.getByRole('button', { name: /zoeken/i }))
+
+    await waitFor(() => {
+      const autogenCalls = fetchMock.mock.calls.filter(
+        ([url, init]) => typeof url === 'string' && url.includes('/api/autogen-counter') && (init as RequestInit | undefined)?.method === 'POST'
+      )
+      expect(autogenCalls).toHaveLength(1)
+    })
+  })
+
+  it('does not increment the autogen counter when the building lookup fails', async () => {
+    setupFetch()
+    render(<DakoppervlakteApp />)
+
+    const geocoder = MockGeocoder.mock.results[MockGeocoder.mock.results.length - 1].value
+    geocoder.geocode.mockImplementation(
+      (_req: unknown, cb: (results: unknown[], status: string) => void) => {
+        cb([{ geometry: { location: { lat: () => 51.1, lng: () => 4.4 } } }], 'OK')
+      },
+    )
+
+    await user.type(screen.getByRole('textbox', { name: /adres/i }), 'Unknown Street 99')
+    await user.click(screen.getByRole('button', { name: /zoeken/i }))
+
+    await waitFor(() => {
+      const buildingCalls = fetchMock.mock.calls.filter(
+        ([url]) => typeof url === 'string' && url.includes('/api/building-polygon')
+      )
+      expect(buildingCalls.length).toBeGreaterThan(0)
+    })
+
+    const autogenPosts = fetchMock.mock.calls.filter(
+      ([url, init]) => typeof url === 'string' && url.includes('/api/autogen-counter') && (init as RequestInit | undefined)?.method === 'POST'
+    )
+    expect(autogenPosts).toHaveLength(0)
   })
 })
 

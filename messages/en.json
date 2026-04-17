@@ -22,7 +22,7 @@
     "addPlane": "Add another plane",
     "totalArea": "Total area",
     "unit": "m²",
-    "searchesCount": "{count, plural, =0 {no searches} one {1 search} other {# searches}}",
+    "statsBoast": "{autogen} of {search} roofs in one click",
     "saveToHistory": "💾 Save to history",
     "updateCounter": "📊 Update counter",
     "clearAll": "Clear all",

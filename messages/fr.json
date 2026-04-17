@@ -22,7 +22,7 @@
     "addPlane": "Ajouter un autre plan",
     "totalArea": "Surface totale",
     "unit": "m²",
-    "searchesCount": "{count, plural, =0 {pas de recherches} one {1 recherche} other {# recherches}}",
+    "statsBoast": "{autogen} sur {search} toits en un clic",
     "saveToHistory": "💾 Enregistrer dans l'historique",
     "updateCounter": "📊 Mettre à jour le compteur",
     "clearAll": "Tout effacer",

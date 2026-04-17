@@ -3,14 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PolygonEntry, DrawingMode, PolygonData } from '@/lib/types'
 import { generatePolygonColor, normalizeHeading } from '@/lib/utils'
+import { createEdgeLabels, type EdgeLabelsController } from '@/lib/edgeLabels'
 
 interface UsePolygonDrawingOptions {
   mapInstanceRef: React.RefObject<google.maps.Map | null>
   currentHeading: number
   currentTilt: number
+  locale: string
 }
 
-export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt }: UsePolygonDrawingOptions) {
+export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt, locale }: UsePolygonDrawingOptions) {
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const dblClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const rightClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
@@ -18,6 +20,7 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
   const tempMarkersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([])
   const tempPathRef = useRef<google.maps.LatLng[]>([])
   const previewPolyRef = useRef<google.maps.Polyline | null>(null)
+  const previewLabelsRef = useRef<EdgeLabelsController | null>(null)
   const polygonsRef = useRef<PolygonEntry[]>([])
 
   const [mode, setMode] = useState<DrawingMode>('idle')
@@ -33,11 +36,13 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
       const headingMatch = normalizeHeading(p.heading) === normalizeHeading(currentHeading)
       const tiltMatch = p.tilt === currentTilt
       const shouldBeOnMap = headingMatch && tiltMatch
-      
+
       if (shouldBeOnMap && p.polygon.getMap() !== map) {
         p.polygon.setMap(map)
+        p.edgeLabels.setMap(map)
       } else if (!shouldBeOnMap && p.polygon.getMap() === map) {
         p.polygon.setMap(null)
+        p.edgeLabels.setMap(null)
       }
     })
   }, [currentHeading, currentTilt, mapInstanceRef, polygons])
@@ -48,6 +53,10 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     return { id: p.id, label: p.label, area: p.area, path: pts, heading: p.heading, tilt: p.tilt }
   })
 
+  const refreshPreviewLabels = useCallback(() => {
+    previewLabelsRef.current?.update(tempPathRef.current, false)
+  }, [])
+
   const clearDrawingState = useCallback(() => {
     tempMarkersRef.current.forEach((m) => { m.map = null })
     tempMarkersRef.current = []
@@ -55,6 +64,10 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     if (previewPolyRef.current) {
       previewPolyRef.current.setMap(null)
       previewPolyRef.current = null
+    }
+    if (previewLabelsRef.current) {
+      previewLabelsRef.current.clear()
+      previewLabelsRef.current = null
     }
     clickListenerRef.current?.remove()
     clickListenerRef.current = null
@@ -78,7 +91,8 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     path.pop()
     setPointCount(path.length)
     previewPolyRef.current?.setPath(path)
-  }, [])
+    refreshPreviewLabels()
+  }, [refreshPreviewLabels])
 
   const syncPolygons = () => {
     setPolygons([...polygonsRef.current])
@@ -86,12 +100,57 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
 
   const resetAll = useCallback(() => {
     clearDrawingState()
-    polygonsRef.current.forEach((e) => e.polygon.setMap(null))
+    polygonsRef.current.forEach((e) => {
+      e.polygon.setMap(null)
+      e.edgeLabels.clear()
+    })
     polygonsRef.current = []
     syncPolygons()
     setMode('idle')
   }, [clearDrawingState])
 
+  const attachPolygonEntry = useCallback(
+    (
+      polygon: google.maps.Polygon,
+      options: { id: string; label: string; area: number; heading: number; tilt: number }
+    ): PolygonEntry => {
+      const map = mapInstanceRef.current
+      const edgeLabels = createEdgeLabels(map!, locale)
+
+      const collectPath = (): google.maps.LatLng[] => {
+        const pts: google.maps.LatLng[] = []
+        polygon.getPath().forEach((pt) => pts.push(pt))
+        return pts
+      }
+
+      edgeLabels.update(collectPath(), true)
+
+      const onGeometryChange = () => {
+        const pts = collectPath()
+        const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
+        polygonsRef.current = polygonsRef.current.map((e) =>
+          e.id === options.id ? { ...e, area: newArea } : e
+        )
+        edgeLabels.update(pts, true)
+        syncPolygons()
+      }
+      polygon.getPath().addListener('set_at', onGeometryChange)
+      polygon.getPath().addListener('insert_at', onGeometryChange)
+      polygon.getPath().addListener('remove_at', onGeometryChange)
+
+      return {
+        id: options.id,
+        label: options.label,
+        area: options.area,
+        polygon,
+        heading: options.heading,
+        tilt: options.tilt,
+        excluded: false,
+        edgeLabels,
+      }
+    },
+    [mapInstanceRef, locale]
+  )
 
   const restorePolygons = useCallback(
     (data: PolygonData[]) => {
@@ -110,34 +169,19 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
           draggable: false,
           map,
         })
-
-        const updateArea = () => {
-          const pts: google.maps.LatLng[] = []
-          polygon.getPath().forEach((p) => pts.push(p))
-          const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
-          polygonsRef.current = polygonsRef.current.map((e) =>
-            e.id === d.id ? { ...e, area: newArea } : e
-          )
-          syncPolygons()
-        }
-        polygon.getPath().addListener('set_at', updateArea)
-        polygon.getPath().addListener('insert_at', updateArea)
-
-        return {
+        return attachPolygonEntry(polygon, {
           id: d.id,
           label: d.label,
           area: d.area,
-          polygon,
           heading: d.heading ?? 0,
           tilt: d.tilt ?? 0,
-          excluded: false,
-        }
+        })
       })
 
       polygonsRef.current = restored
       syncPolygons()
     },
-    [mapInstanceRef, resetAll]
+    [mapInstanceRef, resetAll, attachPolygonEntry]
   )
 
   const finishPolygon = useCallback(() => {
@@ -162,31 +206,18 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
     const id = crypto.randomUUID()
     const label = `Vlak ${polygonsRef.current.length + 1}`
 
-    const entry: PolygonEntry = {
+    const entry = attachPolygonEntry(polygon, {
       id,
       label,
       area,
-      polygon,
       heading: currentHeading,
       tilt: currentTilt,
-      excluded: false,
-    }
+    })
+
     polygonsRef.current = [...polygonsRef.current, entry]
     syncPolygons()
     setMode('idle')
-
-    const updateArea = () => {
-      const pts: google.maps.LatLng[] = []
-      polygon.getPath().forEach((p) => pts.push(p))
-      const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
-      polygonsRef.current = polygonsRef.current.map((e) =>
-        e.id === id ? { ...e, area: newArea } : e
-      )
-      syncPolygons()
-    }
-    polygon.getPath().addListener('set_at', updateArea)
-    polygon.getPath().addListener('insert_at', updateArea)
-  }, [clearDrawingState, mapInstanceRef, currentHeading, currentTilt])
+  }, [clearDrawingState, mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry])
 
   const addPolygonFromPath = useCallback(
     (path: { lat: number; lng: number }[]) => {
@@ -209,31 +240,18 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
       const area = Math.round(areaSqM * 10) / 10
       const id = crypto.randomUUID()
 
-      const entry: PolygonEntry = {
+      const entry = attachPolygonEntry(polygon, {
         id,
         label: 'Auto',
         area,
-        polygon,
         heading: currentHeading,
         tilt: currentTilt,
-        excluded: false,
-      }
+      })
+
       polygonsRef.current = [...polygonsRef.current, entry]
       syncPolygons()
-
-      const updateArea = () => {
-        const pts: google.maps.LatLng[] = []
-        polygon.getPath().forEach((p) => pts.push(p))
-        const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
-        polygonsRef.current = polygonsRef.current.map((e) =>
-          e.id === id ? { ...e, area: newArea } : e
-        )
-        syncPolygons()
-      }
-      polygon.getPath().addListener('set_at', updateArea)
-      polygon.getPath().addListener('insert_at', updateArea)
     },
-    [mapInstanceRef, currentHeading, currentTilt]
+    [mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry]
   )
 
   const startDrawing = useCallback(() => {
@@ -251,6 +269,7 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
       map,
     })
     previewPolyRef.current = previewLine
+    previewLabelsRef.current = createEdgeLabels(map, locale)
 
     clickListenerRef.current = map.addListener('click', (e: google.maps.MapMouseEvent) => {
       if (!e.latLng) return
@@ -276,6 +295,7 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
 
       tempMarkersRef.current.push(marker)
       previewLine.setPath(tempPathRef.current)
+      refreshPreviewLabels()
     })
 
     dblClickListenerRef.current = map.addListener(
@@ -299,11 +319,14 @@ export function usePolygonDrawing({ mapInstanceRef, currentHeading, currentTilt 
       map.getDiv().addEventListener('contextmenu', onContextMenu)
       contextMenuHandlerRef.current = onContextMenu
     }
-  }, [clearDrawingState, finishPolygon, mapInstanceRef, undoLastPoint])
+  }, [clearDrawingState, finishPolygon, mapInstanceRef, undoLastPoint, locale, refreshPreviewLabels])
 
   const deletePolygon = useCallback((id: string) => {
     const entry = polygonsRef.current.find((e) => e.id === id)
-    entry?.polygon.setMap(null)
+    if (entry) {
+      entry.polygon.setMap(null)
+      entry.edgeLabels.clear()
+    }
     polygonsRef.current = polygonsRef.current.filter((e) => e.id !== id)
     syncPolygons()
   }, [])

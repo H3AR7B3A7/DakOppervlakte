@@ -17,6 +17,8 @@ export type Search = {
   polygons?: PolygonData[]
 }
 
+import type { EdgeLabelsController } from './edgeLabels'
+
 export type PolygonEntry = {
   id: string
   label: string
@@ -29,6 +31,8 @@ export type PolygonEntry = {
   tilt: number
   /** Whether this polygon is excluded from the total area calculation */
   excluded: boolean
+  /** Controls the distance labels rendered on each edge of this polygon */
+  edgeLabels: EdgeLabelsController
 }
 
 export type DrawingMode = 'idle' | 'drawing'

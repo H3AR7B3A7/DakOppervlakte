@@ -22,7 +22,7 @@
     "addPlane": "Nog een vlak toevoegen",
     "totalArea": "Totale oppervlakte",
     "unit": "m²",
-    "searchesCount": "{count, plural, =0 {geen zoekopdrachten} one {1 zoekopdracht} other {# zoekopdrachten}}",
+    "statsBoast": "{autogen} van {search} daken in één klik",
     "saveToHistory": "💾 Opslaan in geschiedenis",
     "updateCounter": "📊 Teller bijwerken",
     "clearAll": "Alles wissen",

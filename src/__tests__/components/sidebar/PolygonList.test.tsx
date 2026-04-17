@@ -24,6 +24,7 @@ function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {
       get: vi.fn((key: string) => (key === 'fillColor' ? '#6ee7b7' : undefined)),
       set: vi.fn(),
     } as unknown as google.maps.Polygon,
+    edgeLabels: { update: vi.fn(), setMap: vi.fn(), clear: vi.fn() },
     ...overrides,
   }
 }

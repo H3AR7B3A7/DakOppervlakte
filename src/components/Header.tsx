@@ -7,12 +7,13 @@ import { Button, Logo, HamburgerButton } from '@/components/ui'
 
 interface HeaderProps {
   usageCount: number | null
+  autogenCount?: number | null
   onMenuClick?: () => void
   drawerOpen?: boolean
   drawerId?: string
 }
 
-export function Header({ usageCount, onMenuClick, drawerOpen = false, drawerId }: HeaderProps) {
+export function Header({ usageCount, autogenCount = null, onMenuClick, drawerOpen = false, drawerId }: HeaderProps) {
   const t = useTranslations()
 
   return (
@@ -62,7 +63,7 @@ export function Header({ usageCount, onMenuClick, drawerOpen = false, drawerId }
         <div className="hidden md:flex" style={{ alignItems: 'center', gap: 12 }}>
           {usageCount !== null && usageCount > 0 && (
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              {t('Sidebar.searchesCount', { count: usageCount })}
+              {t('Sidebar.statsBoast', { search: usageCount, autogen: autogenCount ?? 0 })}
             </span>
           )}
 

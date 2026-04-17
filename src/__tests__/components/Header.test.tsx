@@ -12,19 +12,24 @@ vi.mock('@clerk/nextjs', () => ({
 
 describe('Header', () => {
   describe('Usage count display', () => {
-    it('shows search count when available', () => {
-      render(<Header usageCount={42} />)
-      expect(screen.getByText(/42 zoekopdrachten/)).toBeInTheDocument()
+    it('shows the boast with both counts when searches exist', () => {
+      render(<Header usageCount={42} autogenCount={7} />)
+      expect(screen.getByText(/7 van 42 daken in één klik/)).toBeInTheDocument()
     })
 
-    it('hides count when zero', () => {
+    it('hides the boast when search count is zero', () => {
       render(<Header usageCount={0} />)
-      expect(screen.queryByText(/zoekopdrachten/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/in één klik/)).not.toBeInTheDocument()
     })
 
-    it('shows singular form for count of 1', () => {
-      render(<Header usageCount={1} />)
-      expect(screen.getByText(/1 zoekopdracht(?!en)/)).toBeInTheDocument()
+    it('shows the boast with a zero autogen count', () => {
+      render(<Header usageCount={5} autogenCount={0} />)
+      expect(screen.getByText(/0 van 5 daken in één klik/)).toBeInTheDocument()
+    })
+
+    it('treats a missing autogen count as zero', () => {
+      render(<Header usageCount={5} />)
+      expect(screen.getByText(/0 van 5 daken in één klik/)).toBeInTheDocument()
     })
   })
 

@@ -19,6 +19,7 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
   const format = useFormatter()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [pendingLabel, setPendingLabel] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suppressClickRef = useRef(false)
   const skipCommitRef = useRef(false)
@@ -27,7 +28,15 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
     if (longPressTimer.current) clearTimeout(longPressTimer.current)
   }, [])
 
-  if (polygons.length === 0) return null
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsMobile(!mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  if (polygons.length === 0 || !isMobile) return null
 
   const total = polygons.reduce((s, p) => (p.excluded ? s : s + p.area), 0)
 
@@ -55,25 +64,49 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
 
   return (
     <div
-      className="md:hidden"
       style={{
         position: 'absolute',
-        bottom: 16,
+        top: 16,
         left: 16,
-        right: 16,
         display: 'flex',
+        flexDirection: 'column',
         gap: 8,
-        alignItems: 'center',
+        alignItems: 'stretch',
+        width: 'max-content',
+        maxWidth: 'calc(100% - 88px)',
         zIndex: 5,
       }}
     >
       <div
+        data-testid="chip-bar-total"
+        style={{
+          background: 'var(--accent)',
+          color: '#000',
+          borderRadius: 18,
+          padding: '6px 12px',
+          fontSize: 12,
+          fontWeight: 700,
+          fontFamily: 'Syne, sans-serif',
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          lineHeight: 1.2,
+        }}
+      >
+        <span>{t('totalLabel')}</span>
+        <span style={{ fontSize: 11 }}>
+          {format.number(total, { maximumFractionDigits: 1 })} {tSide('unit')}
+        </span>
+      </div>
+      <div
         style={{
           display: 'flex',
-          gap: 8,
-          overflowX: 'auto',
-          flex: 1,
-          paddingBottom: 4,
+          flexDirection: 'column',
+          gap: 6,
+          maxHeight: 'calc(100vh - 180px)',
+          overflowY: 'auto',
+          paddingRight: 4,
         }}
       >
         {polygons.map((p) => {
@@ -88,7 +121,7 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
                 alignItems: 'center',
                 gap: 6,
                 background: 'var(--surface2)',
-                border: '1px solid var(--border)',
+                border: `1px solid ${color}`,
                 borderRadius: 18,
                 padding: '6px 10px',
                 flexShrink: 0,
@@ -96,10 +129,6 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
                 textDecoration: p.excluded ? 'line-through' : 'none',
               }}
             >
-              <span
-                aria-hidden="true"
-                style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }}
-              />
               {isEditing ? (
                 <input
                   autoFocus
@@ -161,9 +190,13 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
                     cursor: 'pointer',
                     padding: 0,
                     display: 'flex',
-                    gap: 4,
+                    flexDirection: 'column',
+                    gap: 1,
                     alignItems: 'center',
-                    maxWidth: 160,
+                    textAlign: 'center',
+                    flex: 1,
+                    minWidth: 0,
+                    lineHeight: 1.2,
                   }}
                 >
                   <span
@@ -171,12 +204,12 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      maxWidth: 100,
+                      maxWidth: '100%',
                     }}
                   >
                     {p.label}
                   </span>
-                  <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--accent)', fontWeight: 600, fontSize: 11 }}>
                     {format.number(p.area, { maximumFractionDigits: 1 })} {tSide('unit')}
                   </span>
                 </button>
@@ -201,21 +234,6 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
             </div>
           )
         })}
-      </div>
-      <div
-        data-testid="chip-bar-total"
-        style={{
-          background: 'var(--accent)',
-          color: '#000',
-          borderRadius: 18,
-          padding: '6px 12px',
-          fontSize: 12,
-          fontWeight: 700,
-          fontFamily: 'Syne, sans-serif',
-          flexShrink: 0,
-        }}
-      >
-        {t('totalLabel')} {format.number(total, { maximumFractionDigits: 1 })} {tSide('unit')}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { generatePolygonColor, normalizeHeading } from '@/lib/utils'
+import { formatDistance, generatePolygonColor, normalizeHeading } from '@/lib/utils'
 
 describe('generatePolygonColor', () => {
   it('returns a valid hsl() string', () => {
@@ -12,6 +12,27 @@ describe('generatePolygonColor', () => {
       expect(hue).toBeGreaterThanOrEqual(40)
       expect(hue).toBeLessThan(320)
     }
+  })
+})
+
+describe('formatDistance', () => {
+  it('uses the locale-appropriate decimal separator', () => {
+    expect(formatDistance(3.5, 'nl-BE')).toMatch(/3,5/)
+    expect(formatDistance(3.5, 'en-US')).toMatch(/3\.5/)
+  })
+
+  it('includes the metre unit symbol', () => {
+    expect(formatDistance(3.5, 'en-US')).toMatch(/m\b/)
+  })
+
+  it('shows one fraction digit below 10 m', () => {
+    expect(formatDistance(2.37, 'en-US')).toMatch(/2\.4/)
+  })
+
+  it('rounds to whole metres at 10 m and above', () => {
+    const formatted = formatDistance(47.6, 'en-US')
+    expect(formatted).toMatch(/48/)
+    expect(formatted).not.toMatch(/\./)
   })
 })
 

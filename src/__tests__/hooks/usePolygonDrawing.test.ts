@@ -35,6 +35,7 @@ function setup(overrides?: { heading?: number; tilt?: number }) {
       mapInstanceRef,
       currentHeading: props.heading,
       currentTilt: props.tilt,
+      locale: 'nl-BE',
     }),
     { initialProps: { heading, tilt } }
   )
@@ -76,7 +77,7 @@ describe('User draws and manages roof polygons', () => {
     it('stays idle when the map is not yet available', () => {
       const mapInstanceRef = { current: null }
       const { result } = renderHook(() =>
-        usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0 })
+        usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0, locale: 'nl-BE' })
       )
       act(() => result.current.startDrawing())
       expect(result.current.mode).toBe('idle')
@@ -110,7 +111,10 @@ describe('User draws and manages roof polygons', () => {
         map._trigger('click', { latLng: { lat: () => 51.1, lng: () => 4.1 } })
       })
 
-      expect(MockAdvancedMarkerElement).toHaveBeenCalledTimes(2)
+      const pointMarkerCalls = MockAdvancedMarkerElement.mock.calls.filter(
+        ([opts]) => (opts as { gmpClickable?: boolean })?.gmpClickable === true
+      )
+      expect(pointMarkerCalls).toHaveLength(2)
     })
 
     it('ignores map clicks that have no coordinates', () => {
