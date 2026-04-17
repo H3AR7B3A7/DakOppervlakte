@@ -1,4 +1,5 @@
 import { render, screen } from '../test-utils'
+import userEvent from '@testing-library/user-event'
 import { Header } from '@/components/Header'
 
 vi.mock('@clerk/nextjs', () => ({
@@ -43,6 +44,31 @@ describe('Header', () => {
     it('shows register button', () => {
       render(<Header usageCount={0} />)
       expect(screen.getByText('Registreren')).toBeInTheDocument()
+    })
+  })
+
+  describe('Mobile menu button', () => {
+    it('renders the hamburger when onMenuClick is provided', () => {
+      render(<Header usageCount={0} onMenuClick={vi.fn()} drawerOpen={false} />)
+      expect(screen.getByRole('button', { name: /menu openen/i })).toBeInTheDocument()
+    })
+
+    it('omits the hamburger when onMenuClick is not provided', () => {
+      render(<Header usageCount={0} />)
+      expect(screen.queryByRole('button', { name: /menu openen/i })).not.toBeInTheDocument()
+    })
+
+    it('reflects drawerOpen via aria-expanded and uses the close label when open', () => {
+      render(<Header usageCount={0} onMenuClick={vi.fn()} drawerOpen={true} />)
+      const btn = screen.getByRole('button', { name: /menu sluiten/i })
+      expect(btn).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('calls onMenuClick when tapped', async () => {
+      const onMenuClick = vi.fn()
+      render(<Header usageCount={0} onMenuClick={onMenuClick} drawerOpen={false} />)
+      await userEvent.click(screen.getByRole('button', { name: /menu openen/i }))
+      expect(onMenuClick).toHaveBeenCalledTimes(1)
     })
   })
 })

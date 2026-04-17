@@ -3,13 +3,16 @@
 import React from 'react'
 import { SignInButton, SignUpButton, UserButton, Show } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
-import { Button, Logo } from '@/components/ui'
+import { Button, Logo, HamburgerButton } from '@/components/ui'
 
 interface HeaderProps {
   usageCount: number | null
+  onMenuClick?: () => void
+  drawerOpen?: boolean
+  drawerId?: string
 }
 
-export function Header({ usageCount }: HeaderProps) {
+export function Header({ usageCount, onMenuClick, drawerOpen = false, drawerId = 'sidebar-drawer' }: HeaderProps) {
   const t = useTranslations()
 
   return (
@@ -27,7 +30,18 @@ export function Header({ usageCount }: HeaderProps) {
         zIndex: 100,
       }}
     >
-      <Logo />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {onMenuClick && (
+          <HamburgerButton
+            className="md:hidden"
+            ariaLabel={drawerOpen ? t('Sidebar.closeMenu') : t('Sidebar.openMenu')}
+            onClick={onMenuClick}
+            expanded={drawerOpen}
+            controls={drawerId}
+          />
+        )}
+        <Logo />
+      </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {usageCount !== null && usageCount > 0 && (
