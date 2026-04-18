@@ -5,7 +5,7 @@ import { routing } from './i18n/routing'
 
 const handleI18n = createIntlMiddleware(routing)
 
-export default clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware(async (_auth, req) => {
   // Don't run i18n middleware on API routes — it would prefix them with /en/api/...
   if (req.nextUrl.pathname.startsWith('/api/')) {
     return NextResponse.next()
