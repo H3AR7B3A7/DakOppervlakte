@@ -59,6 +59,7 @@ async function main() {
     ON CONFLICT (id) DO NOTHING
   `
 
+  // biome-ignore lint/suspicious/noConsole: CLI script; this is the intentional operator-facing output
   console.log('✅ Database initialized')
 }
 
