@@ -1,5 +1,5 @@
 // Coverage baseline (recorded 2026-04-18, Phase 3):
-//   usePolygonDrawing.ts lines covered: TBD — filled in Task 3.
+//   src/hooks/usePolygonDrawing.ts — usePolygonDrawing: 86.03% lines / 60.34% branches
 //   Do not let Phase 4/5 coverage drop below this baseline for usePolygonDrawing.
 //
 // Label assertions in this file are intentionally loose — Phase 4 localizes

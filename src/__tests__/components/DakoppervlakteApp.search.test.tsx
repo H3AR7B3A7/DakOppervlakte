@@ -1,5 +1,5 @@
 // Coverage baseline (recorded 2026-04-18, Phase 3):
-//   DakoppervlakteApp.tsx handleSearch lines covered: TBD — filled in Task 3.
+//   src/components/DakoppervlakteApp.tsx — handleSearch: 77.38% lines / 87.17% branches
 //   Do not let Phase 4/5 coverage drop below this baseline for handleSearch.
 
 import userEvent from '@testing-library/user-event'
@@ -293,6 +293,7 @@ describe('handleRestore: restoring a search from history', () => {
   })
 })
 
+// Guards the shared prelude: handleSearch must geocode + call map.setCenter before any branch runs.
 describe('Map integration sanity — the map actually receives a navigation', () => {
   it('calls setCenter on the map for any successful search', async () => {
     setupFetch({ building: 'feature' })
