@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from 'next-intl'
-import type { Search } from '@/lib/types'
+import type { Search } from '@/domain/search/types'
 
 interface SearchHistoryProps {
   history: Search[]

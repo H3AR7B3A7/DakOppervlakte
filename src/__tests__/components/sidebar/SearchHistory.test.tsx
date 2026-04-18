@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { SearchHistory } from '@/components/sidebar/SearchHistory'
-import type { Search } from '@/lib/types'
+import type { Search } from '@/domain/search/types'
 import { fireEvent, render, screen } from '../../test-utils'
 
 const ENTRIES: Search[] = [

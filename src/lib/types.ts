@@ -1,13 +1,4 @@
-import type { PolygonData } from '@/domain/polygon/types'
 import type { EdgeLabelsController } from './edgeLabels'
-
-export type Search = {
-  id: number
-  address: string
-  area_m2: number
-  created_at: string
-  polygons?: PolygonData[]
-}
 
 export type PolygonEntry = {
   id: string
