@@ -7,7 +7,7 @@ vi.mock('@clerk/nextjs', () => ({
   SignUpButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   UserButton: () => <div data-testid="user-button" />,
   Show: ({ when, children }: { when: string; children: React.ReactNode }) =>
-    when === 'signed-out' ? <>{children}</> : null,
+    when === 'signed-out' ? children : null,
 }))
 
 describe('Header', () => {
