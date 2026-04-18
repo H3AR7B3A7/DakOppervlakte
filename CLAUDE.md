@@ -59,7 +59,7 @@ Project richtlijnen voor AI-assistenten. Lees dit volledig voordat je code schri
 - **Component testing**: `@testing-library/react` + `@testing-library/user-event`
 - **Setup file**: `vitest.setup.ts` — imports `@testing-library/jest-dom` and installs the Google Maps stub
 - **Google Maps stub**: `src/__tests__/__mocks__/googleMaps.ts` — imported once in setup, never per-test
-- **Linter / formatter**: Biome (`npm run lint` → `biome check --write .`); config in `biome.json`; no semicolons, single quotes, 100-char lines
+- **Linter / formatter**: Biome (`npm run check` runs `biome check --write .`, which both formats and lints); config in `biome.json`; no semicolons, single quotes, 100-char lines
 
 ## Workflows
 
