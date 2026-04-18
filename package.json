@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "npx tsc --noEmit && next build",
     "start": "next start",
-    "lint": "eslint --fix",
-    "check": "npx tsc --noEmit && eslint --fix",
+    "lint": "biome check --write .",
+    "check": "npx tsc --noEmit && biome check --write .",
     "db:init": "tsx src/lib/init-db.ts",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
@@ -26,6 +26,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^16.0.0",
@@ -37,8 +38,6 @@
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^4.1.4",
     "@vitest/ui": "^4.1.4",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.3",
     "jsdom": "^25.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",

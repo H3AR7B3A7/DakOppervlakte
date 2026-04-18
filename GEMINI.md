@@ -7,7 +7,7 @@ Roof-area measurement tool. Users search an address on Google Maps, draw polygon
 ```bash
 npm run dev          # Start dev server
 npm run build        # Type-check + build
-npm run check        # Type-check (tsc --noEmit) + lint (eslint --fix) -- run before considering work complete
+npm run check        # Type-check (tsc --noEmit) + lint (biome check --write .) -- run before considering work complete
 npm test             # Vitest run with coverage
 npm run test:watch   # Vitest watch mode
 npm run test:ui      # Vitest browser UI
