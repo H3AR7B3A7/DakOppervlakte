@@ -115,6 +115,6 @@ body .cl-formButtonPrimary {
 }
 .start-drawing-button {
   margin-bottom: 16px;
-  padding: 11px;
-  font-weight: 700;
+  padding: 11px !important;
+  font-weight: 700 !important;
 }
