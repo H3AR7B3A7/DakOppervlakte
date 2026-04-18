@@ -46,17 +46,20 @@ export function useUsageCounter(options: UsageCounterOptions = {}) {
       .catch(() => {})
   }, [endpoint])
 
-  const increment = useCallback(async (address: string) => {
-    if (!address.trim() || hasSeen(storageKey, address)) return
-    markSeen(storageKey, address)
-    try {
-      const res = await fetch(endpoint, { method: 'POST' })
-      const data = await res.json()
-      setCount(data.count ?? null)
-    } catch {
-      // non-critical
-    }
-  }, [endpoint, storageKey])
+  const increment = useCallback(
+    async (address: string) => {
+      if (!address.trim() || hasSeen(storageKey, address)) return
+      markSeen(storageKey, address)
+      try {
+        const res = await fetch(endpoint, { method: 'POST' })
+        const data = await res.json()
+        setCount(data.count ?? null)
+      } catch {
+        // non-critical
+      }
+    },
+    [endpoint, storageKey],
+  )
 
   return { count, increment }
 }

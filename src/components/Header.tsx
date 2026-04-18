@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
-import { SignInButton, SignUpButton, UserButton, Show } from '@clerk/nextjs'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
-import { Button, Logo, HamburgerButton } from '@/components/ui'
+import React from 'react'
+import { Button, HamburgerButton, Logo } from '@/components/ui'
 
 interface HeaderProps {
   usageCount: number | null
@@ -13,7 +13,13 @@ interface HeaderProps {
   drawerId?: string
 }
 
-export function Header({ usageCount, autogenCount = null, onMenuClick, drawerOpen = false, drawerId }: HeaderProps) {
+export function Header({
+  usageCount,
+  autogenCount = null,
+  onMenuClick,
+  drawerOpen = false,
+  drawerId,
+}: HeaderProps) {
   const t = useTranslations()
 
   return (
@@ -78,9 +84,7 @@ export function Header({ usageCount, autogenCount = null, onMenuClick, drawerOpe
         </div>
 
         <Show when="signed-in">
-          <UserButton
-            appearance={{ elements: { avatarBox: { width: 32, height: 32 } } }}
-          />
+          <UserButton appearance={{ elements: { avatarBox: { width: 32, height: 32 } } }} />
         </Show>
       </div>
     </header>

@@ -1,6 +1,6 @@
-import { render, screen } from '../../test-utils'
-import { MapView } from '@/components/map/MapView'
 import React from 'react'
+import { MapView } from '@/components/map/MapView'
+import { render, screen } from '../../test-utils'
 
 describe('User sees the map area', () => {
   it('shows a loading spinner while the map is not ready', () => {
@@ -23,14 +23,14 @@ describe('User sees the map area', () => {
     const { rerender } = render(
       <MapView mapRef={mapRef} mapLoaded={false}>
         <div data-testid="overlay">Overlay</div>
-      </MapView>
+      </MapView>,
     )
     expect(screen.queryByTestId('overlay')).not.toBeInTheDocument()
 
     rerender(
       <MapView mapRef={mapRef} mapLoaded={true}>
         <div data-testid="overlay">Overlay</div>
-      </MapView>
+      </MapView>,
     )
     expect(screen.getByTestId('overlay')).toBeInTheDocument()
   })

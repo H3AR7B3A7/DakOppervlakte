@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { neon } from '@neondatabase/serverless'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +9,7 @@ export async function GET() {
 
   try {
     const sql = neon(url)
-    
+
     // Create tables
     await sql`
       CREATE TABLE IF NOT EXISTS searches (

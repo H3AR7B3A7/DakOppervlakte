@@ -1,5 +1,5 @@
-import React from 'react'
 import { useTranslations } from 'next-intl'
+import type React from 'react'
 
 interface MapOverlayControlsProps {
   is3D: boolean

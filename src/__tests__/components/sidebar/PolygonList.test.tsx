@@ -1,7 +1,7 @@
-import { render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { PolygonList } from '@/components/sidebar/PolygonList'
 import type { PolygonEntry } from '@/lib/types'
+import { render, screen } from '../../test-utils'
 
 // Real stub — no vi.mock() needed. The component only uses .get('fillColor') on the polygon.
 function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {

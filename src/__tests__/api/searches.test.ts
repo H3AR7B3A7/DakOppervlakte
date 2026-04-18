@@ -1,6 +1,6 @@
-import { GET, POST, DELETE } from '@/app/api/searches/route'
-import { NextRequest } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { NextRequest } from 'next/server'
+import { DELETE, GET, POST } from '@/app/api/searches/route'
 import getDb from '@/lib/db'
 
 // Mock Clerk and DB
@@ -20,7 +20,7 @@ describe('searches API', () => {
   it('GET returns 401 if not signed in', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
-    
+
     const res = await GET()
     expect(res.status).toBe(401)
   })
@@ -28,7 +28,7 @@ describe('searches API', () => {
   it('POST returns 401 if not signed in', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
-    
+
     const req = new NextRequest('http://localhost/api/searches', {
       method: 'POST',
       body: JSON.stringify({ address: 'test', area_m2: 10, polygons: [] }),
@@ -48,10 +48,10 @@ describe('searches API', () => {
       method: 'POST',
       body: JSON.stringify(payload),
     })
-    
+
     const res = await POST(req)
     expect(res.status).toBe(200)
-    
+
     // Check if SQL query contains ON CONFLICT
     const lastCall = mockSql.mock.calls[0]
     const queryParts = lastCall[0] as TemplateStringsArray
@@ -66,7 +66,7 @@ describe('searches API', () => {
   it('DELETE requires an ID', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any)
-    
+
     const req = new NextRequest('http://localhost/api/searches')
     const res = await DELETE(req)
     expect(res.status).toBe(400)

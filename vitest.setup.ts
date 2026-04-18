@@ -53,4 +53,3 @@ if (typeof window !== 'undefined' && typeof window.PointerEvent === 'undefined')
   // @ts-expect-error polyfill assignment
   globalThis.PointerEvent = PointerEventPolyfill
 }
-

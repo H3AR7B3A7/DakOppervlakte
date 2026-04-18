@@ -32,7 +32,15 @@ describe('building-polygon API', () => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[3.0, 51.0], [3.001, 51.0], [3.001, 51.001], [3.0, 51.001], [3.0, 51.0]]],
+        coordinates: [
+          [
+            [3.0, 51.0],
+            [3.001, 51.0],
+            [3.001, 51.001],
+            [3.0, 51.001],
+            [3.0, 51.0],
+          ],
+        ],
       },
     }
     mockFetch.mockResolvedValueOnce(makeWfsResponse([polygon]))
@@ -46,15 +54,25 @@ describe('building-polygon API', () => {
   })
 
   it('falls back to UrbIS when GRB returns no features', async () => {
-    mockFetch
-      .mockResolvedValueOnce(makeWfsResponse([]))
-      .mockResolvedValueOnce(makeWfsResponse([{
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[[4.35, 50.845], [4.351, 50.845], [4.351, 50.846], [4.35, 50.846], [4.35, 50.845]]],
+    mockFetch.mockResolvedValueOnce(makeWfsResponse([])).mockResolvedValueOnce(
+      makeWfsResponse([
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [4.35, 50.845],
+                [4.351, 50.845],
+                [4.351, 50.846],
+                [4.35, 50.846],
+                [4.35, 50.845],
+              ],
+            ],
+          },
         },
-      }]))
+      ]),
+    )
 
     const res = await GET(makeRequest('50.8455', '4.3505'))
     const body = await res.json()
@@ -68,14 +86,30 @@ describe('building-polygon API', () => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[3.0, 51.0], [3.001, 51.0], [3.001, 51.001], [3.0, 51.001], [3.0, 51.0]]],
+        coordinates: [
+          [
+            [3.0, 51.0],
+            [3.001, 51.0],
+            [3.001, 51.001],
+            [3.0, 51.001],
+            [3.0, 51.0],
+          ],
+        ],
       },
     }
     const farBuilding = {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[3.005, 51.005], [3.006, 51.005], [3.006, 51.006], [3.005, 51.006], [3.005, 51.005]]],
+        coordinates: [
+          [
+            [3.005, 51.005],
+            [3.006, 51.005],
+            [3.006, 51.006],
+            [3.005, 51.006],
+            [3.005, 51.005],
+          ],
+        ],
       },
     }
     mockFetch.mockResolvedValueOnce(makeWfsResponse([farBuilding, nearBuilding]))
@@ -88,9 +122,7 @@ describe('building-polygon API', () => {
   })
 
   it('returns empty when no buildings are found anywhere', async () => {
-    mockFetch
-      .mockResolvedValueOnce(makeWfsResponse([]))
-      .mockResolvedValueOnce(makeWfsResponse([]))
+    mockFetch.mockResolvedValueOnce(makeWfsResponse([])).mockResolvedValueOnce(makeWfsResponse([]))
 
     const res = await GET(makeRequest('51.0', '3.0'))
     const body = await res.json()
@@ -104,7 +136,15 @@ describe('building-polygon API', () => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[3.01, 51.01], [3.011, 51.01], [3.011, 51.011], [3.01, 51.011], [3.01, 51.01]]],
+        coordinates: [
+          [
+            [3.01, 51.01],
+            [3.011, 51.01],
+            [3.011, 51.011],
+            [3.01, 51.011],
+            [3.01, 51.01],
+          ],
+        ],
       },
     }
     mockFetch.mockResolvedValueOnce(makeWfsResponse([farBuilding]))

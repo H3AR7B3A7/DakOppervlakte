@@ -1,6 +1,6 @@
-import { render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { AddressSearch } from '@/components/sidebar/AddressSearch'
+import { render, screen } from '../../test-utils'
 
 function setup(overrides: Partial<React.ComponentProps<typeof AddressSearch>> = {}) {
   const props = {

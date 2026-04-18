@@ -1,15 +1,10 @@
-import React from 'react'
 import { useTranslations } from 'next-intl'
+import React from 'react'
 
 export function StepGuide() {
   const t = useTranslations('StepGuide')
-  
-  const STEPS = [
-    t('step1'),
-    t('step2'),
-    t('step3'),
-    t('step4'),
-  ] as const
+
+  const STEPS = [t('step1'), t('step2'), t('step3'), t('step4')] as const
 
   return (
     <ol

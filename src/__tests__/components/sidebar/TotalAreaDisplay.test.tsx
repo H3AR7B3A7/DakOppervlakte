@@ -1,11 +1,9 @@
-import { render, screen } from '../../test-utils'
 import { TotalAreaDisplay } from '@/components/sidebar/TotalAreaDisplay'
+import { render, screen } from '../../test-utils'
 
 describe('User sees the total roof area', () => {
   it('renders nothing when the total area is zero', () => {
-    const { container } = render(
-      <TotalAreaDisplay totalArea={0} polygonCount={0} />,
-    )
+    const { container } = render(<TotalAreaDisplay totalArea={0} polygonCount={0} />)
     expect(container).toBeEmptyDOMElement()
   })
 

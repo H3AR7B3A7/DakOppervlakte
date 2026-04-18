@@ -1,7 +1,7 @@
-import { act, fireEvent, render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { PolygonChipBar } from '@/components/map/PolygonChipBar'
 import type { PolygonEntry } from '@/lib/types'
+import { act, fireEvent, render, screen } from '../../test-utils'
 
 beforeEach(() => {
   Object.defineProperty(window, 'matchMedia', {
@@ -30,7 +30,12 @@ function makeEntry(overrides: Partial<PolygonEntry> = {}): PolygonEntry {
     excluded: false,
     polygon: {
       setMap: vi.fn(),
-      getPath: vi.fn(() => ({ addListener: vi.fn(), forEach: vi.fn(), push: vi.fn(), getLength: vi.fn(() => 0) })),
+      getPath: vi.fn(() => ({
+        addListener: vi.fn(),
+        forEach: vi.fn(),
+        push: vi.fn(),
+        getLength: vi.fn(() => 0),
+      })),
       get: vi.fn((key: string) => (key === 'fillColor' ? '#6ee7b7' : undefined)),
       set: vi.fn(),
     } as unknown as google.maps.Polygon,
@@ -157,7 +162,9 @@ describe('PolygonChipBar', () => {
       const chip = screen.getByRole('button', { name: /schakel vlak vlak 1 in of uit/i })
 
       fireEvent.pointerDown(chip)
-      act(() => { vi.advanceTimersByTime(600) })
+      act(() => {
+        vi.advanceTimersByTime(600)
+      })
       fireEvent.pointerUp(chip)
       vi.useRealTimers()
 
@@ -188,7 +195,9 @@ describe('PolygonChipBar', () => {
       const chip = screen.getByRole('button', { name: /schakel vlak vlak 1 in of uit/i })
 
       fireEvent.pointerDown(chip)
-      act(() => { vi.advanceTimersByTime(600) })
+      act(() => {
+        vi.advanceTimersByTime(600)
+      })
       fireEvent.pointerUp(chip)
       vi.useRealTimers()
 

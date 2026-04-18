@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from '../../test-utils'
+import { vi } from 'vitest'
 import { SearchHistory } from '@/components/sidebar/SearchHistory'
 import type { Search } from '@/lib/types'
-import { vi } from 'vitest'
+import { fireEvent, render, screen } from '../../test-utils'
 
 const ENTRIES: Search[] = [
   {
@@ -25,7 +25,7 @@ describe('User views their search history', () => {
 
   it('renders nothing when history is empty', () => {
     const { container } = render(
-      <SearchHistory history={[]} onRestore={onRestore} onDelete={onDelete} />
+      <SearchHistory history={[]} onRestore={onRestore} onDelete={onDelete} />,
     )
     expect(container).toBeEmptyDOMElement()
   })

@@ -1,7 +1,7 @@
-import { render, screen, waitFor, act } from '../test-utils'
 import userEvent from '@testing-library/user-event'
 import { DakoppervlakteApp } from '@/components/DakoppervlakteApp'
-import { MockMap, MockGeocoder } from '../__mocks__/googleMaps'
+import { MockGeocoder, MockMap } from '../__mocks__/googleMaps'
+import { act, render, screen, waitFor } from '../test-utils'
 
 const { mockUserRef } = vi.hoisted(() => ({
   mockUserRef: { current: null as { id: string } | null },
@@ -23,10 +23,7 @@ vi.mock('@clerk/nextjs', () => ({
 const fetchMock = vi.fn()
 vi.stubGlobal('fetch', fetchMock)
 
-function setupFetch(
-  history: unknown[] = [],
-  opts: { buildingPolygon?: unknown } = {},
-) {
+function setupFetch(history: unknown[] = [], opts: { buildingPolygon?: unknown } = {}) {
   fetchMock.mockImplementation((url: string, options?: RequestInit) => {
     const method = options?.method ?? 'GET'
     if (url.includes('/api/autogen-counter')) {
@@ -150,7 +147,9 @@ describe('User opens the app for the first time', () => {
     await timerUser.type(screen.getByRole('textbox', { name: /adres/i }), 'Meir 1')
     await timerUser.click(screen.getByRole('button', { name: /zoeken/i }))
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(700) })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(700)
+    })
 
     expect(screen.getByText(/tekenmode actief/i)).toBeInTheDocument()
     vi.useRealTimers()
@@ -202,7 +201,9 @@ describe('User draws a polygon', () => {
 
     expect(screen.getByRole('button', { name: /roteer kaart links/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /roteer kaart rechts/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /reset kaartrichting naar noord/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /reset kaartrichting naar noord/i }),
+    ).toBeInTheDocument()
   })
 })
 
@@ -234,7 +235,9 @@ describe('Signed-in user saves and views history', () => {
     await waitFor(() => {
       expect(screen.getByText(/opgeslagen/i)).toBeInTheDocument()
     })
-    expect(screen.queryByRole('button', { name: /opslaan in geschiedenis/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /opslaan in geschiedenis/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('Given search history exists, then it is displayed', async () => {
@@ -278,7 +281,18 @@ describe('Signed-in user saves and views history', () => {
         area_m2: 250,
         created_at: '2025-01-01',
         polygons: [
-          { id: 'p1', label: 'Dak A', area: 250, path: [{ lat: 51.1, lng: 4.4 }, { lat: 51.2, lng: 4.5 }, { lat: 51.15, lng: 4.6 }], heading: 0, tilt: 0 },
+          {
+            id: 'p1',
+            label: 'Dak A',
+            area: 250,
+            path: [
+              { lat: 51.1, lng: 4.4 },
+              { lat: 51.2, lng: 4.5 },
+              { lat: 51.15, lng: 4.6 },
+            ],
+            heading: 0,
+            tilt: 0,
+          },
         ],
       },
     ]
@@ -298,7 +312,9 @@ describe('Signed-in user saves and views history', () => {
 
     await timerUser.click(screen.getByTitle('Deze zoekopdracht herstellen'))
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(600) })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600)
+    })
 
     expect(screen.getAllByText('Dak A').length).toBeGreaterThan(0)
     vi.useRealTimers()
@@ -319,7 +335,14 @@ describe('Successful building autogeneration', () => {
         type: 'Feature',
         geometry: {
           type: 'Polygon',
-          coordinates: [[[4.4, 51.1], [4.41, 51.1], [4.41, 51.11], [4.4, 51.1]]],
+          coordinates: [
+            [
+              [4.4, 51.1],
+              [4.41, 51.1],
+              [4.41, 51.11],
+              [4.4, 51.1],
+            ],
+          ],
         },
       },
     })
@@ -337,7 +360,10 @@ describe('Successful building autogeneration', () => {
 
     await waitFor(() => {
       const autogenCalls = fetchMock.mock.calls.filter(
-        ([url, init]) => typeof url === 'string' && url.includes('/api/autogen-counter') && (init as RequestInit | undefined)?.method === 'POST'
+        ([url, init]) =>
+          typeof url === 'string' &&
+          url.includes('/api/autogen-counter') &&
+          (init as RequestInit | undefined)?.method === 'POST',
       )
       expect(autogenCalls).toHaveLength(1)
     })
@@ -359,13 +385,16 @@ describe('Successful building autogeneration', () => {
 
     await waitFor(() => {
       const buildingCalls = fetchMock.mock.calls.filter(
-        ([url]) => typeof url === 'string' && url.includes('/api/building-polygon')
+        ([url]) => typeof url === 'string' && url.includes('/api/building-polygon'),
       )
       expect(buildingCalls.length).toBeGreaterThan(0)
     })
 
     const autogenPosts = fetchMock.mock.calls.filter(
-      ([url, init]) => typeof url === 'string' && url.includes('/api/autogen-counter') && (init as RequestInit | undefined)?.method === 'POST'
+      ([url, init]) =>
+        typeof url === 'string' &&
+        url.includes('/api/autogen-counter') &&
+        (init as RequestInit | undefined)?.method === 'POST',
     )
     expect(autogenPosts).toHaveLength(0)
   })

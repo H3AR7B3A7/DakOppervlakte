@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { useMapOrientation } from '@/hooks/useMapOrientation'
 
 function createMockMap() {
@@ -18,7 +18,7 @@ function createMockMap() {
       return { remove: vi.fn() }
     }),
     _trigger: (event: string, ...args: unknown[]) => {
-      (listeners[event] ?? []).forEach((cb) => cb(...args))
+      ;(listeners[event] ?? []).forEach((cb) => cb(...args))
     },
   }
 }
@@ -27,9 +27,7 @@ describe('useMapOrientation', () => {
   describe('Initial state', () => {
     it('starts with heading 0, tilt 0, zoom 8', () => {
       const mapInstanceRef = { current: null }
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: false })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: false }))
       expect(result.current.heading).toBe(0)
       expect(result.current.tilt).toBe(0)
       expect(result.current.zoom).toBe(8)
@@ -37,9 +35,7 @@ describe('useMapOrientation', () => {
 
     it('cannot enable 3D at default zoom level 8', () => {
       const mapInstanceRef = { current: null }
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: false })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: false }))
       expect(result.current.canEnable3D).toBe(false)
       expect(result.current.is3D).toBe(false)
     })
@@ -48,18 +44,14 @@ describe('useMapOrientation', () => {
   describe('Rotating the map', () => {
     it('rotates heading by the given delta', () => {
       const mapInstanceRef = { current: null }
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: false })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: false }))
       act(() => result.current.handleRotate(90))
       expect(result.current.heading).toBe(90)
     })
 
     it('wraps heading around 360', () => {
       const mapInstanceRef = { current: null }
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: false })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: false }))
       act(() => result.current.handleRotate(-45))
       expect(result.current.heading).toBe(315)
     })
@@ -68,9 +60,7 @@ describe('useMapOrientation', () => {
   describe('Toggling 3D perspective', () => {
     it('does nothing when zoom is below threshold', () => {
       const mapInstanceRef = { current: null }
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: false })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: false }))
       act(() => result.current.handleTiltToggle())
       expect(result.current.tilt).toBe(0)
     })
@@ -80,9 +70,7 @@ describe('useMapOrientation', () => {
       map.getZoom.mockReturnValue(20)
       const mapInstanceRef = { current: map as unknown as google.maps.Map }
 
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: true })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: true }))
 
       act(() => map._trigger('zoom_changed'))
 
@@ -101,9 +89,7 @@ describe('useMapOrientation', () => {
       map.getTilt.mockReturnValue(45)
       const mapInstanceRef = { current: map as unknown as google.maps.Map }
 
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: true })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: true }))
 
       act(() => map._trigger('idle'))
 
@@ -116,9 +102,7 @@ describe('useMapOrientation', () => {
       map.getZoom.mockReturnValue(20)
       const mapInstanceRef = { current: map as unknown as google.maps.Map }
 
-      const { result } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: true })
-      )
+      const { result } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: true }))
 
       act(() => map._trigger('zoom_changed'))
       act(() => result.current.handleTiltToggle())
@@ -135,9 +119,7 @@ describe('useMapOrientation', () => {
       const map = createMockMap()
       const mapInstanceRef = { current: map as unknown as google.maps.Map }
 
-      renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: true })
-      )
+      renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: true }))
 
       expect(map.setHeading).toHaveBeenCalledWith(0)
     })
@@ -146,9 +128,7 @@ describe('useMapOrientation', () => {
       const map = createMockMap()
       const mapInstanceRef = { current: map as unknown as google.maps.Map }
 
-      const { unmount } = renderHook(() =>
-        useMapOrientation({ mapInstanceRef, mapLoaded: true })
-      )
+      const { unmount } = renderHook(() => useMapOrientation({ mapInstanceRef, mapLoaded: true }))
 
       unmount()
       expect(google.maps.event.removeListener).toHaveBeenCalled()

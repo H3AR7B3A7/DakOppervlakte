@@ -4,9 +4,9 @@ import { MockAdvancedMarkerElement } from '../__mocks__/googleMaps'
 type LatLngLike = google.maps.LatLng
 
 const makeLatLng = (lat: number, lng: number): LatLngLike =>
-  ({ lat: () => lat, lng: () => lng } as unknown as LatLngLike)
+  ({ lat: () => lat, lng: () => lng }) as unknown as LatLngLike
 
-const makeMap = () => ({} as unknown as google.maps.Map)
+const makeMap = () => ({}) as unknown as google.maps.Map
 
 describe('Distance labels on polygon edges', () => {
   beforeEach(() => {
@@ -17,23 +17,18 @@ describe('Distance labels on polygon edges', () => {
     it('creates one label per edge, including the closing edge', () => {
       const labels = createEdgeLabels(makeMap(), 'nl-BE')
 
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        true
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], true)
 
       expect(MockAdvancedMarkerElement).toHaveBeenCalledTimes(3)
     })
 
     it('each label displays a locale-formatted distance with a metre unit', () => {
-      ;(google.maps.geometry.spherical.computeDistanceBetween as unknown as ReturnType<typeof vi.fn>)
-        .mockReturnValue(12.3)
+      ;(
+        google.maps.geometry.spherical.computeDistanceBetween as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValue(12.3)
       const labels = createEdgeLabels(makeMap(), 'en-US')
 
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        true
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], true)
 
       const marker = MockAdvancedMarkerElement.mock.results[0].value
       expect((marker.content as HTMLElement).textContent).toMatch(/12.*m/)
@@ -44,10 +39,7 @@ describe('Distance labels on polygon edges', () => {
     it('creates one label per segment, skipping the non-existent closing edge', () => {
       const labels = createEdgeLabels(makeMap(), 'nl-BE')
 
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        false
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], false)
 
       expect(MockAdvancedMarkerElement).toHaveBeenCalledTimes(2)
     })
@@ -65,10 +57,7 @@ describe('Distance labels on polygon edges', () => {
     it('detaches the previous labels when a new path is supplied', () => {
       const labels = createEdgeLabels(makeMap(), 'nl-BE')
 
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        true
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], true)
       const firstPass = [...MockAdvancedMarkerElement.mock.results]
 
       labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1)], false)
@@ -85,10 +74,7 @@ describe('Distance labels on polygon edges', () => {
   describe('Hiding labels together with the polygon', () => {
     it('setMap(null) detaches every label from the map', () => {
       const labels = createEdgeLabels(makeMap(), 'nl-BE')
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        true
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], true)
 
       labels.setMap(null)
 
@@ -102,14 +88,12 @@ describe('Distance labels on polygon edges', () => {
     it('skips labels for edges that would round to 0 m', () => {
       const distances = [12, 0, 8]
       let call = 0
-      ;(google.maps.geometry.spherical.computeDistanceBetween as unknown as ReturnType<typeof vi.fn>)
-        .mockImplementation(() => distances[call++] ?? 1)
+      ;(
+        google.maps.geometry.spherical.computeDistanceBetween as unknown as ReturnType<typeof vi.fn>
+      ).mockImplementation(() => distances[call++] ?? 1)
 
       const labels = createEdgeLabels(makeMap(), 'nl-BE')
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        true
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], true)
 
       expect(MockAdvancedMarkerElement).toHaveBeenCalledTimes(2)
     })
@@ -118,10 +102,7 @@ describe('Distance labels on polygon edges', () => {
   describe('Cleaning up when the polygon is removed', () => {
     it('clear() detaches all labels', () => {
       const labels = createEdgeLabels(makeMap(), 'nl-BE')
-      labels.update(
-        [makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)],
-        true
-      )
+      labels.update([makeLatLng(51, 4), makeLatLng(51.1, 4.1), makeLatLng(51.0, 4.2)], true)
 
       labels.clear()
 

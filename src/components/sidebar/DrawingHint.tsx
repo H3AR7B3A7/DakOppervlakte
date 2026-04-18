@@ -1,5 +1,5 @@
-import React from 'react'
 import { useTranslations } from 'next-intl'
+import React from 'react'
 import { Button } from '@/components/ui'
 
 interface DrawingHintProps {
@@ -53,11 +53,7 @@ export function DrawingHint({ pointCount, onFinish }: DrawingHintProps) {
         {getHintText()}
       </p>
       {canFinish && (
-        <Button
-          variant="accent"
-          onClick={onFinish}
-          style={{ padding: '7px 16px', fontSize: 12 }}
-        >
+        <Button variant="accent" onClick={onFinish} style={{ padding: '7px 16px', fontSize: 12 }}>
           {t('closeShape')}
         </Button>
       )}

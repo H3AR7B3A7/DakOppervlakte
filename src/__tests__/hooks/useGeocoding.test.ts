@@ -19,7 +19,7 @@ function createMockMap() {
       return { remove: vi.fn() }
     }),
     _trigger: (event: string, ...args: unknown[]) => {
-      (listeners[event] ?? []).forEach((cb) => cb(...args))
+      ;(listeners[event] ?? []).forEach((cb) => cb(...args))
     },
   }
 }
@@ -42,9 +42,7 @@ describe('useGeocoding', () => {
   describe('Searching for an address', () => {
     it('starts with empty state', () => {
       const { mapInstanceRef, geocoderRef } = setup()
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
       expect(result.current.address).toBe('')
       expect(result.current.searching).toBe(false)
       expect(result.current.searchError).toBe('')
@@ -56,9 +54,7 @@ describe('useGeocoding', () => {
         cb([{ geometry: { location: { lat: () => 51, lng: () => 4 } } }], 'OK')
       })
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Meir 1'))
 
@@ -72,9 +68,7 @@ describe('useGeocoding', () => {
         cb([{ geometry: { location } }], 'OK')
       })
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Meir 1'))
 
@@ -88,9 +82,7 @@ describe('useGeocoding', () => {
         cb(null, 'ZERO_RESULTS')
       })
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Nonexistent street'))
 
@@ -99,9 +91,7 @@ describe('useGeocoding', () => {
 
     it('ignores empty or whitespace-only addresses', () => {
       const { mapInstanceRef, geocoderRef, geocoder } = setup()
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('   '))
 
@@ -116,9 +106,7 @@ describe('useGeocoding', () => {
       })
       const onComplete = vi.fn()
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Meir 1', onComplete))
 
@@ -132,9 +120,7 @@ describe('useGeocoding', () => {
       })
       const onComplete = vi.fn()
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Nope', onComplete))
 
@@ -145,9 +131,7 @@ describe('useGeocoding', () => {
       const mapInstanceRef = { current: null }
       const geocoderRef = { current: null }
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Meir 1'))
 
@@ -160,15 +144,13 @@ describe('useGeocoding', () => {
         cb([{ geometry: { location: { lat: () => 51, lng: () => 4 } } }], 'OK')
       })
 
-      const { result } = renderHookWithIntl(() =>
-        useGeocoding({ mapInstanceRef, geocoderRef })
-      )
+      const { result } = renderHookWithIntl(() => useGeocoding({ mapInstanceRef, geocoderRef }))
 
       act(() => result.current.geocodeAndNavigate('Meir 1'))
 
       expect(geocoder.geocode).toHaveBeenCalledWith(
         { address: 'Meir 1, Belgium', region: 'BE' },
-        expect.any(Function)
+        expect.any(Function),
       )
     })
   })

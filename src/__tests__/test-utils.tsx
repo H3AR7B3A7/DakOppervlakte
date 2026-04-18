@@ -1,6 +1,12 @@
-import React, { ReactElement } from 'react'
-import { render, renderHook, RenderOptions, RenderHookOptions } from '@testing-library/react'
+import {
+  type RenderHookOptions,
+  type RenderOptions,
+  render,
+  renderHook,
+} from '@testing-library/react'
 import { NextIntlClientProvider } from 'next-intl'
+import type React from 'react'
+import type { ReactElement } from 'react'
 import messages from '../../messages/nl.json'
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
@@ -11,14 +17,12 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: AllTheProviders, ...options })
+const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
+  render(ui, { wrapper: AllTheProviders, ...options })
 
 export function renderHookWithIntl<Result, Props>(
   hook: (props: Props) => Result,
-  options?: Omit<RenderHookOptions<Props>, 'wrapper'>
+  options?: Omit<RenderHookOptions<Props>, 'wrapper'>,
 ) {
   return renderHook(hook, { wrapper: AllTheProviders, ...options })
 }

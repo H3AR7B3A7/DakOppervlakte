@@ -1,15 +1,11 @@
 // Ring coordinates follow GeoJSON convention: [lng, lat] pairs
-export function pointInPolygon(
-  lat: number,
-  lng: number,
-  ring: [number, number][]
-): boolean {
+export function pointInPolygon(lat: number, lng: number, ring: [number, number][]): boolean {
   if (ring.length < 4) return false
   let inside = false
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const [xi, yi] = ring[i]
     const [xj, yj] = ring[j]
-    if ((yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
+    if (yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
       inside = !inside
     }
   }
@@ -28,12 +24,7 @@ export function centroid(ring: [number, number][]): [number, number] {
   return [cx / n, cy / n]
 }
 
-export function haversineDistance(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
+export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000
   const toRad = (d: number) => (d * Math.PI) / 180
   const dLat = toRad(lat2 - lat1)

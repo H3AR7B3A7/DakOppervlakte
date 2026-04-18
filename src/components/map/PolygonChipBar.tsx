@@ -1,7 +1,7 @@
 'use client'
 
+import { useFormatter, useTranslations } from 'next-intl'
 import React, { useEffect, useRef, useState } from 'react'
-import { useTranslations, useFormatter } from 'next-intl'
 import type { PolygonEntry } from '@/lib/types'
 
 interface PolygonChipBarProps {
@@ -13,7 +13,12 @@ interface PolygonChipBarProps {
 
 const LONG_PRESS_MS = 500
 
-export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded }: PolygonChipBarProps) {
+export function PolygonChipBar({
+  polygons,
+  onDelete,
+  onRename,
+  onToggleExcluded,
+}: PolygonChipBarProps) {
   const t = useTranslations('ChipBar')
   const tSide = useTranslations('Sidebar')
   const format = useFormatter()
@@ -24,9 +29,12 @@ export function PolygonChipBar({ polygons, onDelete, onRename, onToggleExcluded 
   const suppressClickRef = useRef(false)
   const skipCommitRef = useRef(false)
 
-  useEffect(() => () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current)
-  }, [])
+  useEffect(
+    () => () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    },
+    [],
+  )
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)')

@@ -1,9 +1,9 @@
 'use client'
 
+import { useFormatter, useTranslations } from 'next-intl'
 import React, { useState } from 'react'
-import { useTranslations, useFormatter } from 'next-intl'
-import type { PolygonEntry } from '@/lib/types'
 import { Badge } from '@/components/ui'
+import type { PolygonEntry } from '@/lib/types'
 import { normalizeHeading } from '@/lib/utils'
 
 interface PolygonListProps {
@@ -172,7 +172,9 @@ export function PolygonList({
                   </button>
                 )}
 
-                <Badge variant="accent">{format.number(p.area, { maximumFractionDigits: 1 })} {t('unit')}</Badge>
+                <Badge variant="accent">
+                  {format.number(p.area, { maximumFractionDigits: 1 })} {t('unit')}
+                </Badge>
 
                 <button
                   onClick={() => onDelete(p.id)}

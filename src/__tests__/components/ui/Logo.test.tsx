@@ -1,5 +1,5 @@
-import { render, screen } from '../../test-utils'
 import { Logo } from '@/components/ui/Logo'
+import { render, screen } from '../../test-utils'
 
 describe('User sees the app brand', () => {
   it('Given the header is visible, then the brand name is shown', () => {

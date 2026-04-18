@@ -1,5 +1,5 @@
-import { render, screen } from '../../test-utils'
 import { Spinner } from '@/components/ui/Spinner'
+import { render, screen } from '../../test-utils'
 
 describe('User sees a loading indicator', () => {
   it('Given content is loading, then a spinner is shown at default size', () => {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { pointInPolygon, centroid, haversineDistance } from '@/lib/geo'
+import { centroid, haversineDistance, pointInPolygon } from '@/lib/geo'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +34,7 @@ async function queryWfs(
   baseUrl: string,
   typeName: string,
   lat: number,
-  lng: number
+  lng: number,
 ): Promise<GeoJsonFeature[]> {
   const bbox = `${lng - BBOX_OFFSET},${lat - BBOX_OFFSET},${lng + BBOX_OFFSET},${lat + BBOX_OFFSET},EPSG:4326`
   const params = new URLSearchParams({
@@ -56,7 +56,7 @@ async function queryWfs(
 function pickClosestBuilding(
   features: GeoJsonFeature[],
   lat: number,
-  lng: number
+  lng: number,
 ): GeoJsonFeature | null {
   if (features.length === 0) return null
 
@@ -98,7 +98,11 @@ export async function GET(request: Request) {
         const type = f.properties?.TYPE ?? f.properties?.type
         return type === undefined || type === 1
       })
-      const match = pickClosestBuilding(features.length > 0 ? features : allFeatures, latNum, lngNum)
+      const match = pickClosestBuilding(
+        features.length > 0 ? features : allFeatures,
+        latNum,
+        lngNum,
+      )
       if (match) {
         return NextResponse.json({
           type: 'Feature',

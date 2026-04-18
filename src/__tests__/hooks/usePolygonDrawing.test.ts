@@ -1,6 +1,11 @@
-import { renderHook, act } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
-import { MockPolygon, MockMarker, MockAdvancedMarkerElement, MockPolyline } from '../__mocks__/googleMaps'
+import {
+  MockAdvancedMarkerElement,
+  MockMarker,
+  MockPolygon,
+  MockPolyline,
+} from '../__mocks__/googleMaps'
 
 function createMockMap() {
   const listeners: Record<string, Array<(...args: unknown[]) => void>> = {}
@@ -19,7 +24,7 @@ function createMockMap() {
       return { remove: vi.fn() }
     }),
     _trigger: (event: string, ...args: unknown[]) => {
-      (listeners[event] ?? []).forEach((cb) => cb(...args))
+      ;(listeners[event] ?? []).forEach((cb) => cb(...args))
     },
   }
 }
@@ -31,13 +36,14 @@ function setup(overrides?: { heading?: number; tilt?: number }) {
   const tilt = overrides?.tilt ?? 0
 
   const hookResult = renderHook(
-    (props) => usePolygonDrawing({
-      mapInstanceRef,
-      currentHeading: props.heading,
-      currentTilt: props.tilt,
-      locale: 'nl-BE',
-    }),
-    { initialProps: { heading, tilt } }
+    (props) =>
+      usePolygonDrawing({
+        mapInstanceRef,
+        currentHeading: props.heading,
+        currentTilt: props.tilt,
+        locale: 'nl-BE',
+      }),
+    { initialProps: { heading, tilt } },
   )
 
   return { map, mapInstanceRef, ...hookResult }
@@ -77,7 +83,7 @@ describe('User draws and manages roof polygons', () => {
     it('stays idle when the map is not yet available', () => {
       const mapInstanceRef = { current: null }
       const { result } = renderHook(() =>
-        usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0, locale: 'nl-BE' })
+        usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0, locale: 'nl-BE' }),
       )
       act(() => result.current.startDrawing())
       expect(result.current.mode).toBe('idle')
@@ -112,7 +118,7 @@ describe('User draws and manages roof polygons', () => {
       })
 
       const pointMarkerCalls = MockAdvancedMarkerElement.mock.calls.filter(
-        ([opts]) => (opts as { gmpClickable?: boolean })?.gmpClickable === true
+        ([opts]) => (opts as { gmpClickable?: boolean })?.gmpClickable === true,
       )
       expect(pointMarkerCalls).toHaveLength(2)
     })
@@ -343,8 +349,30 @@ describe('User draws and manages roof polygons', () => {
 
       act(() => {
         result.current.restorePolygons([
-          { id: 'a', label: 'Voordak', area: 50, path: [{ lat: 51, lng: 4 }, { lat: 51.1, lng: 4.1 }, { lat: 51.05, lng: 4.2 }], heading: 0, tilt: 0 },
-          { id: 'b', label: 'Achterdak', area: 30, path: [{ lat: 52, lng: 5 }, { lat: 52.1, lng: 5.1 }, { lat: 52.05, lng: 5.2 }], heading: 0, tilt: 0 },
+          {
+            id: 'a',
+            label: 'Voordak',
+            area: 50,
+            path: [
+              { lat: 51, lng: 4 },
+              { lat: 51.1, lng: 4.1 },
+              { lat: 51.05, lng: 4.2 },
+            ],
+            heading: 0,
+            tilt: 0,
+          },
+          {
+            id: 'b',
+            label: 'Achterdak',
+            area: 30,
+            path: [
+              { lat: 52, lng: 5 },
+              { lat: 52.1, lng: 5.1 },
+              { lat: 52.05, lng: 5.2 },
+            ],
+            heading: 0,
+            tilt: 0,
+          },
         ])
       })
 

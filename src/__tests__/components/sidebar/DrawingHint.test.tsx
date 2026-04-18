@@ -1,5 +1,5 @@
-import { render, screen } from '../../test-utils'
 import { DrawingHint } from '@/components/sidebar/DrawingHint'
+import { render, screen } from '../../test-utils'
 
 describe('User draws a polygon', () => {
   it('tells the user to place points when none have been placed', () => {

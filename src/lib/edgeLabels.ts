@@ -25,10 +25,7 @@ function makeLabelElement(text: string): HTMLDivElement {
   return el
 }
 
-export function createEdgeLabels(
-  map: google.maps.Map,
-  locale: string
-): EdgeLabelsController {
+export function createEdgeLabels(map: google.maps.Map, locale: string): EdgeLabelsController {
   let markers: google.maps.marker.AdvancedMarkerElement[] = []
   let attached: google.maps.Map | null = map
 

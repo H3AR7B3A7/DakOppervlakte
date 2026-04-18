@@ -1,33 +1,30 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
 import { Show, SignInButton, SignUpButton, useUser } from '@clerk/nextjs'
-
-import { useTranslations, useLocale } from 'next-intl'
-
-import { useGoogleMaps } from '@/hooks/useGoogleMaps'
-import { useMapOrientation } from '@/hooks/useMapOrientation'
-import { useGeocoding } from '@/hooks/useGeocoding'
-import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
-import { useUsageCounter } from '@/hooks/useUsageCounter'
-import { useSearchHistory } from '@/hooks/useSearchHistory'
-import { normalizeHeading } from '@/lib/utils'
-import type { Search } from '@/lib/types'
-
-import { Button } from '@/components/ui'
+import { useLocale, useTranslations } from 'next-intl'
+import React, { useCallback, useState } from 'react'
 import { Header } from '@/components/Header'
 import { SidebarDrawer } from '@/components/layout'
-import { MapView, MapOverlayControls, DrawingOverlay, PolygonChipBar } from '@/components/map'
+import { DrawingOverlay, MapOverlayControls, MapView, PolygonChipBar } from '@/components/map'
 import {
   AddressSearch,
-  RotationControls,
-  PolygonList,
-  TotalAreaDisplay,
   DrawingHint,
-  StepGuide,
-  SearchHistory,
+  PolygonList,
+  RotationControls,
   SaveResetControls,
+  SearchHistory,
+  StepGuide,
+  TotalAreaDisplay,
 } from '@/components/sidebar'
+import { Button } from '@/components/ui'
+import { useGeocoding } from '@/hooks/useGeocoding'
+import { useGoogleMaps } from '@/hooks/useGoogleMaps'
+import { useMapOrientation } from '@/hooks/useMapOrientation'
+import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
+import { useSearchHistory } from '@/hooks/useSearchHistory'
+import { useUsageCounter } from '@/hooks/useUsageCounter'
+import type { Search } from '@/lib/types'
+import { normalizeHeading } from '@/lib/utils'
 
 const DRAWER_TITLE_ID = 'sidebar-drawer-title'
 
@@ -38,19 +35,24 @@ export function DakoppervlakteApp() {
   const isSignedIn = !!user
 
   const { mapRef, mapInstanceRef, geocoderRef, mapLoaded } = useGoogleMaps()
+  const { heading, setHeading, tilt, canEnable3D, is3D, handleRotate, handleTiltToggle } =
+    useMapOrientation({ mapInstanceRef, mapLoaded })
+  const { address, setAddress, searching, searchError, setSearchError, geocodeAndNavigate } =
+    useGeocoding({ mapInstanceRef, geocoderRef })
   const {
-    heading, setHeading, tilt, canEnable3D, is3D,
-    handleRotate, handleTiltToggle,
-  } = useMapOrientation({ mapInstanceRef, mapLoaded })
-  const {
-    address, setAddress, searching, searchError, setSearchError,
-    geocodeAndNavigate,
-  } = useGeocoding({ mapInstanceRef, geocoderRef })
-  const {
-    mode, pointCount, polygons, startDrawing, finishPolygon, undoLastPoint,
+    mode,
+    pointCount,
+    polygons,
+    startDrawing,
+    finishPolygon,
+    undoLastPoint,
     addPolygonFromPath,
-    deletePolygon, renamePolygon, togglePolygonExcluded,
-    resetAll, restorePolygons, serializedPolygons,
+    deletePolygon,
+    renamePolygon,
+    togglePolygonExcluded,
+    resetAll,
+    restorePolygons,
+    serializedPolygons,
   } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt, locale })
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
   const { count: usageCount, increment: incrementSearchCount } = useUsageCounter()
@@ -105,21 +107,35 @@ export function DakoppervlakteApp() {
           setTimeout(() => startDrawing(), 600)
         })
     })
-  }, [address, autoGenerate, geocodeAndNavigate, incrementSearchCount, incrementAutogenCount, startDrawing, addPolygonFromPath, mapInstanceRef, resetAll, t])
+  }, [
+    address,
+    autoGenerate,
+    geocodeAndNavigate,
+    incrementSearchCount,
+    incrementAutogenCount,
+    startDrawing,
+    addPolygonFromPath,
+    mapInstanceRef,
+    resetAll,
+    t,
+  ])
 
-  const handleRestore = useCallback((restored: Search) => {
-    setAddress(restored.address)
-    resetAll()
-    setSaved(false)
-    setSearchError('')
-    setSearchFormCollapsed(true)
-    setDrawerOpen(false)
-    geocodeAndNavigate(restored.address, () => {
-      if (restored.polygons) {
-        setTimeout(() => restorePolygons(restored.polygons!), 500)
-      }
-    })
-  }, [geocodeAndNavigate, resetAll, restorePolygons, setAddress, setSearchError])
+  const handleRestore = useCallback(
+    (restored: Search) => {
+      setAddress(restored.address)
+      resetAll()
+      setSaved(false)
+      setSearchError('')
+      setSearchFormCollapsed(true)
+      setDrawerOpen(false)
+      geocodeAndNavigate(restored.address, () => {
+        if (restored.polygons) {
+          setTimeout(() => restorePolygons(restored.polygons!), 500)
+        }
+      })
+    },
+    [geocodeAndNavigate, resetAll, restorePolygons, setAddress, setSearchError],
+  )
 
   const handleSave = useCallback(async () => {
     await saveEntry(address, totalArea, serializedPolygons)
@@ -248,16 +264,11 @@ export function DakoppervlakteApp() {
                 onClick={handleStartDrawing}
                 style={{ marginBottom: 16, padding: 11, fontWeight: 700 }}
               >
-                ✏️{' '}
-                {polygons.length === 0
-                  ? t('Sidebar.startDrawing')
-                  : t('Sidebar.addPlane')}
+                ✏️ {polygons.length === 0 ? t('Sidebar.startDrawing') : t('Sidebar.addPlane')}
               </Button>
             )}
 
-            {mode === 'drawing' && (
-              <DrawingHint pointCount={pointCount} onFinish={finishPolygon} />
-            )}
+            {mode === 'drawing' && <DrawingHint pointCount={pointCount} onFinish={finishPolygon} />}
 
             <PolygonList
               polygons={polygons}
@@ -268,10 +279,7 @@ export function DakoppervlakteApp() {
               onToggleExcluded={togglePolygonExcluded}
             />
 
-            <TotalAreaDisplay
-              totalArea={totalArea}
-              polygonCount={polygons.length}
-            />
+            <TotalAreaDisplay totalArea={totalArea} polygonCount={polygons.length} />
 
             {polygons.length > 0 && mode === 'idle' && (
               <SaveResetControls
@@ -287,11 +295,7 @@ export function DakoppervlakteApp() {
 
           <Show when="signed-in">
             <div style={{ flexShrink: 0 }}>
-              <SearchHistory
-                history={history}
-                onRestore={handleRestore}
-                onDelete={deleteEntry}
-              />
+              <SearchHistory history={history} onRestore={handleRestore} onDelete={deleteEntry} />
             </div>
           </Show>
 
@@ -334,9 +338,7 @@ export function DakoppervlakteApp() {
             onTiltToggle={handleTiltToggle}
           />
 
-          {mode === 'drawing' && (
-            <DrawingOverlay pointCount={pointCount} onUndo={undoLastPoint} />
-          )}
+          {mode === 'drawing' && <DrawingOverlay pointCount={pointCount} onUndo={undoLastPoint} />}
 
           {mode !== 'drawing' && (
             <PolygonChipBar

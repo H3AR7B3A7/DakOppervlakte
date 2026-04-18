@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
 import { useTranslations } from 'next-intl'
+import React from 'react'
 import { Button } from '@/components/ui'
 
 interface SaveResetControlsProps {
@@ -11,12 +11,7 @@ interface SaveResetControlsProps {
   onReset: () => void
 }
 
-export function SaveResetControls({
-  saved,
-  isSignedIn,
-  onSave,
-  onReset,
-}: SaveResetControlsProps) {
+export function SaveResetControls({ saved, isSignedIn, onSave, onReset }: SaveResetControlsProps) {
   const t = useTranslations()
 
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import type React from 'react'
 import { Spinner } from '@/components/ui'
 
 interface MapViewProps {
@@ -11,10 +11,7 @@ interface MapViewProps {
 
 export function MapView({ mapRef, mapLoaded, children }: MapViewProps) {
   return (
-    <main
-      style={{ flex: 1, position: 'relative' }}
-      aria-label="Interactieve kaart"
-    >
+    <main style={{ flex: 1, position: 'relative' }} aria-label="Interactieve kaart">
       {!mapLoaded && (
         <div
           role="status"

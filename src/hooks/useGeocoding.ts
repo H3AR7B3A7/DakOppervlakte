@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useCallback, useState } from 'react'
 
 interface UseGeocodingOptions {
   mapInstanceRef: React.RefObject<google.maps.Map | null>
@@ -23,21 +23,18 @@ export function useGeocoding({ mapInstanceRef, geocoderRef }: UseGeocodingOption
       setSearching(true)
       setSearchError('')
 
-      geocoder.geocode(
-        { address: addr + ', Belgium', region: 'BE' },
-        (results, status) => {
-          setSearching(false)
-          if (status !== 'OK' || !results?.[0]) {
-            setSearchError(t('Errors.addressNotFound'))
-            return
-          }
-          map.setCenter(results[0].geometry.location)
-          map.setZoom(20)
-          onComplete?.()
+      geocoder.geocode({ address: addr + ', Belgium', region: 'BE' }, (results, status) => {
+        setSearching(false)
+        if (status !== 'OK' || !results?.[0]) {
+          setSearchError(t('Errors.addressNotFound'))
+          return
         }
-      )
+        map.setCenter(results[0].geometry.location)
+        map.setZoom(20)
+        onComplete?.()
+      })
     },
-    [geocoderRef, mapInstanceRef, t]
+    [geocoderRef, mapInstanceRef, t],
   )
 
   return {

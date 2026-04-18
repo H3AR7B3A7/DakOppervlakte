@@ -1,6 +1,6 @@
-import { render, screen } from '../../test-utils'
-import { SaveResetControls } from '@/components/sidebar/SaveResetControls'
 import userEvent from '@testing-library/user-event'
+import { SaveResetControls } from '@/components/sidebar/SaveResetControls'
+import { render, screen } from '../../test-utils'
 
 describe('SaveResetControls', () => {
   const mockOnSave = vi.fn()
@@ -13,7 +13,7 @@ describe('SaveResetControls', () => {
         isSignedIn={false}
         onSave={mockOnSave}
         onReset={mockOnReset}
-      />
+      />,
     )
 
     expect(screen.queryByText('💾 Opslaan in geschiedenis')).toBeNull()
@@ -27,7 +27,7 @@ describe('SaveResetControls', () => {
         isSignedIn={true}
         onSave={mockOnSave}
         onReset={mockOnReset}
-      />
+      />,
     )
 
     expect(screen.getByText('✓ Opgeslagen')).toBeDefined()
@@ -42,7 +42,7 @@ describe('SaveResetControls', () => {
         isSignedIn={true}
         onSave={mockOnSave}
         onReset={mockOnReset}
-      />
+      />,
     )
 
     await user.click(screen.getByText('💾 Opslaan in geschiedenis'))
@@ -57,7 +57,7 @@ describe('SaveResetControls', () => {
         isSignedIn={false}
         onSave={mockOnSave}
         onReset={mockOnReset}
-      />
+      />,
     )
 
     await user.click(screen.getByText('Alles wissen'))
@@ -71,7 +71,7 @@ describe('SaveResetControls', () => {
         isSignedIn={true}
         onSave={mockOnSave}
         onReset={mockOnReset}
-      />
+      />,
     )
     expect(screen.getByText('💾 Opslaan in geschiedenis')).toBeDefined()
   })

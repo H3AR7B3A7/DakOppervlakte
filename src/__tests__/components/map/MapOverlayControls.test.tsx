@@ -1,6 +1,6 @@
-import { render, screen } from '../../test-utils'
 import userEvent from '@testing-library/user-event'
 import { MapOverlayControls } from '@/components/map/MapOverlayControls'
+import { render, screen } from '../../test-utils'
 
 describe('User interacts with map overlay controls', () => {
   const user = userEvent.setup()
@@ -108,7 +108,10 @@ describe('User interacts with map overlay controls', () => {
       render(<MapOverlayControls {...defaults} is3D={true} />)
 
       // Then
-      expect(screen.getByRole('button', { name: /toggle 3d/i })).toHaveAttribute('aria-pressed', 'true')
+      expect(screen.getByRole('button', { name: /toggle 3d/i })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      )
     })
   })
 })

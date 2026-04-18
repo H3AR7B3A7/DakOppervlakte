@@ -1,5 +1,5 @@
+import { useFormatter, useTranslations } from 'next-intl'
 import React from 'react'
-import { useTranslations, useFormatter } from 'next-intl'
 
 interface TotalAreaDisplayProps {
   totalArea: number

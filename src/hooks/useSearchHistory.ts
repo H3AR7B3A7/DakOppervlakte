@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { Search, PolygonData } from '@/lib/types'
+import type { PolygonData, Search } from '@/lib/types'
 
 export function useSearchHistory(isSignedIn: boolean) {
   const [history, setHistory] = useState<Search[]>([])
@@ -39,7 +39,14 @@ export function useSearchHistory(isSignedIn: boolean) {
   const saveEntry = useCallback(
     async (address: string, area_m2: number, polygons: PolygonData[]) => {
       if (!isSignedIn || !address || area_m2 <= 0) {
-        console.warn('[SearchHistory] saveEntry skipped — isSignedIn:', isSignedIn, 'address:', address, 'area_m2:', area_m2)
+        console.warn(
+          '[SearchHistory] saveEntry skipped — isSignedIn:',
+          isSignedIn,
+          'address:',
+          address,
+          'area_m2:',
+          area_m2,
+        )
         return
       }
       try {
@@ -62,7 +69,7 @@ export function useSearchHistory(isSignedIn: boolean) {
         console.error('[SearchHistory] save error:', err)
       }
     },
-    [isSignedIn, fetchHistory]
+    [isSignedIn, fetchHistory],
   )
 
   const deleteEntry = useCallback(
@@ -82,7 +89,7 @@ export function useSearchHistory(isSignedIn: boolean) {
         console.error('[SearchHistory] delete error:', err)
       }
     },
-    [isSignedIn, fetchHistory]
+    [isSignedIn, fetchHistory],
   )
 
   return { history, saveEntry, deleteEntry }

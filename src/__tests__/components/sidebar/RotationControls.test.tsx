@@ -1,6 +1,6 @@
-import { render, screen } from '../../test-utils'
-import { RotationControls } from '@/components/sidebar/RotationControls'
 import userEvent from '@testing-library/user-event'
+import { RotationControls } from '@/components/sidebar/RotationControls'
+import { render, screen } from '../../test-utils'
 
 describe('RotationControls', () => {
   const mockOnHeadingChange = vi.fn()
@@ -17,7 +17,7 @@ describe('RotationControls', () => {
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
-      />
+      />,
     )
 
     expect(screen.getByText('Kaarthoek & perspectief')).toBeDefined()
@@ -41,7 +41,7 @@ describe('RotationControls', () => {
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
-      />
+      />,
     )
 
     await user.click(screen.getByLabelText('Roteer links'))
@@ -62,7 +62,7 @@ describe('RotationControls', () => {
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
-      />
+      />,
     )
 
     await user.click(screen.getByLabelText('Toggle 3D perspectief'))
@@ -79,7 +79,7 @@ describe('RotationControls', () => {
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
-      />
+      />,
     )
     expect(screen.getByText('🏔 Perspectief aan (45°)')).toBeDefined()
   })
@@ -94,7 +94,7 @@ describe('RotationControls', () => {
         onHeadingChange={mockOnHeadingChange}
         onRotate={mockOnRotate}
         onTiltToggle={mockOnTiltToggle}
-      />
+      />,
     )
 
     const slider = screen.getByLabelText('Kaartrichting')

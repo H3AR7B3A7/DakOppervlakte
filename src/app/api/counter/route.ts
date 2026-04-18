@@ -46,7 +46,10 @@ export async function POST() {
         return NextResponse.json({ count: null, debug: 'init-retry-failed' }, { status: 500 })
       }
     }
-    return NextResponse.json({ count: null, debug: e instanceof Error ? e.message : String(e) }, { status: 500 })
+    return NextResponse.json(
+      { count: null, debug: e instanceof Error ? e.message : String(e) },
+      { status: 500 },
+    )
   }
 }
 
@@ -56,7 +59,8 @@ export async function GET() {
     const result = await sql`SELECT count FROM usage_counter WHERE id = 1`
     return NextResponse.json({ count: result[0]?.count ?? 0 })
   } catch (e) {
-    if (e instanceof Error && e.message?.includes('does not exist')) return NextResponse.json({ count: 0 })
+    if (e instanceof Error && e.message?.includes('does not exist'))
+      return NextResponse.json({ count: 0 })
     return NextResponse.json({ count: 0, debug: e instanceof Error ? e.message : String(e) })
   }
 }

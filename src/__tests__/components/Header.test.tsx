@@ -1,6 +1,6 @@
-import { render, screen } from '../test-utils'
 import userEvent from '@testing-library/user-event'
 import { Header } from '@/components/Header'
+import { render, screen } from '../test-utils'
 
 vi.mock('@clerk/nextjs', () => ({
   SignInButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import getDb from '@/lib/db'
 
 export async function POST(req: NextRequest) {

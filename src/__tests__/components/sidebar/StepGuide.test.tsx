@@ -1,5 +1,5 @@
-import { render, screen } from '../../test-utils'
 import { StepGuide } from '@/components/sidebar/StepGuide'
+import { render, screen } from '../../test-utils'
 
 describe('User sees the step guide', () => {
   it('renders all 4 steps', () => {

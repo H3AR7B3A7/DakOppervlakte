@@ -10,25 +10,39 @@
   --text-muted: #6b7280;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-.cl-formButtonPrimary { background: var(--accent) !important; color: #000 !important; }
+.cl-formButtonPrimary {
+  background: var(--accent) !important;
+  color: #000 !important;
+}
 
 .thin-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
-.thin-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
 .thin-scrollbar::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
 }
-.thin-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

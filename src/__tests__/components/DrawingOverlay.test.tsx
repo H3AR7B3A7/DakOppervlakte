@@ -1,5 +1,5 @@
-import { render, screen } from '../test-utils'
 import { DrawingOverlay } from '@/components/map/DrawingOverlay'
+import { render, screen } from '../test-utils'
 
 describe('DrawingOverlay', () => {
   it('shows instruction for fewer than 3 points', () => {
