@@ -3,7 +3,14 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/.next", "!**/coverage", "!**/node_modules", "!**/tsconfig.tsbuildinfo"]
+    "includes": [
+      "**",
+      "!**/.next",
+      "!**/coverage",
+      "!**/node_modules",
+      "!**/tsconfig.tsbuildinfo",
+      "!next-env.d.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
