@@ -1,21 +1,9 @@
 # ROADMAP
 
-- [x] Save the perspective (tilt x cardinal) with the selections / only show selections in the orientation it was created in / use eye icons to indicate if the layer is visible or not in the sidepanel
-- [x] Test coverage
-- [x] Belgium is supposed to have a register of polygons that we can get for the addresses (there's a new api?), so we can autogenerate a selection of the roof, the coordinates don't match exactly, so we might have to allow values within a diamond shape or something when trying to detect the actual building, under the address search set a checkbox to auto generate.
-- [x] Sidebar is overall too large and growing when adding features, this is making the map bigger than the screen when the sidebar grows outside the window vertically, it should always fit the screen, some ideas to save space:
-  - add a scrollbar for the selection section
-  - hide the search form when the user has made a search and show a "new search" button instead that scrolls up and shows the form again
-  - or just have tabs for search / orientate / history
-- [x] Mobile support: Sidebar hamburger, with smaller ui toggles for the layers as an overlay over the map
-- [x] Add distances between polygon points on selection lines. This should be possible frontend.
 - [ ] Potentially increase accuracy of auto generation of roof selection, by using the larger polygon that we are filtering right now
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
-- [x] Add github action that runs `build` and `test` in package.json on pull requests
 - [ ] Add pre commit hook that runs `check` and `test` in package.json
 - [ ] https://dak-oppervlakte.vercel.app/ in README + overall update
-- [x] Use Biome instead of eslint/prettier, set good rules, vercel / nextjs / no semicolons
-- [x] Use linting to implement architecture rules (direction of dependencies)
 - [ ] Extend arch rules — enforce raw-style rule tree-wide, add stricter dumb/pure boundaries
 - [ ] Implement e2e tests with playwright (document CLAUDE/GEMINI/README)
 - [ ] Add Storybook for the pure ui components (document CLAUDE/GEMINI/README) and add chromatic visual checks to the github pr process
