@@ -5,7 +5,11 @@ import { resolve } from 'node:path'
 // Load .env.local the same way Next.js does
 loadEnvConfig(resolve(process.cwd()))
 
-const sql = neon(process.env.DATABASE_URL!)
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL must be set in .env.local')
+}
+const sql = neon(databaseUrl)
 
 async function main() {
   await sql`

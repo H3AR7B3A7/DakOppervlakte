@@ -129,8 +129,9 @@ export function DakoppervlakteApp() {
       setSearchFormCollapsed(true)
       setDrawerOpen(false)
       geocodeAndNavigate(restored.address, () => {
-        if (restored.polygons) {
-          setTimeout(() => restorePolygons(restored.polygons!), 500)
+        const restoredPolygons = restored.polygons
+        if (restoredPolygons) {
+          setTimeout(() => restorePolygons(restoredPolygons), 500)
         }
       })
     },

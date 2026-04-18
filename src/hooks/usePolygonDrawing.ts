@@ -124,7 +124,8 @@ export function usePolygonDrawing({
       options: { id: string; label: string; area: number; heading: number; tilt: number },
     ): PolygonEntry => {
       const map = mapInstanceRef.current
-      const edgeLabels = createEdgeLabels(map!, locale)
+      if (!map) throw new Error('attachPolygonEntry called before map instance is ready')
+      const edgeLabels = createEdgeLabels(map, locale)
 
       const collectPath = (): google.maps.LatLng[] => {
         const pts: google.maps.LatLng[] = []

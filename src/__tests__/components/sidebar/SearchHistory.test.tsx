@@ -62,7 +62,8 @@ describe('User views their search history', () => {
 
   it('highlights restore button on mouse enter', async () => {
     render(<SearchHistory history={ENTRIES} onRestore={onRestore} onDelete={onDelete} />)
-    const restoreButton = screen.getByText('Meir 1, Antwerpen').closest('button')!
+    const restoreButton = screen.getByText('Meir 1, Antwerpen').closest('button')
+    if (!restoreButton) throw new Error('restore button not found')
 
     fireEvent.mouseEnter(restoreButton)
     expect(restoreButton.style.borderColor).toBe('var(--accent)')
