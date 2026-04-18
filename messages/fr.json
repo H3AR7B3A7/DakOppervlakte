@@ -13,6 +13,10 @@
     "titleAccent": "surface de toit",
     "subtitle": "Tapez une adresse et dessinez les contours du toit."
   },
+  "Polygon": {
+    "manualLabel": "Plan {index}",
+    "autoLabel": "Auto"
+  },
   "Sidebar": {
     "addressLabel": "Adresse",
     "addressPlaceholder": "Grand Place 1, Bruxelles...",

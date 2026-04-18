@@ -13,6 +13,10 @@
     "titleAccent": "roof area",
     "subtitle": "Type an address and draw the roof outlines."
   },
+  "Polygon": {
+    "manualLabel": "Plane {index}",
+    "autoLabel": "Auto"
+  },
   "Sidebar": {
     "addressLabel": "Address",
     "addressPlaceholder": "Meir 1, Antwerp...",

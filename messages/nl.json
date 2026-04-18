@@ -13,6 +13,10 @@
     "titleAccent": "dakoppervlakte",
     "subtitle": "Typ een adres en teken de dakcontouren."
   },
+  "Polygon": {
+    "manualLabel": "Vlak {index}",
+    "autoLabel": "Auto"
+  },
   "Sidebar": {
     "addressLabel": "Adres",
     "addressPlaceholder": "Meir 1, Antwerpen...",
