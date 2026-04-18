@@ -17,7 +17,9 @@ const makeEventTarget = () => {
       return { remove: vi.fn() }
     }),
     _trigger: (event: string, ...args: unknown[]) => {
-      ;(listeners[event] ?? []).forEach((cb) => cb(...args))
+      ;(listeners[event] ?? []).forEach((cb) => {
+        cb(...args)
+      })
     },
   }
 }

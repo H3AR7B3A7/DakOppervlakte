@@ -54,7 +54,9 @@ export function usePolygonDrawing({
 
   const serializedPolygons: PolygonData[] = polygons.map((p) => {
     const pts: { lat: number; lng: number }[] = []
-    p.polygon.getPath().forEach((pt) => pts.push({ lat: pt.lat(), lng: pt.lng() }))
+    p.polygon.getPath().forEach((pt) => {
+      pts.push({ lat: pt.lat(), lng: pt.lng() })
+    })
     return { id: p.id, label: p.label, area: p.area, path: pts, heading: p.heading, tilt: p.tilt }
   })
 
@@ -129,7 +131,9 @@ export function usePolygonDrawing({
 
       const collectPath = (): google.maps.LatLng[] => {
         const pts: google.maps.LatLng[] = []
-        polygon.getPath().forEach((pt) => pts.push(pt))
+        polygon.getPath().forEach((pt) => {
+          pts.push(pt)
+        })
         return pts
       }
 

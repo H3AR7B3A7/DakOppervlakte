@@ -50,7 +50,9 @@ export function useMapOrientation({ mapInstanceRef, mapLoaded }: UseMapOrientati
     mapListenersRef.current.push(idleListener, zoomListener)
 
     return () => {
-      mapListenersRef.current.forEach((l) => google.maps.event.removeListener(l))
+      mapListenersRef.current.forEach((l) => {
+        google.maps.event.removeListener(l)
+      })
       mapListenersRef.current = []
     }
   }, [mapLoaded, mapInstanceRef])
