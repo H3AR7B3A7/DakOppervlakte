@@ -2,6 +2,10 @@
  * Minimal Google Maps API stub for Vitest / jsdom.
  * Installed once globally via vitest.setup.ts — never mocked per-test.
  * Only stubs the surface area the app actually uses.
+ *
+ * The `vi.fn().mockImplementation(function () { ... })` pattern is intentional:
+ * callers use `new google.maps.Polygon(...)`, and arrow functions are not
+ * constructable. Do NOT auto-fix to arrow form.
  */
 
 const makeEventTarget = () => {
@@ -32,7 +36,7 @@ const makePath = () => {
 
 export const MockPolygon = vi
   .fn()
-  .mockImplementation(({ fillColor }: { fillColor?: string } = {}) => {
+  .mockImplementation(function ({ fillColor }: { fillColor?: string } = {}) {
     const path = makePath()
     const stored: Record<string, unknown> = { fillColor }
     let currentMap: unknown = null
@@ -49,38 +53,38 @@ export const MockPolygon = vi
     }
   })
 
-export const MockPolyline = vi.fn().mockImplementation(() => ({
-  setMap: vi.fn(),
-  setPath: vi.fn(),
-}))
+export const MockPolyline = vi.fn().mockImplementation(function () {
+  return {
+    setMap: vi.fn(),
+    setPath: vi.fn(),
+  }
+})
 
-export const MockMarker = vi.fn().mockImplementation(() => {
+export const MockMarker = vi.fn().mockImplementation(function () {
   const et = makeEventTarget()
   return { setMap: vi.fn(), addListener: et.addListener }
 })
 
 export const MockAdvancedMarkerElement = vi
   .fn()
-  .mockImplementation(
-    ({
-      map = null,
-      position = null,
-      content = null,
-    }: {
-      map?: unknown
-      position?: unknown
-      content?: unknown
-    } = {}) => {
-      const et = makeEventTarget()
-      return { map, position, content, addListener: et.addListener }
-    },
-  )
+  .mockImplementation(function ({
+    map = null,
+    position = null,
+    content = null,
+  }: {
+    map?: unknown
+    position?: unknown
+    content?: unknown
+  } = {}) {
+    const et = makeEventTarget()
+    return { map, position, content, addListener: et.addListener }
+  })
 
-export const MockGeocoder = vi.fn().mockImplementation(() => ({
-  geocode: vi.fn(),
-}))
+export const MockGeocoder = vi.fn().mockImplementation(function () {
+  return { geocode: vi.fn() }
+})
 
-export const MockMap = vi.fn().mockImplementation(() => {
+export const MockMap = vi.fn().mockImplementation(function () {
   const et = makeEventTarget()
   const div = document.createElement('div')
   return {
