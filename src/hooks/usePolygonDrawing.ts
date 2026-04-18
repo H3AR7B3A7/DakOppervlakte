@@ -37,7 +37,7 @@ export function usePolygonDrawing({
     const map = mapInstanceRef.current
     if (!map) return
 
-    polygonsRef.current.forEach((p) => {
+    polygons.forEach((p) => {
       const headingMatch = normalizeHeading(p.heading) === normalizeHeading(currentHeading)
       const tiltMatch = p.tilt === currentTilt
       const shouldBeOnMap = headingMatch && tiltMatch
@@ -105,9 +105,9 @@ export function usePolygonDrawing({
     refreshPreviewLabels()
   }, [refreshPreviewLabels])
 
-  const syncPolygons = () => {
+  const syncPolygons = useCallback(() => {
     setPolygons([...polygonsRef.current])
-  }
+  }, [])
 
   const resetAll = useCallback(() => {
     clearDrawingState()
@@ -118,7 +118,7 @@ export function usePolygonDrawing({
     polygonsRef.current = []
     syncPolygons()
     setMode('idle')
-  }, [clearDrawingState])
+  }, [clearDrawingState, syncPolygons])
 
   const attachPolygonEntry = useCallback(
     (
@@ -163,7 +163,7 @@ export function usePolygonDrawing({
         edgeLabels,
       }
     },
-    [mapInstanceRef, locale],
+    [mapInstanceRef, locale, syncPolygons],
   )
 
   const restorePolygons = useCallback(
@@ -195,7 +195,7 @@ export function usePolygonDrawing({
       polygonsRef.current = restored
       syncPolygons()
     },
-    [mapInstanceRef, resetAll, attachPolygonEntry],
+    [mapInstanceRef, resetAll, attachPolygonEntry, syncPolygons],
   )
 
   const finishPolygon = useCallback(() => {
@@ -231,7 +231,14 @@ export function usePolygonDrawing({
     polygonsRef.current = [...polygonsRef.current, entry]
     syncPolygons()
     setMode('idle')
-  }, [clearDrawingState, mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry])
+  }, [
+    clearDrawingState,
+    mapInstanceRef,
+    currentHeading,
+    currentTilt,
+    attachPolygonEntry,
+    syncPolygons,
+  ])
 
   const addPolygonFromPath = useCallback(
     (path: { lat: number; lng: number }[]) => {
@@ -265,7 +272,7 @@ export function usePolygonDrawing({
       polygonsRef.current = [...polygonsRef.current, entry]
       syncPolygons()
     },
-    [mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry],
+    [mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry, syncPolygons],
   )
 
   const startDrawing = useCallback(() => {
@@ -340,28 +347,37 @@ export function usePolygonDrawing({
     refreshPreviewLabels,
   ])
 
-  const deletePolygon = useCallback((id: string) => {
-    const entry = polygonsRef.current.find((e) => e.id === id)
-    if (entry) {
-      entry.polygon.setMap(null)
-      entry.edgeLabels.clear()
-    }
-    polygonsRef.current = polygonsRef.current.filter((e) => e.id !== id)
-    syncPolygons()
-  }, [])
+  const deletePolygon = useCallback(
+    (id: string) => {
+      const entry = polygonsRef.current.find((e) => e.id === id)
+      if (entry) {
+        entry.polygon.setMap(null)
+        entry.edgeLabels.clear()
+      }
+      polygonsRef.current = polygonsRef.current.filter((e) => e.id !== id)
+      syncPolygons()
+    },
+    [syncPolygons],
+  )
 
-  const renamePolygon = useCallback((id: string, label: string) => {
-    polygonsRef.current = polygonsRef.current.map((e) => (e.id === id ? { ...e, label } : e))
-    syncPolygons()
-  }, [])
+  const renamePolygon = useCallback(
+    (id: string, label: string) => {
+      polygonsRef.current = polygonsRef.current.map((e) => (e.id === id ? { ...e, label } : e))
+      syncPolygons()
+    },
+    [syncPolygons],
+  )
 
-  const togglePolygonExcluded = useCallback((id: string) => {
-    polygonsRef.current = polygonsRef.current.map((e) => {
-      if (e.id !== id) return e
-      return { ...e, excluded: !e.excluded }
-    })
-    syncPolygons()
-  }, [])
+  const togglePolygonExcluded = useCallback(
+    (id: string) => {
+      polygonsRef.current = polygonsRef.current.map((e) => {
+        if (e.id !== id) return e
+        return { ...e, excluded: !e.excluded }
+      })
+      syncPolygons()
+    },
+    [syncPolygons],
+  )
 
   return {
     mode,
