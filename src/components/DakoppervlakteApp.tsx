@@ -25,6 +25,7 @@ import { useMapOrientation } from '@/hooks/useMapOrientation'
 import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
 import { useSearchHistory } from '@/hooks/useSearchHistory'
 import { useUsageCounter } from '@/hooks/useUsageCounter'
+import { fetchBuildingPolygon } from '@/lib/infrastructure/buildingLookup'
 
 const DRAWER_TITLE_ID = 'sidebar-drawer-title'
 
@@ -79,7 +80,7 @@ export function DakoppervlakteApp() {
     setAutoGenerateError('')
     setSaved(false)
     if (autoGenerate) resetAll()
-    geocodeAndNavigate(address, () => {
+    geocodeAndNavigate(address, async () => {
       incrementSearchCount(address)
       setSearchFormCollapsed(true)
       setDrawerOpen(false)
@@ -91,27 +92,15 @@ export function DakoppervlakteApp() {
       if (!map) return
       const center = map.getCenter()
       if (!center) return
-      const lat = center.lat()
-      const lng = center.lng()
-      fetch(`/api/building-polygon?lat=${lat}&lng=${lng}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.type === 'Feature' && data.geometry?.coordinates) {
-            const coords = data.geometry.coordinates[0] as [number, number][]
-            const path = coords.map(([lng, lat]) => ({ lat, lng }))
-            addPolygonFromPath(path)
-            incrementAutogenCount(address)
-          } else {
-            setAutoGenerateError(t('Sidebar.noBuildingFound'))
-            setTimeout(() => setAutoGenerateError(''), 5000)
-            setTimeout(() => startDrawing(), 600)
-          }
-        })
-        .catch(() => {
-          setAutoGenerateError(t('Sidebar.noBuildingFound'))
-          setTimeout(() => setAutoGenerateError(''), 5000)
-          setTimeout(() => startDrawing(), 600)
-        })
+      const result = await fetchBuildingPolygon(center.lat(), center.lng())
+      if (result.kind === 'found') {
+        addPolygonFromPath(result.path)
+        incrementAutogenCount(address)
+        return
+      }
+      setAutoGenerateError(t('Sidebar.noBuildingFound'))
+      setTimeout(() => setAutoGenerateError(''), 5000)
+      setTimeout(() => startDrawing(), 600)
     })
   }, [
     address,
