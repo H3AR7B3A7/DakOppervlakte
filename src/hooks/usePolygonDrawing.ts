@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { normalizeHeading } from '@/domain/orientation/heading'
 import { generatePolygonColor } from '@/domain/polygon/color'
 import type { PolygonData } from '@/domain/polygon/types'
-import { createEdgeLabels, type EdgeLabelsController } from '@/lib/edgeLabels'
+import { createEdgeLabels, type EdgeLabelsController } from '@/lib/infrastructure/edgeLabels'
 import type { DrawingMode, PolygonEntry } from '@/lib/types'
 
 interface UsePolygonDrawingOptions {

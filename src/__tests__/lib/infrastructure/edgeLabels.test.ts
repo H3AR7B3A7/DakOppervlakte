@@ -1,5 +1,5 @@
-import { createEdgeLabels } from '@/lib/edgeLabels'
-import { MockAdvancedMarkerElement } from '../__mocks__/googleMaps'
+import { createEdgeLabels } from '@/lib/infrastructure/edgeLabels'
+import { MockAdvancedMarkerElement } from '../../__mocks__/googleMaps'
 
 type LatLngLike = google.maps.LatLng
 

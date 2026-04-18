@@ -1,4 +1,4 @@
-import type { EdgeLabelsController } from './edgeLabels'
+import type { EdgeLabelsController } from './infrastructure/edgeLabels'
 
 export type PolygonEntry = {
   id: string
