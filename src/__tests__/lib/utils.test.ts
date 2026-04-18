@@ -8,7 +8,7 @@ describe('generatePolygonColor', () => {
 
   it('generates hues in the 40–319 range to avoid reds and pinks', () => {
     for (let i = 0; i < 100; i++) {
-      const hue = parseInt(generatePolygonColor().match(/hsl\((\d+)/)![1])
+      const hue = parseInt(generatePolygonColor().match(/hsl\((\d+)/)![1], 10)
       expect(hue).toBeGreaterThanOrEqual(40)
       expect(hue).toBeLessThan(320)
     }
