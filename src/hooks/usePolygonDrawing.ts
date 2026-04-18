@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { headingsMatch } from '@/domain/orientation/heading'
 import { roundArea } from '@/domain/polygon/area'
 import { generatePolygonColor } from '@/domain/polygon/color'
+import { fromPolygonData, toPolygonData } from '@/domain/polygon/serialize'
 import type { PolygonData } from '@/domain/polygon/types'
 import { createEdgeLabels, type EdgeLabelsController } from '@/lib/infrastructure/edgeLabels'
 import type { DrawingMode, PolygonEntry } from '@/lib/types'
@@ -60,7 +61,14 @@ export function usePolygonDrawing({
     p.polygon.getPath().forEach((pt) => {
       pts.push({ lat: pt.lat(), lng: pt.lng() })
     })
-    return { id: p.id, label: p.label, area: p.area, path: pts, heading: p.heading, tilt: p.tilt }
+    return toPolygonData({
+      id: p.id,
+      label: p.label,
+      area: p.area,
+      path: pts,
+      heading: p.heading,
+      tilt: p.tilt,
+    })
   })
 
   const refreshPreviewLabels = useCallback(() => {
@@ -176,8 +184,9 @@ export function usePolygonDrawing({
       resetAll()
 
       const restored: PolygonEntry[] = data.map((d) => {
+        const fields = fromPolygonData(d)
         const polygon = new google.maps.Polygon({
-          paths: d.path,
+          paths: fields.path,
           fillColor: generatePolygonColor(),
           fillOpacity: 0.25,
           strokeColor: generatePolygonColor(),
@@ -187,11 +196,11 @@ export function usePolygonDrawing({
           map,
         })
         return attachPolygonEntry(polygon, {
-          id: d.id,
-          label: d.label,
-          area: d.area,
-          heading: d.heading ?? 0,
-          tilt: d.tilt ?? 0,
+          id: fields.id,
+          label: fields.label,
+          area: fields.area,
+          heading: fields.heading,
+          tilt: fields.tilt,
         })
       })
 
