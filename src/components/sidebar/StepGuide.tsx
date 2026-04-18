@@ -19,7 +19,7 @@ export function StepGuide() {
       }}
     >
       {STEPS.map((text, i) => (
-        <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <li key={text} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <span
             aria-hidden="true"
             style={{
