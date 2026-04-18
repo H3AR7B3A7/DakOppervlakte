@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormatter, useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui'
 import type { PolygonEntry } from '@/lib/types'
 import { normalizeHeading } from '@/lib/utils'
@@ -27,6 +27,11 @@ export function PolygonList({
   const format = useFormatter()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [pendingLabel, setPendingLabel] = useState('')
+  const renameInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editingId !== null) renameInputRef.current?.focus()
+  }, [editingId])
 
   const startEdit = (id: string, currentLabel: string) => {
     setEditingId(id)
@@ -126,7 +131,7 @@ export function PolygonList({
                 {/* Editable label */}
                 {editingId === p.id ? (
                   <input
-                    autoFocus
+                    ref={renameInputRef}
                     value={pendingLabel}
                     onChange={(e) => setPendingLabel(e.target.value)}
                     onBlur={() => commitEdit(p.id)}

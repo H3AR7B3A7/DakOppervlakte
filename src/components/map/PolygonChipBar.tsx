@@ -28,6 +28,11 @@ export function PolygonChipBar({
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suppressClickRef = useRef(false)
   const skipCommitRef = useRef(false)
+  const renameInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editingId !== null) renameInputRef.current?.focus()
+  }, [editingId])
 
   useEffect(
     () => () => {
@@ -139,7 +144,7 @@ export function PolygonChipBar({
             >
               {isEditing ? (
                 <input
-                  autoFocus
+                  ref={renameInputRef}
                   aria-label={t('renameChipAriaLabel', { label: p.label })}
                   value={pendingLabel}
                   onChange={(e) => setPendingLabel(e.target.value)}
