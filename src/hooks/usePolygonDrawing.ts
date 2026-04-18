@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { normalizeHeading } from '@/domain/orientation/heading'
+import { headingsMatch } from '@/domain/orientation/heading'
+import { roundArea } from '@/domain/polygon/area'
 import { generatePolygonColor } from '@/domain/polygon/color'
 import type { PolygonData } from '@/domain/polygon/types'
 import { createEdgeLabels, type EdgeLabelsController } from '@/lib/infrastructure/edgeLabels'
@@ -40,7 +41,7 @@ export function usePolygonDrawing({
     if (!map) return
 
     polygons.forEach((p) => {
-      const headingMatch = normalizeHeading(p.heading) === normalizeHeading(currentHeading)
+      const headingMatch = headingsMatch(p.heading, currentHeading)
       const tiltMatch = p.tilt === currentTilt
       const shouldBeOnMap = headingMatch && tiltMatch
 
@@ -143,7 +144,7 @@ export function usePolygonDrawing({
 
       const onGeometryChange = () => {
         const pts = collectPath()
-        const newArea = Math.round(google.maps.geometry.spherical.computeArea(pts) * 10) / 10
+        const newArea = roundArea(google.maps.geometry.spherical.computeArea(pts))
         polygonsRef.current = polygonsRef.current.map((e) =>
           e.id === options.id ? { ...e, area: newArea } : e,
         )
@@ -217,8 +218,7 @@ export function usePolygonDrawing({
       map: mapInstanceRef.current,
     })
 
-    const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath())
-    const area = Math.round(areaSqM * 10) / 10
+    const area = roundArea(google.maps.geometry.spherical.computeArea(polygon.getPath()))
     const id = crypto.randomUUID()
     const label = `Vlak ${polygonsRef.current.length + 1}`
 
@@ -259,8 +259,7 @@ export function usePolygonDrawing({
         map,
       })
 
-      const areaSqM = google.maps.geometry.spherical.computeArea(polygon.getPath())
-      const area = Math.round(areaSqM * 10) / 10
+      const area = roundArea(google.maps.geometry.spherical.computeArea(polygon.getPath()))
       const id = crypto.randomUUID()
 
       const entry = attachPolygonEntry(polygon, {
