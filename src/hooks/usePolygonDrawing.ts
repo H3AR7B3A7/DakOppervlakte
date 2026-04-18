@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { headingsMatch } from '@/domain/orientation/heading'
 import { roundArea } from '@/domain/polygon/area'
 import { generatePolygonColor } from '@/domain/polygon/color'
@@ -11,7 +11,7 @@ import { createEdgeLabels, type EdgeLabelsController } from '@/lib/infrastructur
 import type { DrawingMode, PolygonEntry } from '@/lib/types'
 
 interface UsePolygonDrawingOptions {
-  mapInstanceRef: React.RefObject<google.maps.Map | null>
+  mapInstanceRef: RefObject<google.maps.Map | null>
   currentHeading: number
   currentTilt: number
   locale: string
@@ -186,7 +186,7 @@ export function usePolygonDrawing({
       if (!map) return
       resetAll()
 
-      const restored: PolygonEntry[] = data.map((d) => {
+      polygonsRef.current = data.map((d) => {
         const fields = fromPolygonData(d)
         const polygon = new google.maps.Polygon({
           paths: fields.path,
@@ -206,8 +206,6 @@ export function usePolygonDrawing({
           tilt: fields.tilt,
         })
       })
-
-      polygonsRef.current = restored
       syncPolygons()
     },
     [mapInstanceRef, resetAll, attachPolygonEntry, syncPolygons],

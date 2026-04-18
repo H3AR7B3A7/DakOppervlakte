@@ -1,4 +1,5 @@
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { DakoppervlakteApp } from '@/components/DakoppervlakteApp'
 import { MockGeocoder, MockMap } from '../__mocks__/googleMaps'
 import { act, render, screen, waitFor } from '../test-utils'
@@ -8,10 +9,10 @@ const { mockUserRef } = vi.hoisted(() => ({
 }))
 
 vi.mock('@clerk/nextjs', () => ({
-  SignInButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SignUpButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SignInButton: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SignUpButton: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   UserButton: () => <div data-testid="user-button" />,
-  Show: ({ when, children }: { when: string; children: React.ReactNode }) => {
+  Show: ({ when, children }: { when: string; children: ReactNode }) => {
     const isSignedIn = !!mockUserRef.current
     if (when === 'signed-in' && isSignedIn) return <>{children}</>
     if (when === 'signed-out' && !isSignedIn) return <>{children}</>

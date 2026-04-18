@@ -1,12 +1,12 @@
 'use client'
 
-import type React from 'react'
+import type { ReactNode, RefObject } from 'react'
 import { Spinner } from '@/components/ui'
 
 interface MapViewProps {
-  mapRef: React.RefObject<HTMLDivElement | null>
+  mapRef: RefObject<HTMLDivElement | null>
   mapLoaded: boolean
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 export function MapView({ mapRef, mapLoaded, children }: MapViewProps) {

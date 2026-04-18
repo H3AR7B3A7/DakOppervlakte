@@ -1,8 +1,8 @@
-import type React from 'react'
+import type { ButtonHTMLAttributes } from 'react'
 
 type Variant = 'accent' | 'outline' | 'ghost'
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   fullWidth?: boolean
 }

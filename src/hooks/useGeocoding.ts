@@ -1,11 +1,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { useCallback, useState } from 'react'
+import { type RefObject, useCallback, useState } from 'react'
 
 interface UseGeocodingOptions {
-  mapInstanceRef: React.RefObject<google.maps.Map | null>
-  geocoderRef: React.RefObject<google.maps.Geocoder | null>
+  mapInstanceRef: RefObject<google.maps.Map | null>
+  geocoderRef: RefObject<google.maps.Geocoder | null>
 }
 
 export function useGeocoding({ mapInstanceRef, geocoderRef }: UseGeocodingOptions) {

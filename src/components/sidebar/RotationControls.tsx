@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import type React from 'react'
+import type { CSSProperties } from 'react'
 
 interface RotationControlsProps {
   heading: number
@@ -24,7 +24,7 @@ export function RotationControls({
 }: RotationControlsProps) {
   const t = useTranslations('Sidebar')
 
-  const iconButtonStyle: React.CSSProperties = {
+  const iconButtonStyle: CSSProperties = {
     background: 'var(--surface2)',
     border: '1px solid var(--border)',
     borderRadius: 7,

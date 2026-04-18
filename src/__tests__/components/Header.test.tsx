@@ -1,12 +1,13 @@
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { Header } from '@/components/Header'
 import { render, screen } from '../test-utils'
 
 vi.mock('@clerk/nextjs', () => ({
-  SignInButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SignUpButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SignInButton: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SignUpButton: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   UserButton: () => <div data-testid="user-button" />,
-  Show: ({ when, children }: { when: string; children: React.ReactNode }) =>
+  Show: ({ when, children }: { when: string; children: ReactNode }) =>
     when === 'signed-out' ? children : null,
 }))
 

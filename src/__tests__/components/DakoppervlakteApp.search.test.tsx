@@ -1,12 +1,5 @@
-// Coverage baseline (updated 2026-04-18 after Phase 5):
-//   src/components/DakoppervlakteApp.tsx — 75.32% lines / 87.5% branches
-//   Phase 3 baseline was 77.38% lines / 87.17% branches. Phase 5 slimmed the file
-//   from 354 to 278 lines; the −2.06pp line movement is structural (JSX props split
-//   across more lines, handlers not exercised by this test — see Task 13 analysis),
-//   and branches improved (+0.33pp) because handleSearch now covers both arms of
-//   the linearised fetchBuildingPolygon switch. Do not drop below the new floor.
-
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { DakoppervlakteApp } from '@/components/DakoppervlakteApp'
 import { MockGeocoder, MockMap } from '../__mocks__/googleMaps'
 import { act, render, screen, waitFor } from '../test-utils'
@@ -16,10 +9,10 @@ const { mockUserRef } = vi.hoisted(() => ({
 }))
 
 vi.mock('@clerk/nextjs', () => ({
-  SignInButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SignUpButton: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SignInButton: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SignUpButton: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   UserButton: () => <div data-testid="user-button" />,
-  Show: ({ when, children }: { when: string; children: React.ReactNode }) => {
+  Show: ({ when, children }: { when: string; children: ReactNode }) => {
     const isSignedIn = !!mockUserRef.current
     if (when === 'signed-in' && isSignedIn) return <>{children}</>
     if (when === 'signed-out' && !isSignedIn) return <>{children}</>

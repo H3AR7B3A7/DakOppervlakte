@@ -5,11 +5,10 @@ import {
   renderHook,
 } from '@testing-library/react'
 import { NextIntlClientProvider } from 'next-intl'
-import type React from 'react'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import messages from '../../messages/nl.json'
 
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+const AllTheProviders = ({ children }: { children: ReactNode }) => {
   return (
     <NextIntlClientProvider locale="nl" messages={messages}>
       {children}

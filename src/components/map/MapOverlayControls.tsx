@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl'
-import type React from 'react'
+import type { CSSProperties } from 'react'
 
 interface MapOverlayControlsProps {
   is3D: boolean
@@ -10,7 +10,7 @@ interface MapOverlayControlsProps {
   onTiltToggle: () => void
 }
 
-const overlayBtn: React.CSSProperties = {
+const overlayBtn: CSSProperties = {
   background: 'rgba(17,17,24,0.9)',
   backdropFilter: 'blur(8px)',
   border: '1px solid var(--border)',
@@ -36,7 +36,7 @@ export function MapOverlayControls({
   const t = useTranslations('Map')
 
   const rotationDisabled = !is3D
-  const disabledRotationBtn: React.CSSProperties = {
+  const disabledRotationBtn: CSSProperties = {
     ...overlayBtn,
     opacity: 0.35,
     cursor: 'not-allowed',

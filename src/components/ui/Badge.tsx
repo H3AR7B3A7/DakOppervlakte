@@ -1,7 +1,7 @@
-import type React from 'react'
+import type { ReactNode } from 'react'
 
 interface BadgeProps {
-  children: React.ReactNode
+  children: ReactNode
   variant?: 'accent' | 'muted'
 }
 

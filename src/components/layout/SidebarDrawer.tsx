@@ -1,14 +1,13 @@
 'use client'
 
-import type React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 interface SidebarDrawerProps {
   open: boolean
   onClose: () => void
   titleId: string
   closeLabel: string
-  children: React.ReactNode
+  children: ReactNode
 }
 
 const FOCUSABLE_SELECTOR =

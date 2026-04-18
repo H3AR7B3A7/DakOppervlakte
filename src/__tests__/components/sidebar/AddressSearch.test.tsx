@@ -1,8 +1,9 @@
 import userEvent from '@testing-library/user-event'
+import type { ComponentProps } from 'react'
 import { AddressSearch } from '@/components/sidebar/AddressSearch'
 import { render, screen } from '../../test-utils'
 
-function setup(overrides: Partial<React.ComponentProps<typeof AddressSearch>> = {}) {
+function setup(overrides: Partial<ComponentProps<typeof AddressSearch>> = {}) {
   const props = {
     value: '',
     onChange: vi.fn(),

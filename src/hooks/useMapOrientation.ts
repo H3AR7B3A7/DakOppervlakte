@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { normalizeHeading } from '@/domain/orientation/heading'
 
 interface UseMapOrientationOptions {
-  mapInstanceRef: React.RefObject<google.maps.Map | null>
+  mapInstanceRef: RefObject<google.maps.Map | null>
   mapLoaded: boolean
 }
 
