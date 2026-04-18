@@ -49,6 +49,7 @@ export function SearchHistory({ history, onRestore, onDelete }: SearchHistoryPro
             }}
           >
             <button
+              type="button"
               onClick={() => onRestore(h)}
               title={t('historyRestoreTitle')}
               style={{
@@ -94,6 +95,7 @@ export function SearchHistory({ history, onRestore, onDelete }: SearchHistoryPro
               </span>
             </button>
             <button
+              type="button"
               onClick={() => onDelete(h.id)}
               aria-label={t('deleteHistoryAriaLabel')}
               title={t('deleteHistoryAriaLabel')}

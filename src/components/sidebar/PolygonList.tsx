@@ -148,6 +148,7 @@ export function PolygonList({
                   />
                 ) : (
                   <button
+                    type="button"
                     onClick={() => startEdit(p.id, p.label)}
                     title={t('renamePlaneTitle')}
                     aria-label={t('renamePlaneAriaLabel', { label: p.label })}
@@ -177,6 +178,7 @@ export function PolygonList({
                 </Badge>
 
                 <button
+                  type="button"
                   onClick={() => onDelete(p.id)}
                   aria-label={t('deletePlaneAriaLabel', { label: p.label })}
                   style={{

@@ -64,6 +64,7 @@ export function RotationControls({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <button
+          type="button"
           onClick={() => onRotate(-90)}
           disabled={!is3D}
           aria-label={t('rotateLeftAriaLabel')}
@@ -106,6 +107,7 @@ export function RotationControls({
         </div>
 
         <button
+          type="button"
           onClick={() => onRotate(90)}
           disabled={!is3D}
           aria-label={t('rotateRightAriaLabel')}
@@ -116,6 +118,7 @@ export function RotationControls({
       </div>
 
       <button
+        type="button"
         onClick={onTiltToggle}
         disabled={!canEnable3D && !is3D}
         aria-pressed={tilt === 45}

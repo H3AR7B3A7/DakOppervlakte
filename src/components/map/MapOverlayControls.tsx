@@ -54,6 +54,7 @@ export function MapOverlayControls({
       }}
     >
       <button
+        type="button"
         onClick={rotationDisabled ? undefined : onRotateLeft}
         disabled={rotationDisabled}
         aria-label={t('rotateLeftAriaLabel')}
@@ -63,6 +64,7 @@ export function MapOverlayControls({
       </button>
 
       <button
+        type="button"
         onClick={rotationDisabled ? undefined : onResetHeading}
         disabled={rotationDisabled}
         aria-label={t('resetHeadingAriaLabel')}
@@ -78,6 +80,7 @@ export function MapOverlayControls({
       </button>
 
       <button
+        type="button"
         onClick={rotationDisabled ? undefined : onRotateRight}
         disabled={rotationDisabled}
         aria-label={t('rotateRightAriaLabel')}
@@ -87,6 +90,7 @@ export function MapOverlayControls({
       </button>
 
       <button
+        type="button"
         onClick={onTiltToggle}
         disabled={!canEnable3D && !is3D}
         aria-label={t('tiltAriaLabel')}
