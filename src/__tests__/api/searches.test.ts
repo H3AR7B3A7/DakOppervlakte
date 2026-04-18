@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 import { DELETE, GET, POST } from '@/app/api/searches/route'
-import getDb from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 // Mock Clerk and DB
 vi.mock('@clerk/nextjs/server', () => ({
@@ -9,7 +9,7 @@ vi.mock('@clerk/nextjs/server', () => ({
 }))
 
 vi.mock('@/lib/db', () => ({
-  default: vi.fn(),
+  getDb: vi.fn(),
 }))
 
 describe('searches API', () => {
@@ -18,7 +18,6 @@ describe('searches API', () => {
   })
 
   it('GET returns 401 if not signed in', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
 
     const res = await GET()
@@ -26,7 +25,6 @@ describe('searches API', () => {
   })
 
   it('POST returns 401 if not signed in', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: null } as any)
 
     const req = new NextRequest('http://localhost/api/searches', {
@@ -38,7 +36,6 @@ describe('searches API', () => {
   })
 
   it('POST performs UPSERT', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any)
     const mockSql = vi.fn().mockResolvedValue([])
     vi.mocked(getDb).mockReturnValue(mockSql as unknown as ReturnType<typeof getDb>)
@@ -64,7 +61,6 @@ describe('searches API', () => {
   })
 
   it('DELETE requires an ID', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(auth).mockResolvedValue({ userId: 'user_123' } as any)
 
     const req = new NextRequest('http://localhost/api/searches')

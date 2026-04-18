@@ -1,6 +1,6 @@
 // Mock the db client
 vi.mock('@/lib/db', () => ({
-  default: vi.fn(() => ({
+  getDb: vi.fn(() => ({
     // This allows us to use tagged template literal as a function
     // For simpler mocking, we might need a custom mock implementation
   })),
