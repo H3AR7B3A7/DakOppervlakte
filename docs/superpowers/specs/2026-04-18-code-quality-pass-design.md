@@ -3,7 +3,7 @@
 **Date:** 2026-04-18
 **Status:** Draft — awaiting user review
 **Scope:** Guardrails + pure domain layer extraction + targeted component/hook cleanup
-**Constraints:** No functional changes. All existing tests stay green. Each phase ships as a standalone, revertable PR.
+**Constraints:** No functional changes **with one deliberate exception: removing the sidebar swipe-to-open/close gestures** (Phase 0). All existing tests stay green except those covering the removed swipe behavior. Each phase ships as a standalone, revertable PR.
 
 ---
 
@@ -27,6 +27,41 @@
 Phased horizontal: each phase is one PR across the whole codebase. Each phase must leave the repo in a fully working state (green tests, `npm run check`, `npm run build`). No phase starts until the previous is merged.
 
 Ordering rationale: guardrails first so the clean-code pass is auto-applied; characterization tests before any risky refactor so silent behavior changes cannot sneak in; domain extraction before component cleanup because component cleanup depends on the domain modules.
+
+---
+
+## Phase 0 — Remove sidebar swipe-to-open/close gestures
+
+Independent from the rest of the effort — can ship any time. Listed first because it is the smallest, purely subtractive change and reduces the complexity of `SidebarDrawer.tsx` before later phases need to reason about it.
+
+### Motivation
+
+The swipe-open and swipe-close gestures in `src/components/layout/SidebarDrawer.tsx` add ~120 lines of touch-event plumbing (two `useEffect` blocks wiring `touchstart` / `touchmove` / `touchend` listeners on `document`, plus four magic-number constants). They duplicate capability already available via:
+
+- **Open:** the hamburger button in the `Header`
+- **Close:** the backdrop click + the `Escape` key
+
+Removing them leaves `SidebarDrawer` simpler, drops the `onOpen` prop entirely, and eliminates an edge case where horizontal touch-scrolling inside the drawer can fight the drawer's own swipe-to-close handler.
+
+### Changes
+
+- In `src/components/layout/SidebarDrawer.tsx`:
+  - Remove the two `useEffect` blocks for swipe-open (currently `SidebarDrawer.tsx:58-119`) and swipe-close (currently `SidebarDrawer.tsx:121-178`)
+  - Remove the constants `EDGE_SWIPE_START_PX`, `OPEN_SWIPE_DISTANCE_PX`, `CLOSE_SWIPE_DISTANCE_PX`, `HORIZONTAL_DOMINANCE_RATIO` (currently `SidebarDrawer.tsx:13-16`)
+  - Remove the `onOpen?: () => void` prop from `SidebarDrawerProps`
+- In `src/components/DakoppervlakteApp.tsx`:
+  - Remove the `onOpen={() => setDrawerOpen(true)}` prop on the `<SidebarDrawer>` element (currently `DakoppervlakteApp.tsx:178`)
+- In `src/__tests__/components/layout/SidebarDrawer.test.tsx`:
+  - Remove the swipe-open tests (`'opens when the user swipes right from the left edge'` and the three adjacent `does not open...` cases)
+  - Remove the swipe-close tests (`'closes when the user swipes left while open'`, `'does not close on a right swipe while open'`, `'does not close on a predominantly vertical swipe while open'`)
+  - Keep all other tests: backdrop click, Escape key, focus management on open, body overflow lock, desktop rendering
+
+### Exit criteria
+
+- `npm test` passes
+- `npm run check` passes
+- Drawer opens via hamburger button only, closes via backdrop click / Escape key only — covered by the retained tests
+- No remaining references to `onOpen`, `EDGE_SWIPE_START_PX`, `OPEN_SWIPE_DISTANCE_PX`, `CLOSE_SWIPE_DISTANCE_PX`, `HORIZONTAL_DOMINANCE_RATIO` anywhere in `src/`
 
 ---
 
