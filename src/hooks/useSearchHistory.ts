@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { PolygonData, Search } from '@/lib/types'
+import type { PolygonData } from '@/domain/polygon/types'
+import type { Search } from '@/lib/types'
 
 export function useSearchHistory(isSignedIn: boolean) {
   const [history, setHistory] = useState<Search[]>([])

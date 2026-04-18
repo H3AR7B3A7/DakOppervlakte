@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { PolygonData } from '@/domain/polygon/types'
 import { createEdgeLabels, type EdgeLabelsController } from '@/lib/edgeLabels'
-import type { DrawingMode, PolygonData, PolygonEntry } from '@/lib/types'
+import type { DrawingMode, PolygonEntry } from '@/lib/types'
 import { generatePolygonColor, normalizeHeading } from '@/lib/utils'
 
 interface UsePolygonDrawingOptions {

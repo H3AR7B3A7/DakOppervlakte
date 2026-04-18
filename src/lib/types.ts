@@ -1,13 +1,5 @@
-export type PolygonData = {
-  id: string
-  label: string
-  area: number
-  path: { lat: number; lng: number }[]
-  /** Heading (cardinal direction, 0–360) when the polygon was created */
-  heading?: number
-  /** Tilt (0 or 45) when the polygon was created */
-  tilt?: number
-}
+import type { PolygonData } from '@/domain/polygon/types'
+import type { EdgeLabelsController } from './edgeLabels'
 
 export type Search = {
   id: number
@@ -16,8 +8,6 @@ export type Search = {
   created_at: string
   polygons?: PolygonData[]
 }
-
-import type { EdgeLabelsController } from './edgeLabels'
 
 export type PolygonEntry = {
   id: string
