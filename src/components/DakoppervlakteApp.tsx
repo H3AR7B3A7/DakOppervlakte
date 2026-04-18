@@ -8,6 +8,7 @@ import { SidebarDrawer } from '@/components/layout'
 import { DrawingOverlay, MapOverlayControls, MapView, PolygonChipBar } from '@/components/map'
 import {
   AddressSearch,
+  DrawerTitleBlock,
   DrawingHint,
   PolygonList,
   RotationControls,
@@ -191,33 +192,7 @@ export function DakoppervlakteApp() {
           titleId={DRAWER_TITLE_ID}
           closeLabel={t('Sidebar.closeMenu')}
         >
-          <div
-            style={{
-              padding: '24px 24px 16px',
-              borderBottom: '1px solid var(--border)',
-              flexShrink: 0,
-            }}
-          >
-            <h1
-              id={DRAWER_TITLE_ID}
-              style={{
-                fontFamily: 'Syne, sans-serif',
-                fontWeight: 800,
-                fontSize: 24,
-                letterSpacing: '-0.03em',
-                lineHeight: 1.1,
-                marginBottom: 6,
-                color: 'var(--text)',
-              }}
-            >
-              {t('App.title')}
-              <br />
-              <span style={{ color: 'var(--accent)' }}>{t('App.titleAccent')}</span>
-            </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.5 }}>
-              {t('App.subtitle')}
-            </p>
-          </div>
+          <DrawerTitleBlock titleId={DRAWER_TITLE_ID} />
 
           <div style={{ flexShrink: 0 }}>
             <AddressSearch
