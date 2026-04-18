@@ -3,8 +3,8 @@
 import { useFormatter, useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui'
+import { normalizeHeading } from '@/domain/orientation/heading'
 import type { PolygonEntry } from '@/lib/types'
-import { normalizeHeading } from '@/lib/utils'
 
 interface PolygonListProps {
   polygons: PolygonEntry[]

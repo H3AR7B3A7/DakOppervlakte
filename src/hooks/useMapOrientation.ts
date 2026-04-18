@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { normalizeHeading } from '@/lib/utils'
+import { normalizeHeading } from '@/domain/orientation/heading'
 
 interface UseMapOrientationOptions {
   mapInstanceRef: React.RefObject<google.maps.Map | null>

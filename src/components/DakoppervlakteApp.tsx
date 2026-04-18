@@ -17,6 +17,7 @@ import {
   TotalAreaDisplay,
 } from '@/components/sidebar'
 import { Button } from '@/components/ui'
+import { normalizeHeading } from '@/domain/orientation/heading'
 import type { Search } from '@/domain/search/types'
 import { useGeocoding } from '@/hooks/useGeocoding'
 import { useGoogleMaps } from '@/hooks/useGoogleMaps'
@@ -24,7 +25,6 @@ import { useMapOrientation } from '@/hooks/useMapOrientation'
 import { usePolygonDrawing } from '@/hooks/usePolygonDrawing'
 import { useSearchHistory } from '@/hooks/useSearchHistory'
 import { useUsageCounter } from '@/hooks/useUsageCounter'
-import { normalizeHeading } from '@/lib/utils'
 
 const DRAWER_TITLE_ID = 'sidebar-drawer-title'
 

@@ -1,11 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { normalizeHeading } from '@/domain/orientation/heading'
 import { generatePolygonColor } from '@/domain/polygon/color'
 import type { PolygonData } from '@/domain/polygon/types'
 import { createEdgeLabels, type EdgeLabelsController } from '@/lib/edgeLabels'
 import type { DrawingMode, PolygonEntry } from '@/lib/types'
-import { normalizeHeading } from '@/lib/utils'
 
 interface UsePolygonDrawingOptions {
   mapInstanceRef: React.RefObject<google.maps.Map | null>
