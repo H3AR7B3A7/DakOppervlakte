@@ -194,6 +194,7 @@ export function DakoppervlakteApp() {
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           titleId={DRAWER_TITLE_ID}
+          closeLabel={t('Sidebar.closeMenu')}
         >
           <div
             style={{

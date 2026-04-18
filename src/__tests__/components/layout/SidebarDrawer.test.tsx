@@ -31,7 +31,7 @@ describe('SidebarDrawer', () => {
 
     it('renders the drawer with dialog role when open', () => {
       render(
-        <SidebarDrawer open={true} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={true} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
           <p>content</p>
         </SidebarDrawer>,
@@ -43,7 +43,7 @@ describe('SidebarDrawer', () => {
     it('calls onClose when the backdrop is clicked', async () => {
       const onClose = vi.fn()
       render(
-        <SidebarDrawer open={true} onClose={onClose} titleId="t">
+        <SidebarDrawer open={true} onClose={onClose} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
           <p>content</p>
         </SidebarDrawer>,
@@ -55,7 +55,7 @@ describe('SidebarDrawer', () => {
     it('calls onClose when Escape is pressed', async () => {
       const onClose = vi.fn()
       render(
-        <SidebarDrawer open={true} onClose={onClose} titleId="t">
+        <SidebarDrawer open={true} onClose={onClose} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
           <p>content</p>
         </SidebarDrawer>,
@@ -66,7 +66,7 @@ describe('SidebarDrawer', () => {
 
     it('does not render a backdrop when closed', () => {
       render(
-        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
           <p>content</p>
         </SidebarDrawer>,
@@ -76,21 +76,21 @@ describe('SidebarDrawer', () => {
 
     it('locks body scroll when open', () => {
       const { rerender } = render(
-        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
         </SidebarDrawer>,
       )
       expect(document.body.style.overflow).toBe('')
 
       rerender(
-        <SidebarDrawer open={true} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={true} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
         </SidebarDrawer>,
       )
       expect(document.body.style.overflow).toBe('hidden')
 
       rerender(
-        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
         </SidebarDrawer>,
       )
@@ -103,7 +103,7 @@ describe('SidebarDrawer', () => {
 
     it('renders children without backdrop or dialog role', () => {
       render(
-        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={false} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
           <p>content</p>
         </SidebarDrawer>,
@@ -115,7 +115,7 @@ describe('SidebarDrawer', () => {
 
     it('does not lock body scroll', () => {
       render(
-        <SidebarDrawer open={true} onClose={vi.fn()} titleId="t">
+        <SidebarDrawer open={true} onClose={vi.fn()} titleId="t" closeLabel="Close">
           <h2 id="t">Menu</h2>
         </SidebarDrawer>,
       )

@@ -7,6 +7,7 @@ interface SidebarDrawerProps {
   open: boolean
   onClose: () => void
   titleId: string
+  closeLabel: string
   children: React.ReactNode
 }
 
@@ -27,7 +28,13 @@ function useIsMobile(): boolean {
   return isMobile
 }
 
-export function SidebarDrawer({ open, onClose, titleId, children }: SidebarDrawerProps) {
+export function SidebarDrawer({
+  open,
+  onClose,
+  titleId,
+  closeLabel,
+  children,
+}: SidebarDrawerProps) {
   const isMobile = useIsMobile()
   const drawerRef = useRef<HTMLElement>(null)
   const wasOpenRef = useRef(false)
@@ -84,22 +91,28 @@ export function SidebarDrawer({ open, onClose, titleId, children }: SidebarDrawe
   return (
     <>
       {open && (
-        <div
+        <button
+          type="button"
           data-testid="sidebar-drawer-backdrop"
+          aria-label={closeLabel}
+          tabIndex={-1}
           onClick={onClose}
           style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(0, 0, 0, 0.5)',
             zIndex: 200,
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
           }}
         />
       )}
       <aside
         ref={drawerRef}
-        role={open ? 'dialog' : undefined}
-        aria-modal={open ? true : undefined}
-        aria-labelledby={open ? titleId : undefined}
+        role="dialog"
+        aria-modal={open || undefined}
+        aria-labelledby={titleId}
         aria-hidden={!open}
         style={{
           position: 'fixed',
