@@ -22,21 +22,8 @@ export function Header({
   const t = useTranslations()
 
   return (
-    <header
-      style={{
-        borderBottom: '1px solid var(--border)',
-        padding: '0 24px',
-        height: 60,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: 'var(--surface)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <header className="app-header">
+      <div className="app-header-group">
         {onMenuClick && (
           <HamburgerButton
             className="md:hidden"
@@ -51,23 +38,14 @@ export function Header({
         </div>
       </div>
 
-      <div
-        className="md:hidden"
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          pointerEvents: 'none',
-        }}
-      >
+      <div className="md:hidden app-header-logo-center">
         <Logo />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div className="hidden md:flex" style={{ alignItems: 'center', gap: 12 }}>
+      <div className="app-header-group">
+        <div className="hidden md:flex app-header-group">
           {usageCount !== null && usageCount > 0 && (
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            <span className="app-header-stats">
               {t('Sidebar.statsBoast', { search: usageCount, autogen: autogenCount ?? 0 })}
             </span>
           )}
