@@ -1,5 +1,4 @@
 import { useFormatter, useTranslations } from 'next-intl'
-import React from 'react'
 import type { Search } from '@/lib/types'
 
 interface SearchHistoryProps {

@@ -2,7 +2,6 @@
 
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import { useTranslations } from 'next-intl'
-import React from 'react'
 import { Button, HamburgerButton, Logo } from '@/components/ui'
 
 interface HeaderProps {

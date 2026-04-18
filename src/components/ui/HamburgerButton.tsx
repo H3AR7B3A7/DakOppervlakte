@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface HamburgerButtonProps {
   ariaLabel: string
   onClick: () => void

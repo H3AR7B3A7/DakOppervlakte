@@ -2,7 +2,7 @@
 
 import { Show, SignInButton, SignUpButton, useUser } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Header } from '@/components/Header'
 import { SidebarDrawer } from '@/components/layout'
 import { DrawingOverlay, MapOverlayControls, MapView, PolygonChipBar } from '@/components/map'

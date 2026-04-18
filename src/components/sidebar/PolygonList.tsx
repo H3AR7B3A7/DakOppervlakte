@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormatter, useTranslations } from 'next-intl'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui'
 import type { PolygonEntry } from '@/lib/types'
 import { normalizeHeading } from '@/lib/utils'

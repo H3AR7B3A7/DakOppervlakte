@@ -1,5 +1,3 @@
-import React from 'react'
-
 export function Logo() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

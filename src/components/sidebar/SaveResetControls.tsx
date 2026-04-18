@@ -1,7 +1,6 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import React from 'react'
 import { Button } from '@/components/ui'
 
 interface SaveResetControlsProps {
