@@ -1,4 +1,4 @@
-import { formatDistance } from '@/lib/utils'
+import { formatDistance } from '@/domain/geo/distance'
 
 describe('formatDistance', () => {
   it('uses the locale-appropriate decimal separator', () => {

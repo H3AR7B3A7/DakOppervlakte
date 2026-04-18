@@ -1,4 +1,4 @@
-import { formatDistance } from './utils'
+import { formatDistance } from '@/domain/geo/distance'
 
 export interface EdgeLabelsController {
   /**
