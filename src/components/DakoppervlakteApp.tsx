@@ -1,6 +1,6 @@
 'use client'
 
-import { Show, SignInButton, SignUpButton, useUser } from '@clerk/nextjs'
+import { Show, useUser } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { Header } from '@/components/Header'
@@ -8,6 +8,7 @@ import { SidebarDrawer } from '@/components/layout'
 import { DrawingOverlay, MapOverlayControls, MapView, PolygonChipBar } from '@/components/map'
 import {
   AddressSearch,
+  DrawerFooter,
   DrawerTitleBlock,
   DrawingHint,
   PolygonList,
@@ -271,33 +272,7 @@ export function DakoppervlakteApp() {
             </div>
           </Show>
 
-          <div
-            className="flex md:hidden"
-            style={{
-              padding: '12px 24px',
-              borderTop: '1px solid var(--border)',
-              flexDirection: 'column',
-              alignItems: 'stretch',
-              gap: 10,
-              flexShrink: 0,
-            }}
-          >
-            {usageCount !== null && usageCount > 0 && (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
-                {t('Sidebar.statsBoast', { search: usageCount, autogen: autogenCount ?? 0 })}
-              </span>
-            )}
-            <Show when="signed-out">
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                <SignInButton mode="modal">
-                  <Button variant="outline">{t('Header.signIn')}</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button variant="accent">{t('Common.register')}</Button>
-                </SignUpButton>
-              </div>
-            </Show>
-          </div>
+          <DrawerFooter usageCount={usageCount} autogenCount={autogenCount} />
         </SidebarDrawer>
 
         <MapView mapRef={mapRef} mapLoaded={mapLoaded}>

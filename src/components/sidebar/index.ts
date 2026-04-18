@@ -1,4 +1,5 @@
 export { AddressSearch } from './AddressSearch'
+export { DrawerFooter } from './DrawerFooter'
 export { DrawerTitleBlock } from './DrawerTitleBlock'
 export { DrawingHint } from './DrawingHint'
 export { PolygonList } from './PolygonList'
