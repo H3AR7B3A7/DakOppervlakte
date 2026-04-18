@@ -53,7 +53,13 @@ export function DakoppervlakteApp() {
     resetAll,
     restorePolygons,
     serializedPolygons,
-  } = usePolygonDrawing({ mapInstanceRef, currentHeading: heading, currentTilt: tilt, locale })
+  } = usePolygonDrawing({
+    mapInstanceRef,
+    currentHeading: heading,
+    currentTilt: tilt,
+    locale,
+    t,
+  })
   const { history, saveEntry, deleteEntry } = useSearchHistory(isSignedIn)
   const { count: usageCount, increment: incrementSearchCount } = useUsageCounter()
   const { count: autogenCount, increment: incrementAutogenCount } = useUsageCounter({

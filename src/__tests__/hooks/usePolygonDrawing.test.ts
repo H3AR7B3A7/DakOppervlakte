@@ -31,6 +31,16 @@ function createMockMap() {
   }
 }
 
+const fakeTranslator = (key: string, params?: Record<string, string | number>): string => {
+  if (key === 'Polygon.manualLabel' && params?.index !== undefined) {
+    return `Vlak ${params.index}`
+  }
+  if (key === 'Polygon.autoLabel') {
+    return 'Auto'
+  }
+  return key
+}
+
 function setup(overrides?: { heading?: number; tilt?: number }) {
   const map = createMockMap()
   const mapInstanceRef = { current: map as unknown as google.maps.Map }
@@ -44,6 +54,7 @@ function setup(overrides?: { heading?: number; tilt?: number }) {
         currentHeading: props.heading,
         currentTilt: props.tilt,
         locale: 'nl-BE',
+        t: fakeTranslator,
       }),
     { initialProps: { heading, tilt } },
   )
@@ -85,7 +96,13 @@ describe('User draws and manages roof polygons', () => {
     it('stays idle when the map is not yet available', () => {
       const mapInstanceRef = { current: null }
       const { result } = renderHook(() =>
-        usePolygonDrawing({ mapInstanceRef, currentHeading: 0, currentTilt: 0, locale: 'nl-BE' }),
+        usePolygonDrawing({
+          mapInstanceRef,
+          currentHeading: 0,
+          currentTilt: 0,
+          locale: 'nl-BE',
+          t: fakeTranslator,
+        }),
       )
       act(() => result.current.startDrawing())
       expect(result.current.mode).toBe('idle')

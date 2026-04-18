@@ -45,6 +45,16 @@ function setup(overrides?: { heading?: number; tilt?: number }) {
   const heading = overrides?.heading ?? 0
   const tilt = overrides?.tilt ?? 0
 
+  const fakeTranslator = (key: string, params?: Record<string, string | number>): string => {
+    if (key === 'Polygon.manualLabel' && params?.index !== undefined) {
+      return `Vlak ${params.index}`
+    }
+    if (key === 'Polygon.autoLabel') {
+      return 'Auto'
+    }
+    return key
+  }
+
   const hookResult = renderHook(
     (props: { heading: number; tilt: number }) =>
       usePolygonDrawing({
@@ -52,6 +62,7 @@ function setup(overrides?: { heading?: number; tilt?: number }) {
         currentHeading: props.heading,
         currentTilt: props.tilt,
         locale: 'nl-BE',
+        t: fakeTranslator,
       }),
     { initialProps: { heading, tilt } },
   )

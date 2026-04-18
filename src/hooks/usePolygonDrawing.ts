@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { headingsMatch } from '@/domain/orientation/heading'
 import { roundArea } from '@/domain/polygon/area'
 import { generatePolygonColor } from '@/domain/polygon/color'
+import { polygonLabel, type Translator } from '@/domain/polygon/label'
 import { fromPolygonData, toPolygonData } from '@/domain/polygon/serialize'
 import type { PolygonData } from '@/domain/polygon/types'
 import { createEdgeLabels, type EdgeLabelsController } from '@/lib/infrastructure/edgeLabels'
@@ -14,6 +15,7 @@ interface UsePolygonDrawingOptions {
   currentHeading: number
   currentTilt: number
   locale: string
+  t: Translator
 }
 
 export function usePolygonDrawing({
@@ -21,6 +23,7 @@ export function usePolygonDrawing({
   currentHeading,
   currentTilt,
   locale,
+  t,
 }: UsePolygonDrawingOptions) {
   const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
   const dblClickListenerRef = useRef<google.maps.MapsEventListener | null>(null)
@@ -229,7 +232,7 @@ export function usePolygonDrawing({
 
     const area = roundArea(google.maps.geometry.spherical.computeArea(polygon.getPath()))
     const id = crypto.randomUUID()
-    const label = `Vlak ${polygonsRef.current.length + 1}`
+    const label = polygonLabel('manual', polygonsRef.current.length + 1, t)
 
     const entry = attachPolygonEntry(polygon, {
       id,
@@ -249,6 +252,7 @@ export function usePolygonDrawing({
     currentTilt,
     attachPolygonEntry,
     syncPolygons,
+    t,
   ])
 
   const addPolygonFromPath = useCallback(
@@ -273,7 +277,7 @@ export function usePolygonDrawing({
 
       const entry = attachPolygonEntry(polygon, {
         id,
-        label: 'Auto',
+        label: polygonLabel('auto', polygonsRef.current.length + 1, t),
         area,
         heading: currentHeading,
         tilt: currentTilt,
@@ -282,7 +286,7 @@ export function usePolygonDrawing({
       polygonsRef.current = [...polygonsRef.current, entry]
       syncPolygons()
     },
-    [mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry, syncPolygons],
+    [mapInstanceRef, currentHeading, currentTilt, attachPolygonEntry, syncPolygons, t],
   )
 
   const startDrawing = useCallback(() => {
