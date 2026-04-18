@@ -6,7 +6,7 @@ export type PolygonEntry = {
   area: number
   /** The actual Google Maps Polygon object – only present in browser context */
   polygon: google.maps.Polygon
-  /** Heading (cardinal direction, 0–360) when the polygon was created */
+  /** Heading (compass bearing, 0–360°) when the polygon was created */
   heading: number
   /** Tilt (0 or 45) when the polygon was created */
   tilt: number
