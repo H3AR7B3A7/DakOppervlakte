@@ -34,24 +34,26 @@ const makePath = () => {
   }
 }
 
-export const MockPolygon = vi
-  .fn()
-  .mockImplementation(function ({ fillColor }: { fillColor?: string } = {}) {
-    const path = makePath()
-    const stored: Record<string, unknown> = { fillColor }
-    let currentMap: unknown = null
-    return {
-      setMap: vi.fn((m: unknown) => {
-        currentMap = m
-      }),
-      getMap: vi.fn(() => currentMap),
-      getPath: () => path,
-      get: (key: string) => stored[key],
-      set: (key: string, val: unknown) => {
-        stored[key] = val
-      },
-    }
-  })
+export const MockPolygon = vi.fn().mockImplementation(function ({
+  fillColor,
+}: {
+  fillColor?: string
+} = {}) {
+  const path = makePath()
+  const stored: Record<string, unknown> = { fillColor }
+  let currentMap: unknown = null
+  return {
+    setMap: vi.fn((m: unknown) => {
+      currentMap = m
+    }),
+    getMap: vi.fn(() => currentMap),
+    getPath: () => path,
+    get: (key: string) => stored[key],
+    set: (key: string, val: unknown) => {
+      stored[key] = val
+    },
+  }
+})
 
 export const MockPolyline = vi.fn().mockImplementation(function () {
   return {
@@ -65,20 +67,18 @@ export const MockMarker = vi.fn().mockImplementation(function () {
   return { setMap: vi.fn(), addListener: et.addListener }
 })
 
-export const MockAdvancedMarkerElement = vi
-  .fn()
-  .mockImplementation(function ({
-    map = null,
-    position = null,
-    content = null,
-  }: {
-    map?: unknown
-    position?: unknown
-    content?: unknown
-  } = {}) {
-    const et = makeEventTarget()
-    return { map, position, content, addListener: et.addListener }
-  })
+export const MockAdvancedMarkerElement = vi.fn().mockImplementation(function ({
+  map = null,
+  position = null,
+  content = null,
+}: {
+  map?: unknown
+  position?: unknown
+  content?: unknown
+} = {}) {
+  const et = makeEventTarget()
+  return { map, position, content, addListener: et.addListener }
+})
 
 export const MockGeocoder = vi.fn().mockImplementation(function () {
   return { geocode: vi.fn() }
