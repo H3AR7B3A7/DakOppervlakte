@@ -95,3 +95,26 @@ body .cl-formButtonPrimary {
   min-height: 0;
   overflow-y: auto;
 }
+
+.app-shell {
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 60px);
+  position: relative;
+}
+.sidebar-section {
+  flex-shrink: 0;
+}
+.start-drawing-button {
+  margin-bottom: 16px;
+  padding: 11px;
+  font-weight: 700;
+}

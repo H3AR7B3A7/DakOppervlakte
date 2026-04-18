@@ -161,15 +161,7 @@ export function DakoppervlakteApp() {
   }, [])
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        overflow: 'hidden',
-        background: 'var(--bg)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="app-shell">
       <Header
         usageCount={usageCount}
         autogenCount={autogenCount}
@@ -178,15 +170,7 @@ export function DakoppervlakteApp() {
         drawerId={DRAWER_TITLE_ID}
       />
 
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          overflow: 'hidden',
-          height: 'calc(100vh - 60px)',
-          position: 'relative',
-        }}
-      >
+      <div className="app-content">
         <SidebarDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
@@ -195,7 +179,7 @@ export function DakoppervlakteApp() {
         >
           <DrawerTitleBlock titleId={DRAWER_TITLE_ID} />
 
-          <div style={{ flexShrink: 0 }}>
+          <div className="sidebar-section">
             <AddressSearch
               value={address}
               onChange={setAddress}
@@ -209,7 +193,7 @@ export function DakoppervlakteApp() {
             />
           </div>
 
-          <div className="hidden md:block" style={{ flexShrink: 0 }}>
+          <div className="hidden md:block sidebar-section">
             <RotationControls
               heading={heading}
               tilt={tilt}
@@ -227,7 +211,7 @@ export function DakoppervlakteApp() {
                 variant="accent"
                 fullWidth
                 onClick={handleStartDrawing}
-                style={{ marginBottom: 16, padding: 11, fontWeight: 700 }}
+                className="start-drawing-button"
               >
                 ✏️ {polygons.length === 0 ? t('Sidebar.startDrawing') : t('Sidebar.addPlane')}
               </Button>
@@ -259,7 +243,7 @@ export function DakoppervlakteApp() {
           </SidebarBody>
 
           <Show when="signed-in">
-            <div style={{ flexShrink: 0 }}>
+            <div className="sidebar-section">
               <SearchHistory history={history} onRestore={handleRestore} onDelete={deleteEntry} />
             </div>
           </Show>
