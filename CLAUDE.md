@@ -60,6 +60,7 @@ Project richtlijnen voor AI-assistenten. Lees dit volledig voordat je code schri
 - **Setup file**: `vitest.setup.ts` — imports `@testing-library/jest-dom` and installs the Google Maps stub
 - **Google Maps stub**: `src/__tests__/__mocks__/googleMaps.ts` — imported once in setup, never per-test
 - **Linter / formatter**: Biome (`npm run check` runs `biome check --write .`, which both formats and lints); config in `biome.json`; no semicolons, single quotes, 100-char lines
+- **Architecture check**: `dependency-cruiser` (`npm run check:arch`); config in `.dependency-cruiser.cjs`; enforces the layering table at the top of this file. `npm run check` chains it after Biome.
 
 ## Workflows
 

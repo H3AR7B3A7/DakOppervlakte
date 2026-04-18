@@ -63,6 +63,7 @@ npm run test:ui
 - **Styling** -- Inline React `style={{}}` objects (Tailwind CSS 4 installed for CSS variables/resets in `globals.css`)
 - **Testing** -- Vitest, Testing Library, jsdom, v8 coverage
 - **Linter / formatter** -- Biome 2 (no semicolons, single quotes, 100-char lines)
+- **Architecture check** -- dependency-cruiser (enforces CLAUDE.md layering; `npm run check:arch`)
 
 ## Project Structure
 

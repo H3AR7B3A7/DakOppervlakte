@@ -11,10 +11,11 @@
 - [x] Add distances between polygon points on selection lines. This should be possible frontend.
 - [ ] Potentially increase accuracy of auto generation of roof selection, by using the larger polygon that we are filtering right now
 - [ ] Remove the init endpoint / scripts / ... decent versioning?
-- [ ] Add github action that runs `build` and `test` in package.json
+- [x] Add github action that runs `build` and `test` in package.json on pull requests
 - [ ] Add pre commit hook that runs `check` and `test` in package.json
 - [ ] https://dak-oppervlakte.vercel.app/ in README + overall update
 - [x] Use Biome instead of eslint/prettier, set good rules, vercel / nextjs / no semicolons
-- [ ] Use linting to implement architecture rules (direction of dependencies)
+- [x] Use linting to implement architecture rules (direction of dependencies)
+- [ ] Extend arch rules — enforce raw-style rule tree-wide, add stricter dumb/pure boundaries
 - [ ] Implement e2e tests with playwright (document CLAUDE/GEMINI/README)
 - [ ] Add Storybook for the pure ui components (document CLAUDE/GEMINI/README) and add chromatic visual checks to the github pr process
