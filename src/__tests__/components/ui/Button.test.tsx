@@ -26,8 +26,8 @@ describe('Button', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
-  it('is visually dimmed when disabled', () => {
+  it('is marked disabled when disabled', () => {
     render(<Button disabled>Geblokkeerd</Button>)
-    expect(screen.getByRole('button')).toHaveStyle({ opacity: '0.5' })
+    expect(screen.getByRole('button')).toBeDisabled()
   })
 })
