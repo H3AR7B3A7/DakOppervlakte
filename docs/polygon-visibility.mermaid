@@ -1,0 +1,31 @@
+stateDiagram-v2
+    [*] --> Visible : polygon created at<br/>(drawHeading, drawTilt)
+
+    note right of Visible
+        polygon.getMap() === map
+        edgeLabels.setMap(map)
+        Area contributes to totalArea
+        (unless excluded === true)
+    end note
+
+    note right of Hidden
+        polygon.getMap() === null
+        edgeLabels.setMap(null)
+        Still in polygons[] and
+        serializedPolygons,
+        just not rendered.
+    end note
+
+    Visible --> Hidden : headingsMatch(drawHeading, currentHeading)<br/>=== false<br/>— OR —<br/>drawTilt !== currentTilt
+
+    Hidden --> Visible : headingsMatch(drawHeading, currentHeading)<br/>=== true<br/>— AND —<br/>drawTilt === currentTilt
+
+    note left of Hidden
+        Checked by the effect in
+        usePolygonDrawing whenever
+        currentHeading or currentTilt
+        changes (map 'idle' event).
+    end note
+
+    Visible --> [*] : deletePolygon(id)
+    Hidden --> [*] : deletePolygon(id) / resetAll()

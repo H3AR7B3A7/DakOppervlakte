@@ -20,7 +20,7 @@ sequenceDiagram
     loop User clicks on map (each point)
         User ->> Map: Click on map
         Map ->> PD: click event (latLng)
-        PD ->> Map: new google.maps.Marker<br/>(green circle, size 5, white border)
+        PD ->> Map: new google.maps.marker.AdvancedMarkerElement<br/>(10px circle, 1.5px white border, #6ee7b7 fill)
         PD ->> PD: tempPathRef.push(latLng), pointCount++
 
         alt First marker and pointCount >= 3

@@ -1,0 +1,51 @@
+sequenceDiagram
+    autonumber
+
+    participant User
+    participant Browser
+    participant Header as Header component
+    participant Clerk as Clerk hosted UI
+    participant MW as clerkMiddleware<br/>(src/proxy.ts)
+    participant API as /api/searches route
+    participant Auth as auth() from<br/>@clerk/nextjs/server
+    participant Neon as Neon PostgreSQL
+
+    User ->> Header: Clicks "Sign in"
+    Header ->> Browser: Navigate to Clerk sign-in URL
+    Browser ->> Clerk: GET Clerk-hosted sign-in page
+    activate Clerk
+
+    User ->> Clerk: Enters credentials / completes SSO
+    Clerk -->> Browser: 302 to app domain<br/>+ Set-Cookie: __session=...
+    deactivate Clerk
+
+    Note over Browser: Session cookie now attached<br/>to requests for app domain
+
+    User ->> Browser: Views SearchHistory drawer
+    Browser ->> MW: GET /api/searches<br/>Cookie: __session=...
+    activate MW
+
+    MW ->> MW: clerkMiddleware resolves session,<br/>populates request auth context
+    MW ->> API: forward request (pathname starts with /api/,<br/>so i18n middleware is skipped)
+    activate API
+
+    API ->> Auth: await auth()
+    activate Auth
+    Auth -->> API: { userId, sessionId, ... }
+    deactivate Auth
+
+    alt userId is present (authenticated)
+        API ->> Neon: SELECT ... FROM searches<br/>WHERE user_id = ${userId}<br/>ORDER BY created_at DESC LIMIT 20
+        activate Neon
+        Neon -->> API: Search[]
+        deactivate Neon
+        API -->> Browser: 200 Search[]
+
+    else userId is null (unauthenticated)
+        Note over API: No DB round trip
+        API -->> Browser: 401 { "error": "Unauthorized" }
+    end
+    deactivate API
+    deactivate MW
+
+    Note over Browser,Header: useSearchHistory logs the 401<br/>and leaves history = []

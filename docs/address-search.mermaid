@@ -2,44 +2,84 @@ sequenceDiagram
     autonumber
 
     participant User
-    participant App as DakoppervlakteApp
     participant AS as AddressSearch
+    participant App as DakoppervlakteApp
     participant GEO as useGeocoding
     participant GC as google.maps.Geocoder
     participant Map as google.maps.Map
+    participant UC as useUsageCounter (search)
+    participant BL as fetchBuildingPolygon
+    participant API as GET /api/building-polygon
     participant PD as usePolygonDrawing
+    participant AUC as useUsageCounter (autogen)
 
-    User ->> AS: Types address, presses Enter or clicks Search
+    User ->> AS: Types address, toggles<br/>autoGenerate, clicks Search
     activate AS
     AS ->> App: onSearch()
     deactivate AS
 
     activate App
+    App ->> App: setAutoGenerateError(''),<br/>setSaved(false)
+
+    alt autoGenerate === true
+        App ->> PD: resetAll()
+    end
+
     App ->> GEO: geocodeAndNavigate(address, onComplete)
     activate GEO
+    GEO ->> GEO: setSearching(true),<br/>setSearchError('')
 
-    GEO ->> GEO: setSearching(true), setSearchError('')
-
-    GEO ->> GC: geocode({ address: address + ', Belgium', region: 'BE' })
+    GEO ->> GC: geocode({ address: addr + ', Belgium', region: 'BE' })
     activate GC
 
-    alt Geocoding succeeds
+    alt Geocoding fails or empty results
+        GC -->> GEO: error or []
+        deactivate GC
+        GEO ->> GEO: setSearchError(t('Errors.addressNotFound'))
+        GEO ->> GEO: setSearching(false)
+        deactivate GEO
+
+    else Geocoding succeeds
         GC -->> GEO: results[0].geometry.location
         deactivate GC
-
         GEO ->> Map: setCenter(location)
         GEO ->> Map: setZoom(20)
         GEO ->> GEO: setSearching(false)
         GEO -->> App: onComplete()
         deactivate GEO
 
-        Note over App,PD: 600ms delay before auto-starting drawing mode
-        App ->> PD: startDrawing()
+        App ->> UC: incrementSearchCount(address)
+        Note over UC: POST /api/counter if address<br/>not in localStorage seen-list
 
-    else Geocoding fails or no results
-        GC -->> GEO: error or empty results
-        GEO ->> GEO: setSearchError(t('Errors.addressNotFound'))
-        GEO ->> GEO: setSearching(false)
-        deactivate GEO
+        App ->> App: setSearchFormCollapsed(true),<br/>setDrawerOpen(false)
+
+        alt autoGenerate === true
+            App ->> Map: getCenter()
+            Map -->> App: LatLng
+            App ->> BL: fetchBuildingPolygon(lat, lng)
+            activate BL
+            BL ->> API: GET /api/building-polygon?lat=&lng=
+            activate API
+            API -->> BL: 200 Feature or { features: [] }
+            deactivate API
+
+            alt result.kind === 'found'
+                BL -->> App: { kind: 'found', path }
+                deactivate BL
+                App ->> PD: addPolygonFromPath(path)
+                App ->> AUC: incrementAutogenCount(address)
+                Note over AUC: POST /api/autogen-counter if address<br/>not in localStorage autogen-list
+
+            else result.kind === 'not-found' | 'error'
+                BL -->> App: { kind: 'not-found' } or { kind: 'error' }
+                App ->> App: setAutoGenerateError(t('Sidebar.noBuildingFound'))
+                Note over App: Clears error after 5s,<br/>then setTimeout(startDrawing, 600)
+                App ->> PD: startDrawing()
+            end
+
+        else autoGenerate === false
+            Note over App,PD: 600ms delay before<br/>auto-starting drawing mode
+            App ->> PD: startDrawing()
+        end
     end
     deactivate App

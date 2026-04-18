@@ -3,9 +3,10 @@ sequenceDiagram
 
     participant Client
     participant API as GET /api/building-polygon
-    participant OSM as OpenStreetMap Nominatim
+    participant GRB as GRB Vlaanderen WFS
+    participant URB as UrbIS Brussels WFS
 
-    Client ->> API: GET /api/building-polygon?lat=51.1&lng=4.4
+    Client ->> API: GET /api/building-polygon?lat=51.2211&lng=4.3997
     activate API
 
     API ->> API: Validate lat, lng query params
@@ -13,23 +14,36 @@ sequenceDiagram
     alt Missing lat or lng
         API -->> Client: 400 { error: 'Missing lat/lng' }
     else Valid coordinates
-        API ->> OSM: GET /reverse?format=jsonv2<br/>&lat=51.1&lon=4.4<br/>&polygon_geojson=1&zoom=18
-        activate OSM
+        Note over API: Build bbox around point<br/>(±0.0005° offset, EPSG:4326)
 
-        Note over API,OSM: User-Agent: 'DakOppervlakte/1.0'
+        API ->> GRB: GET /GRB/wfs?service=WFS<br/>&version=2.0.0<br/>&request=GetFeature<br/>&typeName=GRB:GBG<br/>&outputFormat=application/json<br/>&srsName=EPSG:4326<br/>&bbox=...
+        activate GRB
 
-        OSM -->> API: { geojson: { type, coordinates } }
-        deactivate OSM
+        Note over API,GRB: User-Agent: 'DakOppervlakte/1.0'
 
-        alt GeoJSON type is Polygon
+        GRB -->> API: { features: [...] }
+        deactivate GRB
+
+        API ->> API: Filter features by TYPE (1 or undefined)
+        API ->> API: pickClosestBuilding:<br/>point-in-polygon,<br/>else nearest centroid ≤ 50m
+
+        alt GRB feature matches
             API -->> Client: 200 { type: 'Feature',<br/>geometry: { type: 'Polygon', coordinates } }
 
-        else GeoJSON type is Point (no building outline)
-            API ->> API: Generate 10x10m fallback square<br/>(±5-6m offset from center)
-            API -->> Client: 200 { type: 'Feature',<br/>geometry: { type: 'Polygon', coordinates: [square] } }
+        else No GRB match, fall back to UrbIS
+            API ->> URB: GET /geoserver/UrbIS/wfs?service=WFS<br/>&version=2.0.0<br/>&request=GetFeature<br/>&typeName=UrbIS:Bu<br/>&outputFormat=application/json<br/>&srsName=EPSG:4326<br/>&bbox=...
+            activate URB
+            URB -->> API: { features: [...] }
+            deactivate URB
 
-        else No geojson in response
-            API -->> Client: 200 { features: [],<br/>debug: { lat, lng, msg: 'No building found...' } }
+            API ->> API: Filter + pickClosestBuilding
+
+            alt UrbIS feature matches
+                API -->> Client: 200 { type: 'Feature',<br/>geometry: { type: 'Polygon', coordinates } }
+
+            else No match in either source
+                API -->> Client: 200 { features: [],<br/>debug: { lat, lng, msg: 'No building found' } }
+            end
         end
     end
     deactivate API

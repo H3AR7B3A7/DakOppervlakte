@@ -1,0 +1,11 @@
+{
+  "GET_success": {
+    "count": 17
+  },
+  "POST_success": {
+    "count": 18
+  },
+  "GET_fallback_table_missing": {
+    "count": 0
+  }
+}

@@ -1,4 +1,5 @@
 {
+  "_comment": "Error response shapes for Dakoppervlakte API routes. The /api/searches handlers (POST/DELETE/GET) intentionally have no try/catch — unhandled errors (e.g. 'relation searches does not exist') surface as Next.js default 500 HTML pages, not JSON. The explicit entries below are the JSON shapes we DO emit.",
   "/api/searches": {
     "401_unauthorized_GET": {
       "error": "Unauthorized"
@@ -14,20 +15,37 @@
     }
   },
   "/api/counter": {
-    "500_database_init_failed_POST": {
+    "500_init_retry_failed_POST": {
       "count": null,
-      "error": "Database init failed"
+      "debug": "init-retry-failed"
     },
     "500_generic_error_POST": {
       "count": null,
-      "error": "relation \"usage_counter\" does not exist"
+      "debug": "connection timeout"
     },
     "fallback_GET_on_table_missing": {
       "count": 0
     },
     "fallback_GET_on_generic_error": {
       "count": 0,
-      "error": "connection timeout"
+      "debug": "connection timeout"
+    }
+  },
+  "/api/autogen-counter": {
+    "500_init_retry_failed_POST": {
+      "count": null,
+      "debug": "init-retry-failed"
+    },
+    "500_generic_error_POST": {
+      "count": null,
+      "debug": "connection timeout"
+    },
+    "fallback_GET_on_table_missing": {
+      "count": 0
+    },
+    "fallback_GET_on_generic_error": {
+      "count": 0,
+      "debug": "connection timeout"
     }
   },
   "/api/building-polygon": {
@@ -37,9 +55,9 @@
     "no_building_found": {
       "features": [],
       "debug": {
-        "lat": "51.1",
-        "lng": "4.4",
-        "msg": "No building found via Nominatim"
+        "lat": "51.2211",
+        "lng": "4.3997",
+        "msg": "No building found"
       }
     }
   },

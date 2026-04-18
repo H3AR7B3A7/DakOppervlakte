@@ -11,7 +11,7 @@ flowchart TD
     end
 
     subgraph Smart ["Smart Components"]
-        App["DakoppervlakteApp — Thin orchestrator, wires 6 hooks"]
+        App["DakoppervlakteApp — Thin orchestrator, wires 7 hook calls"]
     end
 
     subgraph Hooks ["Custom Hooks"]
@@ -36,12 +36,20 @@ flowchart TD
         DH["DrawingHint"]
         SG["StepGuide"]
         HI["SearchHistory"]
+        DTB["DrawerTitleBlock"]
+        DF["DrawerFooter"]
+    end
+
+    subgraph Layout ["Layout Components"]
+        SBD["SidebarDrawer"]
+        SBB["SidebarBody"]
     end
 
     subgraph Map ["Map Components (dumb)"]
         MV["MapView"]
         MO["MapOverlayControls"]
         DO["DrawingOverlay"]
+        PCB["PolygonChipBar"]
     end
 
     subgraph UI ["UI Primitives (stateless)"]
@@ -50,10 +58,12 @@ flowchart TD
         BDG["Badge"]
         LOGO["Logo"]
         SPIN["Spinner"]
+        HB["HamburgerButton"]
     end
 
     subgraph API ["API Routes (app/api/)"]
         CTR["/api/counter"]
+        ACTR["/api/autogen-counter"]
         SCH["/api/searches"]
         BLD["/api/building-polygon"]
         INIT["/api/init"]
@@ -63,15 +73,19 @@ flowchart TD
         GMAP["Google Maps API"]
         CLK["Clerk Auth"]
         NEON["Neon PostgreSQL"]
-        OSM["OpenStreetMap Nominatim"]
+        GRB["GRB Vlaanderen WFS"]
+        URB["UrbIS Brussels WFS"]
     end
 
     Page --> App
     App --> GM & MO_HOOK & GEO & PD & UC & SH
     App --> HDR
+    App --> SBD
+    SBD --> SBB
+    SBD --> DTB & DF
     App --> AS & RC & PL & TA & SR & DH & SG & HI
-    App --> MV & MO & DO
-    HDR --> LOGO & BTN
+    App --> MV & MO & DO & PCB
+    HDR --> LOGO & BTN & HB
     AS --> BTN & INP
     SR & DH --> BTN
     PL --> BDG
@@ -81,11 +95,14 @@ flowchart TD
     GEO --> GMAP
     PD --> GMAP
     UC --> CTR
+    UC --> ACTR
     SH --> SCH
     SCH --> CLK
     SCH --> NEON
     CTR --> NEON
-    BLD --> OSM
+    ACTR --> NEON
+    BLD --> GRB
+    BLD --> URB
     INIT --> NEON
 ```
 
@@ -98,15 +115,15 @@ State lives in custom hooks and is wired together by `DakoppervlakteApp` (thin o
 | `heading`, `tilt`, `zoom` | `useMapOrientation` | Map orientation, synced bidirectionally with the map instance via `idle` and `zoom_changed` listeners |
 | `canEnable3D`, `is3D` | `useMapOrientation` | Computed: `zoom >= 14` and `tilt === 45` respectively |
 | `address`, `searching`, `searchError` | `useGeocoding` | Address search form state and geocoding lifecycle |
-| `saved` | `DakoppervlakteApp` | Whether current calculation has been persisted (only local state remaining in App) |
+| `saved`, `autoGenerate`, `autoGenerateError`, `drawerOpen`, `searchFormCollapsed` | `DakoppervlakteApp` | UI coordination state: persistence flag, auto-generate toggle + error, mobile drawer open/closed, collapsed search form |
 | `mode`, `pointCount`, `polygons` | `usePolygonDrawing` | Drawing FSM state and completed polygon list |
 | `mapRef`, `mapInstanceRef`, `geocoderRef`, `mapLoaded` | `useGoogleMaps` | Google Maps SDK and instance lifecycle |
-| `count` | `useUsageCounter` | Global calculation counter |
+| `count` (search), `count` (autogen) | `useUsageCounter` (invoked twice with different `endpoint`/`storageKey`) | Global address-search counter and global auto-generate counter |
 | `history` | `useSearchHistory` | Authenticated user's saved searches |
 
 ## Hook Composition
 
-`DakoppervlakteApp` (~240 lines) is a thin orchestrator that wires up six hooks and one extracted component. It holds a single piece of local state (`saved`) and defines five callbacks that coordinate across hooks. See [hook-composition.mermaid](hook-composition.mermaid) for the full diagram.
+`DakoppervlakteApp` (~279 lines) is a thin orchestrator that wires up seven hook calls (`useUsageCounter` is invoked twice) plus the `Header`, the sidebar drawer, and the map. It holds five pieces of local UI state — `saved`, `autoGenerate`, `autoGenerateError`, `drawerOpen`, `searchFormCollapsed` — and defines six `useCallback`s (`handleSearch`, `handleRestore`, `handleSave`, `handleReset`, `handleStartDrawing`, `handleExpandSearch`) that coordinate across hooks. See [hook-composition.mermaid](hook-composition.mermaid) for the full diagram.
 
 | Hook | Concern | Depends On |
 |------|---------|------------|
@@ -121,19 +138,19 @@ State lives in custom hooks and is wired together by `DakoppervlakteApp` (thin o
 
 | Component | Extracted from | Props |
 |-----------|---------------|-------|
-| `Header` | `DakoppervlakteApp` | `usageCount: number \| null` |
+| `Header` | `DakoppervlakteApp` | `usageCount: number \| null`, `autogenCount: number \| null`, `onMenuClick: () => void`, `drawerOpen: boolean`, `drawerId: string` |
 
-`Header` contains the Logo, usage count display, and Clerk auth buttons (SignIn/SignUp/UserButton). It uses `useTranslations()` internally.
+`Header` contains the Logo, both usage-count displays (search + auto-generate), the mobile `HamburgerButton`, and Clerk auth buttons (SignIn/SignUp/UserButton). It uses `useTranslations()` internally.
 
 ## Key Design Decisions
 
-1. **Client-side geometry** -- All area calculations run in the browser using `google.maps.geometry.spherical.computeArea()`. No server-side computation.
+1. **Client-side geometry** -- All area calculations run in the browser using `google.maps.geometry.spherical.computeArea()`. No server-side computation. See [ADR-0001](adr/0001-client-side-area-calculation.md).
 
-2. **Orientation-based polygon visibility** -- Polygons are tagged with the `heading` and `tilt` at which they were drawn. When the map rotates to a different orientation, those polygons are hidden. This lets users draw separate polygon sets for different perspectives of the same roof.
+2. **Orientation-based polygon visibility** -- Polygons are tagged with the `heading` and `tilt` at which they were drawn. When the map rotates to a different orientation, those polygons are hidden. This lets users draw separate polygon sets for different perspectives of the same roof. See [ADR-0003](adr/0003-orientation-based-polygon-visibility.md) and [polygon-visibility.mermaid](polygon-visibility.mermaid).
 
 3. **Ref-based drawing state** -- `usePolygonDrawing` stores temporary drawing artifacts (markers, preview line, path) in refs rather than React state, avoiding unnecessary re-renders during drawing.
 
-4. **Upsert-based save** -- When saving a search, the database upserts on `(user_id, address)`. Repeated calculations for the same address update the existing row.
+4. **Upsert-based save** -- When saving a search, the database upserts on `(user_id, address)`. Repeated calculations for the same address update the existing row. See [ADR-0002](adr/0002-upsert-by-user-and-address.md).
 
 5. **Serverless database** -- Neon PostgreSQL with the `@neondatabase/serverless` driver, optimized for edge/serverless environments. No connection pooling.
 
@@ -157,11 +174,19 @@ erDiagram
         BIGINT count
     }
 
-    searches }|--|| searches : "UNIQUE(user_id, address)"
+    autogen_counter {
+        INT id PK
+        BIGINT count
+    }
 ```
 
+The `searches` table carries a `UNIQUE(user_id, address)` constraint enforced at the table level — see `src/lib/init-db.ts`.
+
 - `searches.polygons` stores serialized `PolygonData[]` (each with `id`, `label`, `area`, `path[]`, `heading`, `tilt`)
-- `usage_counter` has a single row (`id = 1`) tracking the global calculation count
+- `usage_counter` has a single row (`id = 1`) tracking the global address-search count
+- `autogen_counter` has a single row (`id = 1`) tracking how many addresses have been auto-generated into a building polygon via the GRB/UrbIS lookup
+
+Schema bootstrap is handled by an ad-hoc init script (`src/lib/init-db.ts`) and a public `GET /api/init` endpoint. Both are throwaway glue — see [migrations.md](migrations.md) for the current state and the planned migration to drizzle-kit.
 
 ## Request Lifecycle
 
@@ -196,6 +221,64 @@ src/proxy.ts (clerkMiddleware wraps all matched routes)
 ```
 
 **Note:** The middleware file is named `src/proxy.ts` rather than the conventional `middleware.ts`. The matcher pattern covers all routes except static assets.
+
+## Deployment Topology
+
+The app runs as a single Next.js deployment on Vercel. The browser talks directly to two third-party JS SDKs (Google Maps, Clerk) and to our own `/api/*` routes. Server-side, Vercel's Node runtime reaches Neon for persistence, the two Belgian WFS providers for building polygons, and Clerk for session verification.
+
+```mermaid
+flowchart LR
+    subgraph Client ["Browser (client)"]
+        UI[Next.js React app<br/>DakoppervlakteApp]
+    end
+
+    subgraph Vercel ["Vercel (Next.js deployment)"]
+        MW[proxy.ts<br/>clerkMiddleware + next-intl]
+        RSC[Server Components<br/>app/&#91;locale&#93;/page.tsx]
+        API1["/api/counter"]
+        API2["/api/autogen-counter"]
+        API3["/api/building-polygon"]
+        API4["/api/searches"]
+        API5["/api/init"]
+    end
+
+    subgraph DB ["Managed data"]
+        NEON[(Neon PostgreSQL<br/>searches, usage_counter,<br/>autogen_counter)]
+    end
+
+    subgraph Third ["Third-party services"]
+        GMAPS[Google Maps<br/>JavaScript API]
+        CLERK[Clerk<br/>auth + sessions]
+        GRB[GRB Vlaanderen<br/>WFS]
+        URBIS[UrbIS Brussels<br/>WFS]
+    end
+
+    UI -->|HTML, JSON| MW
+    MW --> RSC
+    MW --> API1
+    MW --> API2
+    MW --> API3
+    MW --> API4
+    MW --> API5
+
+    UI -.->|Maps JS SDK, tiles| GMAPS
+    UI -.->|Sign-in UI, session cookie| CLERK
+
+    API1 --> NEON
+    API2 --> NEON
+    API4 --> NEON
+    API5 --> NEON
+    API3 -->|GetFeature bbox| GRB
+    API3 -->|GetFeature bbox fallback| URBIS
+    API4 -->|auth&#40;&#41; server-side| CLERK
+```
+
+- **Browser -> Vercel**: HTML for pages, JSON for all `/api/*` routes.
+- **Browser -> Google Maps**: loaded via `useGoogleMaps` directly; map tiles, Geocoder, drawing, geometry helpers.
+- **Browser -> Clerk**: hosted sign-in/sign-up UI and a session cookie set on the app domain. See [auth-flow.mermaid](auth-flow.mermaid).
+- **Vercel -> Neon**: `@neondatabase/serverless` over HTTPS; no connection pooling. Every API invocation opens a fresh connection.
+- **Vercel -> GRB / UrbIS**: unauthenticated `GET .../wfs?service=WFS&request=GetFeature&bbox=...` calls. GRB is queried first; UrbIS is a fallback when GRB returns no features.
+- **Vercel -> Clerk**: server-side session verification via `auth()` from `@clerk/nextjs/server`.
 
 ## Internationalization
 

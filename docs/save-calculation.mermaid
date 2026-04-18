@@ -4,8 +4,6 @@ sequenceDiagram
     participant User
     participant App as DakoppervlakteApp
     participant SR as SaveResetControls
-    participant UC as useUsageCounter
-    participant CounterAPI as POST /api/counter
     participant SH as useSearchHistory
     participant API as POST /api/searches
     participant Clerk as Clerk auth()
@@ -15,14 +13,7 @@ sequenceDiagram
     SR ->> App: onSave()
     activate App
 
-    App ->> UC: increment()
-    activate UC
-    UC ->> CounterAPI: POST /api/counter
-    activate CounterAPI
-    CounterAPI -->> UC: { count }
-    deactivate CounterAPI
-    UC -->> App: void
-    deactivate UC
+    Note over App: No counter increment here —<br/>incrementSearchCount fires in handleSearch,<br/>not handleSave
 
     App ->> SH: saveEntry(address, totalArea, serializedPolygons)
     activate SH
@@ -54,7 +45,7 @@ sequenceDiagram
     SH -->> App: void
     deactivate SH
 
-    App ->> App: setSaved(true)
+    App ->> App: setSaved(true), setDrawerOpen(false)
     deactivate App
 
     Note over SR: UI shows checkmark confirmation

@@ -1,7 +1,7 @@
 flowchart TD
     subgraph App ["DakoppervlakteApp (thin orchestrator)"]
-        LOCAL["Local state: saved"]
-        CB["Callbacks: handleSearch, handleRestore,<br/>handleSave, handleReset, handleStartDrawing"]
+        LOCAL["Local state: saved,<br/>autoGenerate, autoGenerateError,<br/>drawerOpen, searchFormCollapsed"]
+        CB["Callbacks: handleSearch, handleRestore,<br/>handleSave, handleReset,<br/>handleStartDrawing, handleExpandSearch"]
     end
 
     subgraph Hooks ["Hook Composition"]
@@ -11,17 +11,19 @@ flowchart TD
 
         GEO["useGeocoding<br/>─────────────<br/>address, setAddress, searching,<br/>searchError, setSearchError,<br/>geocodeAndNavigate()"]
 
-        PD["usePolygonDrawing<br/>─────────────<br/>mode, pointCount, polygons,<br/>startDrawing, finishPolygon,<br/>deletePolygon, renamePolygon,<br/>togglePolygonExcluded,<br/>resetAll, restorePolygons,<br/>serializedPolygons"]
+        PD["usePolygonDrawing<br/>─────────────<br/>mode, pointCount, polygons,<br/>startDrawing, finishPolygon,<br/>undoLastPoint, addPolygonFromPath,<br/>deletePolygon, renamePolygon,<br/>togglePolygonExcluded,<br/>resetAll, restorePolygons,<br/>serializedPolygons"]
 
-        UC["useUsageCounter<br/>─────────────<br/>count, increment"]
+        UC["useUsageCounter (search)<br/>─────────────<br/>endpoint: /api/counter<br/>storageKey: dakoppervlakte_searched_addresses<br/>count, increment"]
+
+        AUC["useUsageCounter (autogen)<br/>─────────────<br/>endpoint: /api/autogen-counter<br/>storageKey: dakoppervlakte_autogen_addresses<br/>count, increment"]
 
         SH["useSearchHistory<br/>─────────────<br/>history, saveEntry,<br/>deleteEntry"]
     end
 
     subgraph Components ["Rendered Components"]
         HDR["Header"]
-        SIDEBAR["Sidebar: AddressSearch,<br/>RotationControls, PolygonList,<br/>TotalAreaDisplay, SaveResetControls,<br/>DrawingHint, StepGuide,<br/>SearchHistory"]
-        MAP["Map: MapView,<br/>MapOverlayControls,<br/>DrawingOverlay"]
+        SIDEBAR["Sidebar: AddressSearch,<br/>RotationControls, PolygonList,<br/>TotalAreaDisplay, SaveResetControls,<br/>DrawingHint, StepGuide,<br/>SearchHistory, DrawerTitleBlock,<br/>DrawerFooter"]
+        MAP["Map: MapView,<br/>MapOverlayControls,<br/>DrawingOverlay, PolygonChipBar"]
     end
 
     %% Hook dependency chain
@@ -31,13 +33,14 @@ flowchart TD
     MO -->|heading, tilt| PD
 
     %% App wires hooks to components
-    App --> GM & MO & GEO & PD & UC & SH
+    App --> GM & MO & GEO & PD & UC & AUC & SH
     UC -->|usageCount| HDR
+    AUC -->|autogenCount| HDR
     MO -->|heading, tilt, is3D, canEnable3D| SIDEBAR
     MO -->|is3D, canEnable3D, handleRotate, handleTiltToggle| MAP
     GEO -->|address, searching, searchError| SIDEBAR
     PD -->|mode, pointCount, polygons| SIDEBAR
-    PD -->|mode, pointCount| MAP
+    PD -->|mode, pointCount, polygons, undoLastPoint| MAP
     SH -->|history| SIDEBAR
 
     %% External dependencies
@@ -46,4 +49,6 @@ flowchart TD
     GEO -.->|geocode()| GMAP
     PD -.->|click listeners, Polygon, Marker| GMAP
     UC -.->|fetch| API_CTR["/api/counter"]
+    AUC -.->|fetch| API_ACTR["/api/autogen-counter"]
     SH -.->|fetch| API_SCH["/api/searches"]
+    App -.->|fetchBuildingPolygon| API_BLD["/api/building-polygon"]
