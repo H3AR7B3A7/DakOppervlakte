@@ -175,7 +175,6 @@ export function DakoppervlakteApp() {
       >
         <SidebarDrawer
           open={drawerOpen}
-          onOpen={() => setDrawerOpen(true)}
           onClose={() => setDrawerOpen(false)}
           titleId={DRAWER_TITLE_ID}
         >
