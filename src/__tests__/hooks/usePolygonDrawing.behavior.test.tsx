@@ -125,12 +125,21 @@ describe('Public API: drawing lifecycle', () => {
   })
 
   it('finishPolygon with 3+ points adds a polygon, returns to idle, and exposes a rounded area', () => {
+    // Override computeArea for this test so the assertion exercises the hook's
+    // rounding logic rather than just the mock's default integer return value.
+    // mockReturnValueOnce is consumed by the single computeArea call in
+    // finishPolygon, after which the factory default (() => 100) takes over.
+    ;(
+      google.maps.geometry.spherical.computeArea as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValueOnce(123.456)
     const { result, map } = setup()
     drawThreePoints(map, result)
     act(() => result.current.finishPolygon())
     expect(result.current.mode).toBe('idle')
     expect(result.current.polygons).toHaveLength(1)
-    expect(result.current.polygons[0].area).toBe(100)
+    // 123.456 rounded to 1 decimal place is 123.5 — if the hook stopped
+    // rounding, this would read 123.456 and fail.
+    expect(result.current.polygons[0].area).toBe(123.5)
     expect(result.current.polygons[0].label).toEqual(expect.any(String))
     expect(result.current.polygons[0].label).not.toBe('')
   })
@@ -203,15 +212,22 @@ describe('Public API: orientation sync', () => {
       ])
     })
     const polygon = result.current.polygons[0].polygon
-    expect(polygon.setMap).not.toHaveBeenCalledWith(null)
+    const setMapMock = polygon.setMap as ReturnType<typeof vi.fn>
+    expect(setMapMock).not.toHaveBeenCalledWith(null)
 
     rerender({ heading: 90, tilt: 0 })
-    expect(polygon.setMap).toHaveBeenCalledWith(null)
+    expect(setMapMock).toHaveBeenCalledWith(null)
+
+    // Snapshot the call count AFTER the hide step so subsequent assertions
+    // only see calls made by the re-alignment branch — the setup-time
+    // setMap(nonNullMap) from addPolygonFromPath must not satisfy the check.
+    const callsAfterHide = setMapMock.mock.calls.length
 
     rerender({ heading: 0, tilt: 0 })
-    const mapCalls = (polygon.setMap as ReturnType<typeof vi.fn>).mock.calls
-    const lastNonNullCall = [...mapCalls].reverse().find((call) => call[0] !== null)
-    expect(lastNonNullCall).toBeDefined()
+
+    const callsAfterRealign = setMapMock.mock.calls.slice(callsAfterHide)
+    expect(callsAfterRealign.length).toBeGreaterThan(0)
+    expect(callsAfterRealign[callsAfterRealign.length - 1][0]).not.toBeNull()
   })
 })
 
