@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { centroid, haversineDistance, pointInPolygon } from '@/lib/geo'
+import { centroid, haversineDistance, pointInPolygon } from '@/domain/geo/ring'
 
 export const dynamic = 'force-dynamic'
 

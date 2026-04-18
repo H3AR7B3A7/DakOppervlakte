@@ -1,4 +1,4 @@
-import { centroid, haversineDistance, pointInPolygon } from '@/lib/geo'
+import { centroid, haversineDistance, pointInPolygon } from '@/domain/geo/ring'
 
 describe('pointInPolygon', () => {
   const square = [
