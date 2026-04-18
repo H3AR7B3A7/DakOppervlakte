@@ -4,7 +4,7 @@ import { Show, useUser } from '@clerk/nextjs'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { Header } from '@/components/Header'
-import { SidebarDrawer } from '@/components/layout'
+import { SidebarBody, SidebarDrawer } from '@/components/layout'
 import { DrawingOverlay, MapOverlayControls, MapView, PolygonChipBar } from '@/components/map'
 import {
   AddressSearch,
@@ -221,15 +221,7 @@ export function DakoppervlakteApp() {
             />
           </div>
 
-          <div
-            className="thin-scrollbar"
-            style={{
-              padding: '16px 24px',
-              flex: 1,
-              minHeight: 0,
-              overflowY: 'auto',
-            }}
-          >
+          <SidebarBody>
             {mode === 'idle' && (
               <Button
                 variant="accent"
@@ -264,7 +256,7 @@ export function DakoppervlakteApp() {
             )}
 
             {polygons.length === 0 && mode === 'idle' && <StepGuide />}
-          </div>
+          </SidebarBody>
 
           <Show when="signed-in">
             <div style={{ flexShrink: 0 }}>

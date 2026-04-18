@@ -88,3 +88,10 @@ body .cl-formButtonPrimary {
   gap: 8px;
   justify-content: center;
 }
+
+.sidebar-body {
+  padding: 16px 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
