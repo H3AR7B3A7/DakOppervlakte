@@ -23,9 +23,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.cl-formButtonPrimary {
-  background: var(--accent) !important;
-  color: #000 !important;
+body .cl-formButtonPrimary {
+  background: var(--accent);
+  color: #000;
 }
 
 .thin-scrollbar {
