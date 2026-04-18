@@ -12,8 +12,7 @@ export function TotalAreaDisplay({ totalArea, polygonCount }: TotalAreaDisplayPr
   if (totalArea === 0) return null
 
   return (
-    <div
-      role="region"
+    <section
       aria-label={t('totalArea')}
       style={{
         background: 'rgba(110,231,183,0.08)',
@@ -50,6 +49,6 @@ export function TotalAreaDisplay({ totalArea, polygonCount }: TotalAreaDisplayPr
         {format.number(totalArea, { maximumFractionDigits: 1 })}
       </p>
       <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 4 }}>{t('unit')}</p>
-    </div>
+    </section>
   )
 }
