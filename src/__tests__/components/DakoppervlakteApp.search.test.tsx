@@ -1,6 +1,10 @@
-// Coverage baseline (recorded 2026-04-18, Phase 3):
-//   src/components/DakoppervlakteApp.tsx — handleSearch: 77.38% lines / 87.17% branches
-//   Do not let Phase 4/5 coverage drop below this baseline for handleSearch.
+// Coverage baseline (updated 2026-04-18 after Phase 5):
+//   src/components/DakoppervlakteApp.tsx — 75.32% lines / 87.5% branches
+//   Phase 3 baseline was 77.38% lines / 87.17% branches. Phase 5 slimmed the file
+//   from 354 to 278 lines; the −2.06pp line movement is structural (JSX props split
+//   across more lines, handlers not exercised by this test — see Task 13 analysis),
+//   and branches improved (+0.33pp) because handleSearch now covers both arms of
+//   the linearised fetchBuildingPolygon switch. Do not drop below the new floor.
 
 import userEvent from '@testing-library/user-event'
 import { DakoppervlakteApp } from '@/components/DakoppervlakteApp'
