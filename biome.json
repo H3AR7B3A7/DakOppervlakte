@@ -84,7 +84,8 @@
         "postcss.config.mjs",
         "tailwind.config.*",
         "vitest.config.mts",
-        "vitest.setup.ts"
+        "vitest.setup.ts",
+        "playwright.config.ts"
       ],
       "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
     },
