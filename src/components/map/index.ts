@@ -1,4 +1,5 @@
 export { DrawingOverlay } from './DrawingOverlay'
+export { IdleHint } from './IdleHint'
 export { MapOverlayControls } from './MapOverlayControls'
 export { MapView } from './MapView'
 export { PolygonChipBar } from './PolygonChipBar'

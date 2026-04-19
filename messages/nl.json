@@ -89,6 +89,7 @@
     "tiltZoomRequiredTooltip": "Zoom in om 3D te activeren",
     "drawingOverlayInitial": "✏️ Klik hoekpunten aan ({count} geplaatst)",
     "drawingOverlayReady": "✏️ {count} punten — dubbelklik om te sluiten",
+    "idleOverlayHint": "✏️ Dubbelklik de kaart om te beginnen tekenen",
     "undoLastPoint": "Laatste punt ongedaan maken"
   },
   "ChipBar": {

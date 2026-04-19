@@ -89,6 +89,7 @@
     "tiltZoomRequiredTooltip": "Zoom in to enable 3D",
     "drawingOverlayInitial": "✏️ Click corners ({count} placed)",
     "drawingOverlayReady": "✏️ {count} points — double click to close",
+    "idleOverlayHint": "✏️ Double-click the map to start drawing",
     "undoLastPoint": "Undo last point"
   },
   "ChipBar": {

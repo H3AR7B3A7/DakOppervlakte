@@ -89,6 +89,7 @@
     "tiltZoomRequiredTooltip": "Zoomez pour activer le 3D",
     "drawingOverlayInitial": "✏️ Cliquez sur les coins ({count} placés)",
     "drawingOverlayReady": "✏️ {count} points — double-cliquez pour fermer",
+    "idleOverlayHint": "✏️ Double-cliquez sur la carte pour commencer à dessiner",
     "undoLastPoint": "Annuler le dernier point"
   },
   "ChipBar": {

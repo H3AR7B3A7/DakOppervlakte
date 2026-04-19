@@ -5,7 +5,13 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { Header } from '@/components/Header'
 import { SidebarBody, SidebarDrawer } from '@/components/layout'
-import { DrawingOverlay, MapOverlayControls, MapView, PolygonChipBar } from '@/components/map'
+import {
+  DrawingOverlay,
+  IdleHint,
+  MapOverlayControls,
+  MapView,
+  PolygonChipBar,
+} from '@/components/map'
 import {
   AddressSearch,
   DrawerFooter,
@@ -263,6 +269,8 @@ export function DakoppervlakteApp() {
           />
 
           {mode === 'drawing' && <DrawingOverlay pointCount={pointCount} onUndo={undoLastPoint} />}
+
+          {mode === 'idle' && polygons.length === 0 && <IdleHint />}
 
           {mode !== 'drawing' && (
             <PolygonChipBar
