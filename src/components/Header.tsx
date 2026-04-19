@@ -42,23 +42,21 @@ export function Header({
         <Logo />
       </div>
 
-      <div className="app-header-group">
-        <div className="hidden md:flex app-header-group">
-          {usageCount !== null && usageCount > 0 && (
-            <span className="app-header-stats">
-              {t('Sidebar.statsBoast', { search: usageCount, autogen: autogenCount ?? 0 })}
-            </span>
-          )}
+      <div className="app-header-right">
+        {usageCount !== null && usageCount > 0 && (
+          <span className="app-header-stats">
+            {t('Sidebar.statsBoast', { search: usageCount, autogen: autogenCount ?? 0 })}
+          </span>
+        )}
 
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <Button variant="outline">{t('Header.signIn')}</Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button variant="accent">{t('Common.register')}</Button>
-            </SignUpButton>
-          </Show>
-        </div>
+        <Show when="signed-out">
+          <SignInButton mode="modal">
+            <Button variant="outline">{t('Header.signIn')}</Button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <Button variant="accent">{t('Common.register')}</Button>
+          </SignUpButton>
+        </Show>
 
         <Show when="signed-in">
           <UserButton appearance={{ elements: { avatarBox: { width: 32, height: 32 } } }} />
