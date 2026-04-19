@@ -14,7 +14,7 @@
     "subtitle": "Type an address and draw the roof outlines."
   },
   "Polygon": {
-    "manualLabel": "Plane {index}",
+    "manualLabel": "Area {index}",
     "autoLabel": "Auto"
   },
   "Sidebar": {
@@ -23,7 +23,7 @@
     "searchAriaLabel": "Search for an address",
     "searchButtonAriaLabel": "Search",
     "startDrawing": "Start drawing",
-    "addPlane": "Add another plane",
+    "addPlane": "Add another area",
     "totalArea": "Total area",
     "unit": "m²",
     "statsBoast": "{autogen} of {search} roofs in one click",
@@ -34,10 +34,10 @@
     "historyAriaLabel": "Search history",
     "historyRestoreTitle": "Restore this search",
     "deleteHistoryAriaLabel": "Remove from history",
-    "planesTitle": "Planes",
-    "planeNameAriaLabel": "Plane name",
+    "planesTitle": "Areas",
+    "planeNameAriaLabel": "Area name",
     "renamePlaneTitle": "Click to rename",
-    "renamePlaneAriaLabel": "Rename plane: {label}",
+    "renamePlaneAriaLabel": "Rename area: {label}",
     "deletePlaneAriaLabel": "Delete {label}",
     "includeInTotal": "Include in total",
     "excludeFromTotal": "Exclude from total",
@@ -63,7 +63,7 @@
   },
   "Drawing": {
     "hint": "Click on the map to start drawing",
-    "finish": "Finish polygon",
+    "finish": "Finish area",
     "modeActive": "✏️ Drawing mode active",
     "hint0": "Click points on the map.",
     "hint1": "1 point — keep going...",
@@ -79,7 +79,7 @@
     "step1": "Type an address and click →",
     "step2": "Rotate the map for a better view",
     "step3": "Click \"Start drawing\" and click corners",
-    "step4": "Add multiple planes for a total"
+    "step4": "Add multiple areas for a total"
   },
   "Map": {
     "rotateLeftAriaLabel": "Rotate map left",
@@ -94,7 +94,7 @@
   },
   "ChipBar": {
     "totalLabel": "Σ",
-    "toggleChipAriaLabel": "Toggle plane {label} ({area} m²)",
+    "toggleChipAriaLabel": "Toggle area {label} ({area} m²)",
     "deleteChipAriaLabel": "Delete {label}",
     "renameChipAriaLabel": "Rename {label}"
   },

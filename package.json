@@ -48,6 +48,7 @@
     "jsdom": "^29.0.2",
     "tailwindcss": "^4",
     "typescript": "^6",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.4",
+    "@swc/helpers": "^0.5.21"
   }
 }
