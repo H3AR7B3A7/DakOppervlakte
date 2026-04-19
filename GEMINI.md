@@ -1,87 +1,98 @@
 # Dakoppervlakte
 
-Roof-area measurement tool. Users search an address on Google Maps, draw polygons on rooftops, and get area calculations. Auth via Clerk, i18n via next-intl (nl/en/fr, default nl), DB on Neon Postgres.
-
-## Build & Test Commands
-
-```bash
-npm run dev          # Start dev server
-npm run build        # Type-check + build
-npm run check        # Type-check (tsc --noEmit) + lint (biome check --write .) -- run before considering work complete
-npm test             # Vitest run with coverage
-npm run test:watch   # Vitest watch mode
-npm run test:ui      # Vitest browser UI
-npx vitest run src/__tests__/path/to/file.test.ts   # Single file
-npx vitest run -t "test name pattern"                # Single test by name
-```
-
 ## Architecture
 
-| Layer | Location | Rules |
+| Layer | Where | Rule |
 |---|---|---|
 | Pages | `src/app/[locale]/page.tsx` | Shell only. No logic, no state. |
-| Smart components | `src/components/DakoppervlakteApp.tsx` | Orchestrates hooks + state. No raw fetch calls. |
-| Dumb components | `src/components/sidebar/`, `src/components/map/` | Props-only. No API calls, no global state. |
-| UI primitives | `src/components/ui/` | Stateless. Props + children only. Barrel-exported via `index.ts`. |
-| Hooks | `src/hooks/` | One concern per hook. All side effects encapsulated here. |
-| API routes | `src/app/api/` | Proxy external services + DB access. |
-| Types | `src/lib/types.ts` | Shared types: `Search`, `PolygonEntry`, `PolygonData`, `DrawingMode` |
-| Utils | `src/lib/utils.ts` | Pure helpers: `generatePolygonColor`, `normalizeHeading` |
+| Smart components | `src/components/DakoppervlakteApp.tsx` | App state lives here via hooks. No raw `style={{}}` — enforced by `scripts/check-raw-styles.mjs` (currently scans `DakoppervlakteApp.tsx` + `Header.tsx`). |
+| Dumb components | `src/components/{sidebar,map,layout}/` | Props-in, callbacks-out. Local UI state and `useTranslations` are fine; no API calls or global state. |
+| Pure UI | `src/components/ui/` | Stateless. Primitives + children only. |
+| Hooks | `src/hooks/` | One concern per hook. Encapsulate all side effects. |
+| Domain | `src/domain/{geo,orientation,polygon,search}/` | Pure TS (types + helpers). No React, no framework imports — enforced by `domain-is-pure`. |
+| Infrastructure | `src/lib/infrastructure/` | DB / external-service adapters. Governed by `infrastructure-boundaries`. |
+| API routes | `src/app/api/` | Proxy for external services + DB access. |
 
-## Entry Points
+## Key files
 
-- `src/components/DakoppervlakteApp.tsx` -- main smart component, all orchestration
-- `src/hooks/useGoogleMaps.ts` -- Google Maps script loading + map instance lifecycle
-- `src/hooks/usePolygonDrawing.ts` -- drawing FSM (idle <-> drawing), polygon visibility by heading/tilt
-- `src/hooks/useUsageCounter.ts` -- global usage counter fetch + increment
-- `src/hooks/useSearchHistory.ts` -- per-user search history fetch + persist
-- `src/lib/db.ts` -- Neon serverless client factory (`getDb()`)
-- `src/proxy.ts` -- Clerk + next-intl middleware (NOT named `middleware.ts`)
-- `src/i18n/routing.ts` -- locale config: nl (default), en, fr
+- `src/components/DakoppervlakteApp.tsx` — thin orchestrator; wires 6 hooks (`useUsageCounter` called twice) + `Header`
+- `src/components/Header.tsx` — logo, usage counts, Clerk auth buttons
+- `src/hooks/useGoogleMaps.ts` — Google Maps script + instance lifecycle
+- `src/hooks/useMapOrientation.ts` — heading/tilt/zoom state, bidirectional map sync
+- `src/hooks/useGeocoding.ts` — address lookup, geocoding API, error state
+- `src/hooks/usePolygonDrawing.ts` — drawing FSM: `idle ↔ drawing` (`finishPolygon` returns to `idle`)
+- `src/hooks/useUsageCounter.ts` — parameterised counter (`/api/counter` default, also `/api/autogen-counter`); fetch + increment with per-address dedupe in `localStorage`
+- `src/hooks/useSearchHistory.ts` — history fetch + save + delete
+- `src/lib/types.ts` — live/browser types only: `PolygonEntry`, `DrawingMode`
+- `src/lib/db.ts` — Neon client factory (`getDb()` reads `DATABASE_URL`)
+- `src/domain/{geo,orientation,polygon,search}/` — pure helpers + types per slice (e.g. `normalizeHeading`, `generatePolygonColor`, `Search`, `PolygonData`)
 
-## Path Aliases
+## API rules
 
-`@/*` maps to `./src/*` (tsconfig.json)
+- Public (no auth): `/api/counter`, `/api/autogen-counter`, `/api/building-polygon`, `/api/init`
+- Protected: `/api/searches` — always check `auth()` and return 401 if no `userId`
+- DB-touching routes should handle `table does not exist` gracefully and include a `debug` field in error responses. Done in `/api/counter`, `/api/autogen-counter`, `/api/building-polygon`. `/api/searches` is the current outlier and should be brought into line when touched.
 
-## API Rules
+## Testing rules (short version)
 
-| Route | Auth | Notes |
-|---|---|---|
-| `/api/counter` | Public | Usage counter. Auto-creates table on first call. |
-| `/api/building-polygon` | Public | Proxies Nominatim for building geometry. |
-| `/api/searches` | Protected | `auth()` required, returns 401 without `userId`. Upserts on `(user_id, address)`. |
-| `/api/init` | Public | DB table initialization. |
+> **Test use cases, not implementations. Mock as little as possible.** See README.md for the full philosophy.
 
-- `/api/counter` handles `table does not exist` errors gracefully (auto-creates table and retries). Other DB routes (`/api/searches`) do not.
-- `/api/building-polygon` includes a `debug` field in its fallback response. Other routes do not.
+1. **Write tests from the user's perspective** — actions and observable outcomes, never internal state or class names
+2. **Tests must fail when the feature breaks** — if you can delete the implementation and the test passes, it's wrong
+3. **Group by scenario, not by component** — `describe('User draws a polygon')`, not `describe('DrawingHint')`
+4. **Mock as little as possible** — only mock true external systems (Google Maps, Clerk, network). Never mock your own hooks, components, or pure functions. If something is hard to test without mocking, improve the design instead.
+5. **Mock at the boundary** — when you must mock, do it at the outermost edge (the external SDK or `fetch`), never inside your own codebase
+6. **API tests use the real route handler** — import and call it with a `Request`; assert on `Response` status + body
 
-## Testing Patterns
+## Environment
 
-- **Framework**: Vitest + jsdom + `@testing-library/react` + `@testing-library/user-event`
-- **Setup**: `vitest.setup.ts` imports `@testing-library/jest-dom` and global Google Maps stub
-- **Google Maps stub**: `src/__tests__/__mocks__/googleMaps.ts` -- installed once globally, never per-test. `computeArea` returns 100 m^2 by default; override with `vi.mocked(...).mockReturnValue`
-- **Philosophy**: Test use cases, not implementations. Group by scenario (`describe('User draws a polygon')`), not by component
-- **Mocking**: Mock only external boundaries (Google Maps, Clerk, fetch). Never mock own hooks/components/utils
-- **API tests**: Import route handler directly, call with `Request`, assert on `Response` status + body
-- **Custom render**: Component tests should import `render` from `src/__tests__/test-utils.tsx` (wraps in `NextIntlClientProvider` with nl locale and messages), not from `@testing-library/react` directly
-- **Coverage**: v8 provider; excludes `src/app/api/**`, `src/lib/init-db.ts`, test files
+Copy `.env.example` to `.env.local` (not `.env` — Next.js only auto-loads `.env.local` for local dev).
 
-## Env Vars
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | Neon Postgres connection string (auto-injected by Vercel Neon integration in prod) |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk frontend key |
+| `CLERK_SECRET_KEY` | Clerk backend key |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Google Maps JS API key |
 
-```
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY   # Clerk auth
-CLERK_SECRET_KEY                    # Clerk server-side
-NEXT_PUBLIC_GOOGLE_MAPS_KEY         # Google Maps JS API
-DATABASE_URL                        # Neon Postgres connection string
-```
+## Commands
 
-## Key Gotchas
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | `tsc --noEmit` then `next build` |
+| `npm run start` | Serve the production build |
+| `npm run check` | Full pipeline: `tsc --noEmit` → `biome check --write .` → `check:arch` → `check:raw-styles` |
+| `npm run lint` | Biome only (`biome check --write .`) |
+| `npm test` | All tests once (`vitest run --coverage`) |
+| `npx vitest run <path>` | Single test file |
+| `npx vitest -t "<name>"` | Single test by name |
+| `npm run test:watch` | Vitest watch mode |
+| `npm run db:init` | Throwaway bootstrap (`tsx src/lib/init-db.ts`) — slated for replacement by real migrations; see `docs/migrations.md` |
 
-- **Middleware file is `src/proxy.ts`**, not `middleware.ts`. Combines Clerk auth + next-intl. Skips i18n for `/api/` routes.
-- **Inline styles for components** -- component styling uses inline `style={{}}` objects. Tailwind is installed for CSS resets/variables in `globals.css`. `layout.tsx` uses `className` for font and layout. No CSS modules.
-- **Polygon visibility is orientation-based** -- polygons store `heading` and `tilt` at creation time; only visible when map orientation matches (via `normalizeHeading`)
-- **Search save is upsert** -- `ON CONFLICT (user_id, address)` updates existing entry instead of creating duplicate
-- **Polygons can be excluded** -- `excluded: boolean` on `PolygonEntry` removes from total area calculation
-- **Next.js 16** -- APIs and conventions may differ from earlier versions. Check `node_modules/next/dist/docs/` before assuming standard patterns.
-- **React 19** -- uses latest React; be aware of breaking changes vs React 18
-- **`globals: true`** in vitest config -- `describe`, `it`, `expect`, `vi` available without imports
+**Always run `npm run check` and `npm test` before considering work complete.**
+
+## Tooling
+
+- **Test runner**: Vitest + jsdom; `@testing-library/react` + `@testing-library/user-event`
+- **Setup file**: `vitest.setup.ts` — imports `@testing-library/jest-dom` and installs the Google Maps stub
+- **Google Maps stub**: `src/__tests__/__mocks__/googleMaps.ts` — installed once in setup, never per-test
+- **i18n render wrapper**: `src/__tests__/test-utils.tsx` — wraps components in `NextIntlClientProvider` with `locale='nl'`. Import `render` from there, not from `@testing-library/react` directly.
+- **Linter / formatter**: Biome (`biome.json`); no semicolons, single quotes, 100-char lines
+- **Architecture check**: `dependency-cruiser` (`.dependency-cruiser.cjs`); enforces `ui-is-pure`, `dumb-no-hooks-or-app`, `hooks-no-components-or-app`, `below-app-no-app`, `domain-is-pure`, `infrastructure-boundaries`, `no-circular`
+- **Raw-style check**: `scripts/check-raw-styles.mjs` — blocks `style={{...}}` in smart components (currently scans `DakoppervlakteApp.tsx` + `Header.tsx` only)
+
+## Workflows
+
+- **New component**: create in the correct layer, export from the barrel `index.ts` in that folder
+- **New API data**: add the type to `src/domain/<slice>/types.ts` (or `src/lib/types.ts` only for live `google.maps` objects); fetch in a hook; pass the result as props. Types under `src/lib/` cannot import from `src/domain/` — the `domain-is-pure` rule will reject it.
+- **New test**: check the use-case list in README.md first; add to the relevant `src/__tests__/` file; import `render` from `src/__tests__/test-utils.tsx`; do not mock unless forced to
+- **Debugging**: add a `debug` field to JSON responses, `console.error` in catch blocks
+- **Before committing**: `npm run check` (typecheck + lint + arch + raw-styles) then `npm test`. Do not skip.
+
+## Further reading
+
+- `README.md` — full testing philosophy and use-case list
+- `docs/gotchas.md` — known surprising behaviours (unreachable `noBuildingFound` error, counter fires on search not save). Tests should NOT codify these — fix the bug instead.
+- `docs/architecture.md`, `docs/adr/` — architectural decisions
+- `docs/migrations.md` — planned move off `init-db.ts` to real DB versioning
