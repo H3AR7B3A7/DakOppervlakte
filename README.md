@@ -54,6 +54,21 @@ npx vitest run -t "draws a polygon"
 npm run test:ui
 ```
 
+### End-to-End (E2E) Testing
+
+Playwright is used for E2E tests. Since these tests run in a real browser environment, you must install the Chromium browser binary before running them for the first time:
+
+```bash
+# Install required browser binaries
+npx playwright install chromium
+
+# Run E2E tests
+npm run e2e
+
+# Run E2E tests in UI mode
+npm run e2e:ui
+```
+
 ## Quality Gate
 
 `npm run check` is the local quality gate. It runs, in order:
@@ -63,16 +78,16 @@ npm run test:ui
 3. `npm run check:arch` -- `dependency-cruiser` layering rules
 4. `npm run check:raw-styles` -- custom check for raw inline styles outside smart components
 
-CI (`.github/workflows/ci.yml`) runs `npm run check`, `npm test`, and `npm run build` on every push and pull request to `master`.
+CI (`.github/workflows/ci.yml`) runs `npm run check`, `npm test`, `npm run build`, and `npm run e2e` on every pull request to `master`.
 
 ## Environment Variables
 
-| Variable | Purpose | Where to obtain |
-|---|---|---|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk frontend auth key | [Clerk Dashboard](https://dashboard.clerk.com) |
-| `CLERK_SECRET_KEY` | Clerk server-side auth key | [Clerk Dashboard](https://dashboard.clerk.com) |
-| `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Google Maps JavaScript API key | [Google Cloud Console](https://console.cloud.google.com) |
-| `DATABASE_URL` | Neon Postgres connection string | [Neon Console](https://console.neon.tech) or Vercel integration |
+| Variable                            | Purpose                         | Where to obtain                                                 |
+|-------------------------------------|---------------------------------|-----------------------------------------------------------------|
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk frontend auth key         | [Clerk Dashboard](https://dashboard.clerk.com)                  |
+| `CLERK_SECRET_KEY`                  | Clerk server-side auth key      | [Clerk Dashboard](https://dashboard.clerk.com)                  |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY`       | Google Maps JavaScript API key  | [Google Cloud Console](https://console.cloud.google.com)        |
+| `DATABASE_URL`                      | Neon Postgres connection string | [Neon Console](https://console.neon.tech) or Vercel integration |
 
 ## Tech Stack
 
@@ -127,4 +142,4 @@ More known pitfalls and their causes are collected in [`docs/gotchas.md`](docs/g
 
 ## Documentation
 
-Additional architecture documentation, sequence diagrams, and API response examples are available in the [`docs/`](docs/) folder.
+Additional architecture documentation, sequence diagrams, and API response examples are available in the [`docs/`](docs) folder.
