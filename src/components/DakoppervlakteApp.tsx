@@ -58,6 +58,7 @@ export function DakoppervlakteApp() {
     serializedPolygons,
   } = usePolygonDrawing({
     mapInstanceRef,
+    mapLoaded,
     currentHeading: heading,
     currentTilt: tilt,
     locale,

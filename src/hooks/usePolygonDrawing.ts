@@ -12,6 +12,7 @@ import type { DrawingMode, PolygonEntry } from '@/lib/types'
 
 interface UsePolygonDrawingOptions {
   mapInstanceRef: RefObject<google.maps.Map | null>
+  mapLoaded: boolean
   currentHeading: number
   currentTilt: number
   locale: string
@@ -20,6 +21,7 @@ interface UsePolygonDrawingOptions {
 
 export function usePolygonDrawing({
   mapInstanceRef,
+  mapLoaded,
   currentHeading,
   currentTilt,
   locale,
@@ -358,6 +360,17 @@ export function usePolygonDrawing({
     locale,
     refreshPreviewLabels,
   ])
+
+  useEffect(() => {
+    if (!mapLoaded || mode !== 'idle') return
+    const map = mapInstanceRef.current
+    if (!map) return
+    const listener = map.addListener('dblclick', (e: google.maps.MapMouseEvent) => {
+      e.stop?.()
+      startDrawing()
+    })
+    return () => listener.remove()
+  }, [mapLoaded, mode, mapInstanceRef, startDrawing])
 
   const deletePolygon = useCallback(
     (id: string) => {

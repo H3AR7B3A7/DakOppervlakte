@@ -29,7 +29,11 @@ function createMockMap() {
     addListener: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
       listeners[event] ??= []
       listeners[event].push(cb)
-      return { remove: vi.fn() }
+      return {
+        remove: vi.fn(() => {
+          listeners[event] = (listeners[event] ?? []).filter((fn) => fn !== cb)
+        }),
+      }
     }),
     _trigger: (event: string, ...args: unknown[]) => {
       ;(listeners[event] ?? []).forEach((cb) => {
@@ -39,11 +43,12 @@ function createMockMap() {
   }
 }
 
-function setup(overrides?: { heading?: number; tilt?: number }) {
+function setup(overrides?: { heading?: number; tilt?: number; mapLoaded?: boolean }) {
   const map = createMockMap()
   const mapInstanceRef = { current: map as unknown as google.maps.Map }
   const heading = overrides?.heading ?? 0
   const tilt = overrides?.tilt ?? 0
+  const mapLoaded = overrides?.mapLoaded ?? true
 
   const fakeTranslator = (key: string, params?: Record<string, string | number>): string => {
     if (key === 'Polygon.manualLabel' && params?.index !== undefined) {
@@ -59,6 +64,7 @@ function setup(overrides?: { heading?: number; tilt?: number }) {
     (props: { heading: number; tilt: number }) =>
       usePolygonDrawing({
         mapInstanceRef,
+        mapLoaded,
         currentHeading: props.heading,
         currentTilt: props.tilt,
         locale: 'nl-BE',

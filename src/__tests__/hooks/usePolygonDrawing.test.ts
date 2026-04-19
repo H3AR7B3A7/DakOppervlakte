@@ -21,7 +21,11 @@ function createMockMap() {
     addListener: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
       listeners[event] ??= []
       listeners[event].push(cb)
-      return { remove: vi.fn() }
+      return {
+        remove: vi.fn(() => {
+          listeners[event] = (listeners[event] ?? []).filter((fn) => fn !== cb)
+        }),
+      }
     }),
     _trigger: (event: string, ...args: unknown[]) => {
       ;(listeners[event] ?? []).forEach((cb) => {
@@ -41,16 +45,18 @@ const fakeTranslator = (key: string, params?: Record<string, string | number>): 
   return key
 }
 
-function setup(overrides?: { heading?: number; tilt?: number }) {
+function setup(overrides?: { heading?: number; tilt?: number; mapLoaded?: boolean }) {
   const map = createMockMap()
   const mapInstanceRef = { current: map as unknown as google.maps.Map }
   const heading = overrides?.heading ?? 0
   const tilt = overrides?.tilt ?? 0
+  const mapLoaded = overrides?.mapLoaded ?? true
 
   const hookResult = renderHook(
     (props) =>
       usePolygonDrawing({
         mapInstanceRef,
+        mapLoaded,
         currentHeading: props.heading,
         currentTilt: props.tilt,
         locale: 'nl-BE',
@@ -98,6 +104,7 @@ describe('User draws and manages roof polygons', () => {
       const { result } = renderHook(() =>
         usePolygonDrawing({
           mapInstanceRef,
+          mapLoaded: false,
           currentHeading: 0,
           currentTilt: 0,
           locale: 'nl-BE',
@@ -106,6 +113,17 @@ describe('User draws and manages roof polygons', () => {
       )
       act(() => result.current.startDrawing())
       expect(result.current.mode).toBe('idle')
+    })
+
+    it('can start drawing by double-clicking the map', () => {
+      const { result, map } = setup()
+      expect(result.current.mode).toBe('idle')
+
+      act(() => {
+        map._trigger('dblclick', { stop: vi.fn() })
+      })
+
+      expect(result.current.mode).toBe('drawing')
     })
   })
 
